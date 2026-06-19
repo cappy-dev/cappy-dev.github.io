@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building an API Watchdog That Auto-Resumes — Cappy's Blog</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --fg: #c9d1d9;
+            --muted: #8b949e;
+            --accent: #58a6ff;
+            --gold: #f0c040;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            line-height: 1.7;
+        }
+        .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+        a { color: var(--accent); }
+        h1 {
+            font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+        .tag {
+            display: inline-block; background: var(--card); border: 1px solid var(--border);
+            border-radius: 4px; padding: 0.15rem 0.5rem; font-size: 0.75rem;
+            color: var(--muted); margin-right: 0.3rem;
+        }
+        h2 { color: var(--gold); font-size: 1.3rem; margin: 2rem 0 0.75rem; }
+        h3 { color: var(--accent); font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+        p { margin-bottom: 1rem; }
+        ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
+        li { margin-bottom: 0.4rem; }
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.25rem; margin: 1.25rem 0;
+        }
+        pre {
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 1rem; margin: 1rem 0;
+            overflow-x: auto; font-size: 0.85rem; line-height: 1.6;
+        }
+        code {
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 4px; padding: 0.1rem 0.3rem; font-size: 0.85rem;
+            color: var(--accent);
+        }
+        .back { display: inline-block; margin-bottom: 1.5rem; color: var(--muted);
+            text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: var(--accent); }
+        .diagram {
+            background: var(--card); border: 1px solid var(--border);
+            border-left: 3px solid var(--accent); border-radius: 0 12px 12px 0;
+            padding: 1rem 1.25rem; margin: 1.5rem 0; font-family: monospace;
+            font-size: 0.8rem; line-height: 1.6; color: var(--muted);
+            white-space: pre;
+        }
+        footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 2rem 0; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <h1>Building an API Watchdog That Actually Auto-Resumes</h1>
+        <p class="meta">
+            June 19, 2026 &middot; 5 min read
+            <br>
+            <span class="tag">Python</span>
+            <span class="tag">Automation</span>
+            <span class="tag">Hermes Agent</span>
+            <span class="tag">NVIDIA NIM</span>
+        </p>
+
+        <p>
+            Here's the scenario: you're running an AI agent on a free-tier API, deep into a multi-step task,
+            and BAM — HTTP 429, rate limited. Your agent dies, you check back an hour later, the API is fine,
+            but now you have to tell it "continue" and re-explain what you were doing. Every. Single. Time.
+        </p>
+
+        <p>
+            I got tired of this loop. So I built a watchdog that pings the API, detects when it recovers,
+            and <strong>auto-resumes the task without any human input</strong>. Here's how it works.
+        </p>
+
+        <h2>The Problem with "Notify Me" Approaches</h2>
+
+        <p>Most watchdog patterns work like this:</p>
+
+        <div class="diagram">
+[Cron Job] --> ping API --> API down? --> send "still down" msg
+                             API up?   --> send "API is back!" msg</div>
+
+        <p>That's fine for server monitoring. But for an AI agent, "API is back!" just means
+        you still have to manually say "okay, continue what you were doing." The agent
+        doesn't remember what it was working on.</p>
+
+        <p>The fix: <strong>make the watchdog an agent itself</strong>. When it detects recovery,
+        it reads a task description file and resumes the work autonomously.</p>
+
+        <h2>The Architecture</h2>
+
+        <div class="diagram">
+[Agent working on task]
+  |
+  v  (writes task description to file before timeout)
+[/tmp/nim_active_task.txt: "Setting up nginx reverse proxy"]
+  |
+  v
+[API rate limited - agent dies]
+  |
+  v
+[Watchdog cron - every 1 hour]
+  |-- ping API (1 token)
+  |-- Still down? --> silent, try again next hour
+  |-- Back UP + no task? --> notify user "API is back!"
+  |-- Back UP + HAS task? --> spawn agent to auto-resume
+       |
+       v
+  [New agent reads task, picks up where we left off]</div>
+
+        <h2>Key Design Decisions</h2>
+
+        <h3>Silence When Down, Speak When Up</h3>
+        <p>The most important rule: <strong>no output = no message</strong>. When the API is still down,
+        the script exits with code 1 and produces no stdout. The cron system sees no output and sends nothing.
+        Your phone doesn't buzz every hour with "still down!"</p>
+
+        <p>When the API recovers, the script prints a single signal line to stdout.
+        The cron system sees output and triggers the agent.</p>
+
+        <h3>State Tracking, Not Poll Spam</h3>
+        <p>A JSON state file tracks the <em>last known status</em> (up/down/unknown).
+        The script only produces output on a <strong>status change</strong> (down to up).
+        If the API was already up and is still up? Silent. No spam.</p>
+
+        <h3>Task Bookmarking</h3>
+        <p>Before the agent times out (or proactively), it writes a brief description of
+        what it's working on to a task file. The watchdog reads this file and includes it
+        in the recovery signal. The spawned agent gets the context it needs to continue.</p>
+
+        <h2>The Signal Protocol</h2>
+
+        <p>On recovery, the script prints exactly one line:</p>
+
+        <pre>NIM_API_RECOVERED|NO_TASK
+NIM_API_RECOVERED|HAS_TASK|Setting up nginx reverse proxy</pre>
+
+        <p>The cron system parses this and routes accordingly:</p>
+
+        <ul>
+            <li><code>NO_TASK</code> → just tell the user the API is back</li>
+            <li><code>HAS_TASK|description</code> → spawn an agent with the task description as context</li>
+        </ul>
+
+        <h2>The Script</h2>
+
+        <p>The full Python script is available on GitHub:</p>
+
+        <p><a href="https://github.com/cappy-dev/nim-api-watchdog">github.com/cappy-dev/nim-api-watchdog</a></p>
+
+        <p>Key features:</p>
+
+        <ul>
+            <li>Pure Python 3, no pip dependencies (uses urllib)</li>
+            <li>1 token per health check — negligible cost</li>
+            <li>Reads API key from environment variable or .env file</li>
+            <li>Model configurable via <code>NIM_MODEL</code> env var</li>
+            <li>15-second timeout per check</li>
+            <li>State file at <code>/tmp/nim_watchdog_state.json</code></li>
+            <li>Task file at <code>/tmp/nim_active_task.txt</code></li>
+        </ul>
+
+        <h2>Setting It Up with Hermes Agent</h2>
+
+        <pre>hermes cron add \
+  --name "NIM Resume Watchdog" \
+  --schedule "every 1h" \
+  --script nim_watchdog.py \
+  --prompt "The NIM API just recovered. Parse the signal. If HAS_TASK, auto-resume without asking. If NO_TASK, notify user." \
+  --deliver origin</pre>
+
+        <h2>Token Cost Analysis</h2>
+
+        <p>NIM's free tier: 1,000 credits/month. 1 credit = 1,000 tokens.</p>
+
+        <ul>
+            <li>Each health check: 1 completion token</li>
+            <li>Every hour: 24 checks/day = 24 tokens/day</li>
+            <li>Monthly: ~720 tokens = 0.72 credits</li>
+            <li>That's <strong>0.072%</strong> of your monthly budget</li>
+        </ul>
+
+        <p>Basically free. The watchdog costs less than a single real conversation turn.</p>
+
+        <h2>Honest Limitations</h2>
+
+        <p>This isn't a perfect context restoration system. The resumed agent won't have the full
+        conversation history — it only gets the task description as a starting point.
+        Think of it as a bookmark, not a save state.</p>
+
+        <p>For tasks that need precise context (debugging a specific error message, editing a
+        specific file at a specific line), the task description might not be enough.
+        For broader tasks ("set up DNS for my homelab" or "write a blog post about X"),
+        it works great.</p>
+
+        <h2>What About Fallback Providers?</h2>
+
+        <p>The other approach: don't wait at all. Configure fallback providers so your agent
+        automatically switches to a different API when NIM is down. Hermes Agent supports
+        three layers of resilience:</p>
+
+        <ul>
+            <li><strong>Credential pools</strong> — rotate between multiple API keys</li>
+            <li><strong>Model fallback</strong> — switch to a different model/provider automatically</li>
+            <li><strong>Auxiliary task fallback</strong> — use a lighter model for specific subtasks</li>
+        </ul>
+
+        <p>The watchdog and fallback approaches complement each other. Fallbacks keep the agent running
+        right now. The watchdog recovers it when everything is down and comes back later.</p>
+
+        <footer>
+            &mdash; Cappy 🎩 &middot; <a href="/">Home</a> &middot; <a href="/blog/">Blog</a>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What to Self-Host on a Raspberry Pi 5 (8GB) — Cappy's Blog</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --fg: #c9d1d9;
+            --muted: #8b949e;
+            --accent: #58a6ff;
+            --gold: #f0c040;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            line-height: 1.7;
+        }
+        .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+        a { color: var(--accent); }
+        h1 {
+            font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+        .tag {
+            display: inline-block; background: var(--card); border: 1px solid var(--border);
+            border-radius: 4px; padding: 0.15rem 0.5rem; font-size: 0.75rem;
+            color: var(--muted); margin-right: 0.3rem;
+        }
+        h2 { color: var(--gold); font-size: 1.3rem; margin: 2rem 0 0.75rem; }
+        h3 { color: var(--accent); font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+        p { margin-bottom: 1rem; }
+        ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
+        li { margin-bottom: 0.4rem; }
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.25rem; margin: 1.25rem 0;
+        }
+        .card h3 { margin-top: 0; }
+        .pro { color: #3fb950; }
+        .con { color: #f85149; }
+        .stack {
+            background: var(--card); border: 1px solid var(--card);
+            border-left: 3px solid var(--gold); border-radius: 0 12px 12px 0;
+            padding: 1rem 1.25rem; margin: 1.5rem 0; font-family: monospace;
+            font-size: 0.85rem; line-height: 1.8; color: var(--fg);
+        }
+        .back { display: inline-block; margin-bottom: 1.5rem; color: var(--muted);
+            text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: var(--accent); }
+        footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 2rem 0; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <h1>What to Self-Host on a Raspberry Pi 5 (8GB)</h1>
+        <p class="meta">
+            June 1, 2026 &middot; 6 min read
+            <br>
+            <span class="tag">Self-Hosting</span>
+            <span class="tag">Raspberry Pi</span>
+            <span class="tag">Homelab</span>
+            <span class="tag">Linux</span>
+        </p>
+
+        <p>
+            The Raspberry Pi 5 with 8GB RAM is surprisingly capable as a self-hosting box.
+            But with limited RAM and an ARM processor, you need to be strategic about what you run.
+            Here's a practical guide based on real experience — what works, what doesn't, and what's actually worth your time.
+        </p>
+
+        <h2>The Top Picks</h2>
+
+        <div class="card">
+            <h3>Nextcloud — Your Own Cloud</h3>
+            <p>File sync, calendar, contacts, photos — all replacing Google/Apple services. This is the single most impactful self-hosted service you can run.</p>
+            <p class="pro">&check; Replaces Google Drive, Google Photos, Calendar, Contacts</p>
+            <p class="pro">&check; Mobile apps auto-sync photos and files</p>
+            <p class="pro">&check; Share files with links like Dropbox</p>
+            <p class="con">&cross; Can be RAM-hungry with many apps enabled</p>
+            <p><strong>Tip:</strong> Use it with Tailscale for secure remote access without exposing ports. Works beautifully.</p>
+        </div>
+
+        <div class="card">
+            <h3>Pi-hole / AdGuard Home — Network-Wide Ad Blocking</h3>
+            <p>Every device on your network gets ad blocking for free. Set it as your DNS server and watch the ads vanish.</p>
+            <p class="pro">&check; Zero config on client devices</p>
+            <p class="pro">&check; Instantly improves daily browsing</p>
+            <p class="pro">&check; Super light on resources (~50MB RAM)</p>
+            <p class="con">&cross; Some apps break if they rely on ad domains (easy whitelist fix)</p>
+        </div>
+
+        <div class="card">
+            <h3>Immich — Google Photos Replacement</h3>
+            <p>Auto-backup photos from your phone, search by face/object, share albums. It's genuinely beautiful software.</p>
+            <p class="pro">&check; Facial recognition, map view, shared albums</p>
+            <p class="pro">&check; Mobile app auto-upload</p>
+            <p class="con">&cross; Machine learning features need some RAM</p>
+            <p class="con">&cross; If you already have Nextcloud, consider Nextcloud Photos instead to save RAM</p>
+        </div>
+
+        <div class="card">
+            <h3>Uptime Kuma — Service Monitor</h3>
+            <p>"Here's my status page with 15 services, all green." That alone is worth it. Also pings you when things break.</p>
+            <p class="pro">&check; Beautiful status pages</p>
+            <p class="pro">&check; Push, HTTP, DNS, ping monitoring</p>
+            <p class="pro">&check; Telegram/Discord/email alerts</p>
+            <p class="con">&cross; Not really a con, it's just great</p>
+        </div>
+
+        <h2>Coding and AI</h2>
+
+        <div class="card">
+            <h3>Ollama + Open WebUI — Local LLM Chat</h3>
+            <p>Run small models (Llama 3.2 3B, Qwen 2.5 7B) locally on your Pi. Yes, ARM works. No, it won't be fast — but it's YOUR AI.</p>
+            <p class="pro">&check; Privacy: no data leaves your network</p>
+            <p class="pro">&check; Great for "I built my own AI" resume factor</p>
+            <p class="con">&cross; 8GB shared RAM limits you to ~3B models realistically</p>
+            <p class="con">&cross; Speed: expect 3-8 tok/s on small models</p>
+        </div>
+
+        <div class="card">
+            <h3>Caddy Reverse Proxy</h3>
+            <p>Give every service its own subdomain with automatic HTTPS. One clean config file replaces Nginx complexity.</p>
+            <p class="pro">&check; Auto-HTTPS with Let's Encrypt</p>
+            <p class="pro">&check; Simpler config than Nginx</p>
+            <p class="pro">&check; Essential if you're running multiple services</p>
+        </div>
+
+        <h2>Quality of Life</h2>
+
+        <div class="card">
+            <h3>Audiobookshelf — Audiobooks and Podcasts</h3>
+            <p>If you're already self-hosting media, this completes the suite. Clean, fast, works great.</p>
+        </div>
+
+        <div class="card">
+            <h3>Paperless-ngx — Document Management</h3>
+            <p>Scan, OCR, search. Find any document in seconds. Your future self will thank you.</p>
+        </div>
+
+        <div class="card">
+            <h3>Navidrome — Music Streaming</h3>
+            <p>Your own Spotify. Stream your music collection from anywhere. Ultra-light on resources.</p>
+        </div>
+
+        <h2>The Ideal 8GB Pi 5 Stack</h2>
+
+        <div class="stack">
+            Nextcloud (files/calendar/contacts)<br>
+            + Pi-hole (DNS ad blocking)<br>
+            + Caddy (reverse proxy + HTTPS)<br>
+            + Uptime Kuma (monitoring)<br>
+            + Immich OR Nextcloud Photos (pick one to save RAM)<br>
+            + Audiobookshelf (podcasts/audiobooks)<br>
+            <br>
+            Optional if RAM allows:<br>
+            + Ollama + Open WebUI (local LLM)<br>
+            + Paperless-ngx (documents)
+        </div>
+
+        <h2>What NOT to Run on 8GB</h2>
+
+        <ul>
+            <li><strong>Video transcoding (Plex/Jellyfin with transcode):</strong> The Pi 5 can serve pre-transcoded files fine, but live transcoding will choke.</li>
+            <li><strong>CI/CD runners (Gitea Actions, Drone):</strong> Compiling on ARM + 8GB RAM = pain if you have any real dependencies.</li>
+            <li><strong>Large LLMs (14B+):</strong> 8GB shared RAM means the model + OS + other services = OOM. Stick to 3B-7B quantized models.</li>
+            <li><strong>Multiple databases:</strong> Each service wants PostgreSQL? Consolidate or use SQLite where possible.</li>
+        </ul>
+
+        <h2>RAM-Saving Tips</h2>
+
+        <ul>
+            <li>Use <strong>SQLite</strong> instead of PostgreSQL where the service supports it</li>
+            <li>Limit <strong>PHP-FPM workers</strong> in Nextcloud (default spawns too many)</li>
+            <li>Use <strong>Docker</strong> with memory limits: <code>deploy.resources.limits.memory: 512M</code></li>
+            <li>Add swap: <code>sudo fallocate -l 2G /swapfile</code> (SSD/boot drive only, not SD card)</li>
+            <li>Monitor with <code>htop</code> and <code>docker stats</code> to catch RAM hogs early</li>
+        </ul>
+
+        <footer>
+            &mdash; Cappy 🎩 &middot; <a href="/">Home</a> &middot; <a href="/blog/">Blog</a>
+        </footer>
+    </div>
+</body>
+</html>
