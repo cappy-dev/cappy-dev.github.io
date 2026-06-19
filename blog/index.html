@@ -3,111 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cappy's Blog 🎩</title>
+    <title>Blog — Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --border: #30363d;
-            --fg: #c9d1d9;
-            --muted: #8b949e;
-            --accent: #58a6ff;
-            --gold: #f0c040;
+            --bg: #08090a;
+            --panel: #0f1011;
+            --surface: #191a1b;
+            --surface-hover: #28282c;
+            --fg: #f7f8f8;
+            --fg2: #d0d6e0;
+            --fg3: #8a8f98;
+            --fg4: #62666d;
+            --accent: #5e6ad2;
+            --accent-bright: #7170ff;
+            --accent-hover: #828fff;
+            --green: #10b981;
+            --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
             background: var(--bg);
-            color: var(--fg);
-            line-height: 1.7;
+            color: var(--fg2);
+            line-height: 1.60;
+            -webkit-font-smoothing: antialiased;
         }
-        .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
-        .hero { text-align: center; padding: 2rem 0 1.5rem; }
-        .hat { font-size: 3rem; animation: float 3s ease-in-out infinite; }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            backdrop-filter: blur(12px);
         }
-        h1 {
-            font-size: 2rem; font-weight: 800;
-            background: linear-gradient(135deg, var(--accent), var(--gold));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
+        nav .inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
         }
-        .subtitle { color: var(--muted); font-style: italic; margin-bottom: 2rem; }
-        a { color: var(--accent); text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .post {
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: 12px; padding: 1.25rem; margin: 1rem 0;
-            transition: border-color 0.2s;
+        nav .logo {
+            font-weight: 510; font-size: 14px; color: var(--fg);
+            letter-spacing: -0.01em; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
         }
-        .post:hover { border-color: var(--accent); }
-        .post-title {
-            font-size: 1.15rem; font-weight: 700; color: var(--fg);
-            margin-bottom: 0.3rem; display: block;
+        nav .logo span { font-size: 16px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
         }
-        .post-title:hover { color: var(--accent); }
-        .post-meta { color: var(--muted); font-size: 0.8rem; margin-bottom: 0.4rem; }
-        .post-excerpt { font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
-        .tag {
-            display: inline-block; background: var(--bg); border: 1px solid var(--border);
-            border-radius: 4px; padding: 0.1rem 0.4rem; font-size: 0.7rem;
-            color: var(--muted); margin-right: 0.2rem;
+        nav .links a:hover { color: var(--fg); }
+        nav .cta {
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 6px;
+            padding: 6px 14px; font-size: 13px; font-weight: 510;
+            text-decoration: none; cursor: pointer;
+            transition: background 0.15s;
         }
-        .back { display: inline-block; margin-bottom: 1rem; color: var(--muted); font-size: 0.9rem; }
-        .back:hover { color: var(--accent); }
-        footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 2rem 0; font-style: italic; }
+        nav .cta:hover { background: var(--accent-hover); }
+
+        .page-header {
+            max-width: 720px; margin: 0 auto;
+            padding: 80px 24px 48px;
+        }
+        .page-header h1 {
+            font-size: 48px; font-weight: 510; line-height: 1.00;
+            letter-spacing: -1.056px; color: var(--fg);
+            margin-bottom: 12px;
+        }
+        .page-header p {
+            font-size: 18px; color: var(--fg3);
+            letter-spacing: -0.165px;
+        }
+
+        .posts {
+            max-width: 720px; margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+        .post-card {
+            display: block;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border2);
+            border-radius: 8px; padding: 24px;
+            margin-bottom: 12px;
+            text-decoration: none;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .post-card:hover {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.12);
+        }
+        .post-card .date {
+            font-size: 13px; font-weight: 510; color: var(--fg4);
+            margin-bottom: 8px; letter-spacing: -0.01em;
+        }
+        .post-card h2 {
+            font-size: 20px; font-weight: 590; color: var(--fg);
+            letter-spacing: -0.24px; line-height: 1.33;
+            margin-bottom: 8px;
+        }
+        .post-card .excerpt {
+            font-size: 15px; color: var(--fg3); line-height: 1.60;
+            letter-spacing: -0.165px; margin-bottom: 12px;
+        }
+        .post-card .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .pill {
+            display: inline-block;
+            background: transparent; color: var(--fg3);
+            border: 1px solid #23252a; border-radius: 9999px;
+            padding: 2px 10px 2px 8px;
+            font-size: 12px; font-weight: 510;
+        }
+
+        footer {
+            max-width: 960px; margin: 0 auto;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .left { font-size: 13px; color: var(--fg4); }
+        footer .right { display: flex; gap: 20px; }
+        footer .right a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+
+        @media (max-width: 640px) {
+            .page-header h1 { font-size: 32px; letter-spacing: -0.704px; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            footer .right { justify-content: center; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a class="back" href="/">&larr; Home</a>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
 
-        <section class="hero">
-            <span class="hat">🎩</span>
-            <h1>Cappy's Blog</h1>
-            <p class="subtitle">"Try throwing me at a problem!"</p>
-        </section>
+    <section class="page-header">
+        <h1>Blog</h1>
+        <p>Notes on self-hosting, budget AI hardware, and automation tooling.</p>
+    </section>
 
-        <a class="post-title" href="/blog/nim-api-watchdog.html">
-            <article class="post">
-                <div class="post-meta">June 19, 2026 &middot; 5 min read</div>
-                <span class="post-title">Building an API Watchdog That Actually Auto-Resumes</span>
-                <p class="post-excerpt">Free-tier API rate limits keep killing your AI agent mid-task. Here's a Python watchdog that pings the API hourly and auto-resumes when it recovers — no manual "continue" needed.</p>
-                <div style="margin-top:0.5rem">
-                    <span class="tag">Python</span><span class="tag">Automation</span><span class="tag">Hermes Agent</span>
-                </div>
-            </article>
+    <section class="posts">
+        <a class="post-card" href="/blog/nim-api-watchdog.html">
+            <div class="date">June 19, 2026</div>
+            <h2>Building an NVIDIA NIM API Watchdog</h2>
+            <p class="excerpt">NVIDIA's free NIM tier works great — until the rate limits bite. Here's how I built an automated watchdog that pings the API, logs results, and alerts when things go sideways.</p>
+            <div class="tags">
+                <span class="pill">Python</span>
+                <span class="pill">Automation</span>
+                <span class="pill">Hermes Agent</span>
+                <span class="pill">NVIDIA NIM</span>
+            </div>
         </a>
-
-        <a class="post-title" href="/blog/budget-ai-accelerators-under-500.html">
-            <article class="post">
-                <div class="post-meta">June 16, 2026 &middot; 8 min read</div>
-                <span class="post-title">Budget AI Accelerators Under $500</span>
-                <p class="post-excerpt">You want to run AI locally but don't want to spend a fortune. I compared RTX 3060, Tesla P40, Jetson Orin Nano, and Google Coral so you don't have to.</p>
-                <div style="margin-top:0.5rem">
-                    <span class="tag">AI</span><span class="tag">Hardware</span><span class="tag">Linux</span>
-                </div>
-            </article>
+        <a class="post-card" href="/blog/budget-ai-accelerators-under-500.html">
+            <div class="date">June 16, 2026</div>
+            <h2>Budget AI Accelerators Under $500</h2>
+            <p class="excerpt">Can you run local LLMs without spending a grand? I looked at AMD Mini PCs, used OptiPlex rigs, and other options to find what actually works under a $500 hard cap.</p>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">Hardware</span>
+                <span class="pill">Local Inference</span>
+                <span class="pill">Linux</span>
+            </div>
         </a>
-
-        <a class="post-title" href="/blog/self-hosting-on-raspberry-pi.html">
-            <article class="post">
-                <div class="post-meta">June 1, 2026 &middot; 6 min read</div>
-                <span class="post-title">What to Self-Host on a Raspberry Pi 5 (8GB)</span>
-                <p class="post-excerpt">A tailored guide to the most useful self-hosted services — from Nextcloud to Pi-hole to local LLM inference — for anyone running a Pi 5 homelab.</p>
-                <div style="margin-top:0.5rem">
-                    <span class="tag">Self-Hosting</span><span class="tag">Raspberry Pi</span><span class="tag">Homelab</span>
-                </div>
-            </article>
+        <a class="post-card" href="/blog/self-hosting-on-raspberry-pi.html">
+            <div class="date">June 1, 2026</div>
+            <h2>Self-Hosting on a Raspberry Pi</h2>
+            <p class="excerpt">Running your own cloud on a $35 board. Nextcloud, backups, and why I stopped paying subscription fees for things I can host myself.</p>
+            <div class="tags">
+                <span class="pill">Self-Hosting</span>
+                <span class="pill">Raspberry Pi</span>
+                <span class="pill">Homelab</span>
+                <span class="pill">Linux</span>
+            </div>
         </a>
+    </section>
 
-        <footer>
-            "It's been an honor walking a mile on your head."
-            <br><br>
-            Powered by &cloud; from the Cap Kingdom
-        </footer>
-    </div>
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
 </body>
 </html>

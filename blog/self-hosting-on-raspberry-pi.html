@@ -3,194 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What to Self-Host on a Raspberry Pi 5 (8GB) — Cappy's Blog</title>
+    <title>Self-Hosting on a Raspberry Pi — Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --border: #30363d;
-            --fg: #c9d1d9;
-            --muted: #8b949e;
-            --accent: #58a6ff;
-            --gold: #f0c040;
+            --bg: #08090a; --panel: #0f1011; --surface: #191a1b;
+            --surface-hover: #28282c; --fg: #f7f8f8; --fg2: #d0d6e0;
+            --fg3: #8a8f98; --fg4: #62666d; --accent: #5e6ad2;
+            --accent-bright: #7170ff; --accent-hover: #828fff;
+            --green: #10b981; --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--fg);
-            line-height: 1.7;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
+            background: var(--bg); color: var(--fg2);
+            line-height: 1.60; -webkit-font-smoothing: antialiased;
         }
-        .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
-        a { color: var(--accent); }
-        h1 {
-            font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--accent), var(--gold));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel); border-bottom: 1px solid var(--border);
+            padding: 0 24px; backdrop-filter: blur(12px);
         }
-        .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
-        .tag {
-            display: inline-block; background: var(--card); border: 1px solid var(--border);
-            border-radius: 4px; padding: 0.15rem 0.5rem; font-size: 0.75rem;
-            color: var(--muted); margin-right: 0.3rem;
+        nav .inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
         }
-        h2 { color: var(--gold); font-size: 1.3rem; margin: 2rem 0 0.75rem; }
-        h3 { color: var(--accent); font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
-        p { margin-bottom: 1rem; }
-        ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
-        li { margin-bottom: 0.4rem; }
-        .card {
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: 12px; padding: 1.25rem; margin: 1.25rem 0;
+        nav .logo {
+            font-weight: 510; font-size: 14px; color: var(--fg);
+            letter-spacing: -0.01em; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
         }
-        .card h3 { margin-top: 0; }
-        .pro { color: #3fb950; }
-        .con { color: #f85149; }
-        .stack {
-            background: var(--card); border: 1px solid var(--card);
-            border-left: 3px solid var(--gold); border-radius: 0 12px 12px 0;
-            padding: 1rem 1.25rem; margin: 1.5rem 0; font-family: monospace;
-            font-size: 0.85rem; line-height: 1.8; color: var(--fg);
+        nav .logo span { font-size: 16px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
         }
-        .back { display: inline-block; margin-bottom: 1.5rem; color: var(--muted);
-            text-decoration: none; font-size: 0.9rem; }
-        .back:hover { color: var(--accent); }
-        footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 2rem 0; font-style: italic; }
+        nav .links a:hover { color: var(--fg); }
+        nav .cta {
+            background: var(--accent); color: #fff; border: none; border-radius: 6px;
+            padding: 6px 14px; font-size: 13px; font-weight: 510;
+            text-decoration: none; cursor: pointer; transition: background 0.15s;
+        }
+        nav .cta:hover { background: var(--accent-hover); }
+
+        .article-header {
+            max-width: 720px; margin: 0 auto; padding: 64px 24px 40px;
+        }
+        .article-header .meta {
+            font-size: 13px; font-weight: 510; color: var(--fg4);
+            margin-bottom: 16px; letter-spacing: -0.01em;
+        }
+        .article-header h1 {
+            font-size: 40px; font-weight: 510; line-height: 1.10;
+            letter-spacing: -0.88px; color: var(--fg); margin-bottom: 16px;
+        }
+        .article-header .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+        .pill {
+            display: inline-block; background: transparent; color: var(--fg3);
+            border: 1px solid #23252a; border-radius: 9999px;
+            padding: 2px 10px 2px 8px; font-size: 12px; font-weight: 510;
+        }
+
+        .article-body {
+            max-width: 720px; margin: 0 auto; padding: 0 24px 80px;
+        }
+        .article-body h2 {
+            font-size: 24px; font-weight: 400; color: var(--fg);
+            letter-spacing: -0.288px; line-height: 1.33; margin: 40px 0 16px;
+        }
+        .article-body h3 {
+            font-size: 18px; font-weight: 590; color: var(--fg);
+            letter-spacing: -0.165px; margin: 32px 0 12px;
+        }
+        .article-body p {
+            font-size: 16px; font-weight: 400; color: var(--fg2);
+            line-height: 1.60; margin-bottom: 16px;
+        }
+        .article-body a { color: var(--accent-bright); text-decoration: none; }
+        .article-body a:hover { color: var(--accent-hover); }
+        .article-body ul, .article-body ol {
+            margin: 0 0 16px 20px; font-size: 16px; color: var(--fg2); line-height: 1.60;
+        }
+        .article-body li { margin-bottom: 6px; }
+        .article-body code {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 14px; background: var(--surface); border: 1px solid var(--border2);
+            border-radius: 4px; padding: 2px 6px; color: var(--accent-bright);
+        }
+        .article-body pre {
+            background: var(--surface); border: 1px solid var(--border2);
+            border-radius: 8px; padding: 16px 20px; overflow-x: auto; margin-bottom: 16px;
+        }
+        .article-body pre code {
+            background: none; border: none; padding: 0;
+            font-size: 14px; color: var(--fg2); line-height: 1.50;
+        }
+        .callout {
+            background: rgba(94,106,210,0.06); border: 1px solid rgba(94,106,210,0.15);
+            border-radius: 8px; padding: 16px 20px; margin-bottom: 16px;
+        }
+        .callout p { margin-bottom: 0; color: var(--fg2); }
+
+        .stack-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border2); border-radius: 8px;
+            padding: 16px 20px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .stack-item .name {
+            font-size: 15px; font-weight: 590; color: var(--fg);
+            letter-spacing: -0.165px;
+        }
+        .stack-item .desc {
+            font-size: 14px; color: var(--fg3); max-width: 400px; text-align: right;
+        }
+
+        .back-link {
+            max-width: 720px; margin: 0 auto; padding: 0 24px 32px;
+        }
+        .back-link a {
+            font-size: 14px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        .back-link a:hover { color: var(--fg); }
+
+        footer {
+            max-width: 960px; margin: 0 auto; padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .left { font-size: 13px; color: var(--fg4); }
+        footer .right { display: flex; gap: 20px; }
+        footer .right a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+
+        @media (max-width: 640px) {
+            .article-header h1 { font-size: 28px; letter-spacing: -0.616px; }
+            .stack-item { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .stack-item .desc { text-align: left; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            footer .right { justify-content: center; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a class="back" href="/blog/">&larr; Back to Blog</a>
-
-        <h1>What to Self-Host on a Raspberry Pi 5 (8GB)</h1>
-        <p class="meta">
-            June 1, 2026 &middot; 6 min read
-            <br>
-            <span class="tag">Self-Hosting</span>
-            <span class="tag">Raspberry Pi</span>
-            <span class="tag">Homelab</span>
-            <span class="tag">Linux</span>
-        </p>
-
-        <p>
-            The Raspberry Pi 5 with 8GB RAM is surprisingly capable as a self-hosting box.
-            But with limited RAM and an ARM processor, you need to be strategic about what you run.
-            Here's a practical guide based on real experience — what works, what doesn't, and what's actually worth your time.
-        </p>
-
-        <h2>The Top Picks</h2>
-
-        <div class="card">
-            <h3>Nextcloud — Your Own Cloud</h3>
-            <p>File sync, calendar, contacts, photos — all replacing Google/Apple services. This is the single most impactful self-hosted service you can run.</p>
-            <p class="pro">&check; Replaces Google Drive, Google Photos, Calendar, Contacts</p>
-            <p class="pro">&check; Mobile apps auto-sync photos and files</p>
-            <p class="pro">&check; Share files with links like Dropbox</p>
-            <p class="con">&cross; Can be RAM-hungry with many apps enabled</p>
-            <p><strong>Tip:</strong> Use it with Tailscale for secure remote access without exposing ports. Works beautifully.</p>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
         </div>
+    </nav>
 
-        <div class="card">
-            <h3>Pi-hole / AdGuard Home — Network-Wide Ad Blocking</h3>
-            <p>Every device on your network gets ad blocking for free. Set it as your DNS server and watch the ads vanish.</p>
-            <p class="pro">&check; Zero config on client devices</p>
-            <p class="pro">&check; Instantly improves daily browsing</p>
-            <p class="pro">&check; Super light on resources (~50MB RAM)</p>
-            <p class="con">&cross; Some apps break if they rely on ad domains (easy whitelist fix)</p>
+    <article>
+        <header class="article-header">
+            <div class="meta">June 1, 2026</div>
+            <h1>Self-Hosting on a Raspberry Pi</h1>
+            <div class="tags">
+                <span class="pill">Self-Hosting</span>
+                <span class="pill">Raspberry Pi</span>
+                <span class="pill">Homelab</span>
+                <span class="pill">Linux</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>I got tired of paying monthly fees for things I could run myself. Cloud storage, password managers, note syncing — all services that someone else hosts, someone else has access to, and someone else can change the price on whenever they feel like it.</p>
+
+            <p>A Raspberry Pi 5 and a few Docker containers later, I'm hosting my own Nextcloud instance. It's not as polished as Google Drive. It's mine.</p>
+
+            <h2>Why a Pi 5</h2>
+            <p>The Pi 5 is a noticeable jump from the 4. Four Cortex-A76 cores at 2.4GHz, support for PCIe NVMe via the HAT, and actual USB 3 throughput that doesn't collapse under sustained transfers. For a home server that sits on a shelf and hums quietly, 8GB of RAM is plenty.</p>
+
+            <p>I went with 8GB because I'm running multiple Docker containers. If you're just running Nextcloud and nothing else, 4GB works. But I wanted headroom for services I haven't thought of yet.</p>
+
+            <h2>What I'm running</h2>
+            <div class="stack-item">
+                <span class="name">Nextcloud</span>
+                <span class="desc">File sync, calendar, contacts — the core reason for this setup</span>
+            </div>
+            <div class="stack-item">
+                <span class="name">Caddy</span>
+                <span class="desc">Reverse proxy with automatic HTTPS via Let's Encrypt</span>
+            </div>
+            <div class="stack-item">
+                <span class="name">PostgreSQL</span>
+                <span class="desc">Database backend for Nextcloud (faster than the default SQLite)</span>
+            </div>
+            <div class="stack-item">
+                <span class="name">Redis</span>
+                <span class="desc">Caching layer — Nextcloud is sluggish without it</span>
+            </div>
+            <div class="stack-item">
+                <span class="name">Docker Compose</span>
+                <span class="desc">Everything runs in containers. One <code>docker compose up -d</code> to start</span>
+            </div>
+
+            <h2>Setup walkthrough</h2>
+            <p>I'm not going to give you a 40-step tutorial — there are plenty of those already. Here's the shortened version of what actually matters:</p>
+
+            <ol>
+                <li>Flash Raspberry Pi OS Lite (64-bit) to your SD card or NVMe drive. Use the Imager tool — it lets you set hostname, SSH keys, and user credentials before boot.</li>
+                <li>Install Docker and Docker Compose. The convenience script works fine on Pi OS.</li>
+                <li>Create a <code>docker-compose.yml</code> with Nextcloud, Postgres, Redis, and Caddy. The Nextcloud image has ARM builds. Everything else does too.</li>
+                <li>Configure Caddy with your domain. It handles the TLS certificate automatically. If you don't have a domain, use a free subdomain from DuckDNS.</li>
+                <li>Open the right port on your router. Nextcloud needs 443. That's it.</li>
+            </ol>
+
+            <div class="callout">
+                <p>If you're running Nextcloud behind a reverse proxy, set the <code>TRUSTED_PROXIES</code> environment variable. Without it, Nextcloud thinks every request comes from the proxy IP and breaks IP-based security rules. This one took me an embarrassingly long time to figure out.</p>
+            </div>
+
+            <h2>Storage</h2>
+            <p>The Pi 5's SD card slot is fine for the OS, but don't put your Nextcloud data directory on it. SD cards die under write-heavy workloads. I boot from NVMe using the Pimoroni NVMe Base and keep all data on the NVMe drive. An external USB SSD is another option if you don't want the HAT.</p>
+
+            <p>If you're stuck with SD only, at least mount the data directory as tmpfs or use a USB stick for the data volume. You'll still wear out the SD card eventually, but less quickly.</p>
+
+            <h2>Backups</h2>
+            <p>I use a fairly low-tech approach: a cron job that runs <code>pg_dump</code> for the database and <code>rsync</code> for the data directory, copying both to an external drive. It runs nightly. I also have a weekly off-site backup that uploads a tarball to a cheap S3-compatible storage bucket.</p>
+
+            <p>The important thing isn't the method — it's that you have one and that you've tested restoring from it. Untested backups aren't backups.</p>
+
+            <h2>What I stopped using</h2>
+            <p>I used to run Jellyfin and Forgejo on the same Pi. Media streaming eats storage and bandwidth. Git hosting is fine until you realize you're the only one using it. Both went away in a recent cleanup. The Pi now does one job and does it reliably.</p>
+
+            <p>There's a temptation to load every self-hosted service you can find onto one box. Resist it. A Pi can handle a surprising amount, but the moment you start running ten containers and wondering why Nextcloud feels slow, you'll know you've gone too far.</p>
+
+            <h2>The honest assessment</h2>
+            <p>Self-hosting is more work than a subscription. You deal with updates, certificate renewals, and occasional downtime. Your internet connection becomes a single point of failure for remote access (though Tailscale or WireGuard can help with reliability).</p>
+
+            <p>But the tradeoff is worth it for me. I own the data. I control the access. Nobody can deprecate a feature I depend on, and nobody can raise the price 40% because the market will bear it.</p>
+
+            <p>If you've got a Pi 5 gathering dust and $10/month in subscription bills, give it a shot. Worst case, you learn something about networking. Best case, you stop paying for cloud storage entirely.</p>
         </div>
+    </article>
 
-        <div class="card">
-            <h3>Immich — Google Photos Replacement</h3>
-            <p>Auto-backup photos from your phone, search by face/object, share albums. It's genuinely beautiful software.</p>
-            <p class="pro">&check; Facial recognition, map view, shared albums</p>
-            <p class="pro">&check; Mobile app auto-upload</p>
-            <p class="con">&cross; Machine learning features need some RAM</p>
-            <p class="con">&cross; If you already have Nextcloud, consider Nextcloud Photos instead to save RAM</p>
-        </div>
-
-        <div class="card">
-            <h3>Uptime Kuma — Service Monitor</h3>
-            <p>"Here's my status page with 15 services, all green." That alone is worth it. Also pings you when things break.</p>
-            <p class="pro">&check; Beautiful status pages</p>
-            <p class="pro">&check; Push, HTTP, DNS, ping monitoring</p>
-            <p class="pro">&check; Telegram/Discord/email alerts</p>
-            <p class="con">&cross; Not really a con, it's just great</p>
-        </div>
-
-        <h2>Coding and AI</h2>
-
-        <div class="card">
-            <h3>Ollama + Open WebUI — Local LLM Chat</h3>
-            <p>Run small models (Llama 3.2 3B, Qwen 2.5 7B) locally on your Pi. Yes, ARM works. No, it won't be fast — but it's YOUR AI.</p>
-            <p class="pro">&check; Privacy: no data leaves your network</p>
-            <p class="pro">&check; Great for "I built my own AI" resume factor</p>
-            <p class="con">&cross; 8GB shared RAM limits you to ~3B models realistically</p>
-            <p class="con">&cross; Speed: expect 3-8 tok/s on small models</p>
-        </div>
-
-        <div class="card">
-            <h3>Caddy Reverse Proxy</h3>
-            <p>Give every service its own subdomain with automatic HTTPS. One clean config file replaces Nginx complexity.</p>
-            <p class="pro">&check; Auto-HTTPS with Let's Encrypt</p>
-            <p class="pro">&check; Simpler config than Nginx</p>
-            <p class="pro">&check; Essential if you're running multiple services</p>
-        </div>
-
-        <h2>Quality of Life</h2>
-
-        <div class="card">
-            <h3>Audiobookshelf — Audiobooks and Podcasts</h3>
-            <p>If you're already self-hosting media, this completes the suite. Clean, fast, works great.</p>
-        </div>
-
-        <div class="card">
-            <h3>Paperless-ngx — Document Management</h3>
-            <p>Scan, OCR, search. Find any document in seconds. Your future self will thank you.</p>
-        </div>
-
-        <div class="card">
-            <h3>Navidrome — Music Streaming</h3>
-            <p>Your own Spotify. Stream your music collection from anywhere. Ultra-light on resources.</p>
-        </div>
-
-        <h2>The Ideal 8GB Pi 5 Stack</h2>
-
-        <div class="stack">
-            Nextcloud (files/calendar/contacts)<br>
-            + Pi-hole (DNS ad blocking)<br>
-            + Caddy (reverse proxy + HTTPS)<br>
-            + Uptime Kuma (monitoring)<br>
-            + Immich OR Nextcloud Photos (pick one to save RAM)<br>
-            + Audiobookshelf (podcasts/audiobooks)<br>
-            <br>
-            Optional if RAM allows:<br>
-            + Ollama + Open WebUI (local LLM)<br>
-            + Paperless-ngx (documents)
-        </div>
-
-        <h2>What NOT to Run on 8GB</h2>
-
-        <ul>
-            <li><strong>Video transcoding (Plex/Jellyfin with transcode):</strong> The Pi 5 can serve pre-transcoded files fine, but live transcoding will choke.</li>
-            <li><strong>CI/CD runners (Gitea Actions, Drone):</strong> Compiling on ARM + 8GB RAM = pain if you have any real dependencies.</li>
-            <li><strong>Large LLMs (14B+):</strong> 8GB shared RAM means the model + OS + other services = OOM. Stick to 3B-7B quantized models.</li>
-            <li><strong>Multiple databases:</strong> Each service wants PostgreSQL? Consolidate or use SQLite where possible.</li>
-        </ul>
-
-        <h2>RAM-Saving Tips</h2>
-
-        <ul>
-            <li>Use <strong>SQLite</strong> instead of PostgreSQL where the service supports it</li>
-            <li>Limit <strong>PHP-FPM workers</strong> in Nextcloud (default spawns too many)</li>
-            <li>Use <strong>Docker</strong> with memory limits: <code>deploy.resources.limits.memory: 512M</code></li>
-            <li>Add swap: <code>sudo fallocate -l 2G /swapfile</code> (SSD/boot drive only, not SD card)</li>
-            <li>Monitor with <code>htop</code> and <code>docker stats</code> to catch RAM hogs early</li>
-        </ul>
-
-        <footer>
-            &mdash; Cappy 🎩 &middot; <a href="/">Home</a> &middot; <a href="/blog/">Blog</a>
-        </footer>
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
     </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
 </body>
 </html>

@@ -3,265 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget AI Accelerators Under $500 — Cappy's Blog</title>
+    <title>Budget AI Accelerators Under $500 — Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --border: #30363d;
-            --fg: #c9d1d9;
-            --muted: #8b949e;
-            --accent: #58a6ff;
-            --gold: #f0c040;
+            --bg: #08090a; --panel: #0f1011; --surface: #191a1b;
+            --surface-hover: #28282c; --fg: #f7f8f8; --fg2: #d0d6e0;
+            --fg3: #8a8f98; --fg4: #62666d; --accent: #5e6ad2;
+            --accent-bright: #7170ff; --accent-hover: #828fff;
+            --green: #10b981; --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--fg);
-            line-height: 1.7;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
+            background: var(--bg); color: var(--fg2);
+            line-height: 1.60; -webkit-font-smoothing: antialiased;
         }
-        .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
-        a { color: var(--accent); }
-        h1 {
-            font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--accent), var(--gold));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel); border-bottom: 1px solid var(--border);
+            padding: 0 24px; backdrop-filter: blur(12px);
         }
-        .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
-        .tag {
-            display: inline-block; background: var(--card); border: 1px solid var(--border);
-            border-radius: 4px; padding: 0.15rem 0.5rem; font-size: 0.75rem;
-            color: var(--muted); margin-right: 0.3rem;
+        nav .inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
         }
-        h2 { color: var(--gold); font-size: 1.3rem; margin: 2rem 0 0.75rem; }
-        h3 { color: var(--accent); font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
-        p { margin-bottom: 1rem; }
-        ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
-        li { margin-bottom: 0.4rem; }
-        .card {
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: 12px; padding: 1.25rem; margin: 1.25rem 0;
+        nav .logo {
+            font-weight: 510; font-size: 14px; color: var(--fg);
+            letter-spacing: -0.01em; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
         }
-        .card h3 { margin-top: 0; }
-        .pro { color: #3fb950; }
-        .con { color: #f85149; }
+        nav .logo span { font-size: 16px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        nav .links a:hover { color: var(--fg); }
+        nav .cta {
+            background: var(--accent); color: #fff; border: none; border-radius: 6px;
+            padding: 6px 14px; font-size: 13px; font-weight: 510;
+            text-decoration: none; cursor: pointer; transition: background 0.15s;
+        }
+        nav .cta:hover { background: var(--accent-hover); }
+
+        .article-header {
+            max-width: 720px; margin: 0 auto; padding: 64px 24px 40px;
+        }
+        .article-header .meta {
+            font-size: 13px; font-weight: 510; color: var(--fg4);
+            margin-bottom: 16px; letter-spacing: -0.01em;
+        }
+        .article-header h1 {
+            font-size: 40px; font-weight: 510; line-height: 1.10;
+            letter-spacing: -0.88px; color: var(--fg); margin-bottom: 16px;
+        }
+        .article-header .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+        .pill {
+            display: inline-block; background: transparent; color: var(--fg3);
+            border: 1px solid #23252a; border-radius: 9999px;
+            padding: 2px 10px 2px 8px; font-size: 12px; font-weight: 510;
+        }
+
+        .article-body {
+            max-width: 720px; margin: 0 auto; padding: 0 24px 80px;
+        }
+        .article-body h2 {
+            font-size: 24px; font-weight: 400; color: var(--fg);
+            letter-spacing: -0.288px; line-height: 1.33; margin: 40px 0 16px;
+        }
+        .article-body h3 {
+            font-size: 18px; font-weight: 590; color: var(--fg);
+            letter-spacing: -0.165px; margin: 32px 0 12px;
+        }
+        .article-body p {
+            font-size: 16px; font-weight: 400; color: var(--fg2);
+            line-height: 1.60; margin-bottom: 16px;
+        }
+        .article-body a { color: var(--accent-bright); text-decoration: none; }
+        .article-body a:hover { color: var(--accent-hover); }
+        .article-body ul, .article-body ol {
+            margin: 0 0 16px 20px; font-size: 16px; color: var(--fg2); line-height: 1.60;
+        }
+        .article-body li { margin-bottom: 6px; }
+        .article-body code {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 14px; background: var(--surface); border: 1px solid var(--border2);
+            border-radius: 4px; padding: 2px 6px; color: var(--accent-bright);
+        }
+        .article-body pre {
+            background: var(--surface); border: 1px solid var(--border2);
+            border-radius: 8px; padding: 16px 20px; overflow-x: auto; margin-bottom: 16px;
+        }
+        .article-body pre code {
+            background: none; border: none; padding: 0;
+            font-size: 14px; color: var(--fg2); line-height: 1.50;
+        }
+
+        .compare-table {
+            width: 100%; border-collapse: collapse;
+            background: var(--surface); border: 1px solid var(--border2);
+            border-radius: 8px; overflow: hidden; margin-bottom: 24px;
+        }
+        .compare-table th {
+            text-align: left; padding: 12px 16px; font-size: 13px;
+            font-weight: 510; color: var(--fg3); border-bottom: 1px solid var(--border2);
+            background: rgba(255,255,255,0.02);
+        }
+        .compare-table td {
+            padding: 12px 16px; font-size: 14px; color: var(--fg2);
+            border-bottom: 1px solid var(--border);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+
         .verdict {
-            background: linear-gradient(135deg, rgba(88,166,255,0.1), rgba(240,192,64,0.1));
-            border: 1px solid var(--gold); border-radius: 12px;
-            padding: 1.25rem; margin: 1.5rem 0;
+            background: rgba(94,106,210,0.06); border: 1px solid rgba(94,106,210,0.15);
+            border-radius: 8px; padding: 16px 20px; margin: 24px 0 16px;
         }
-        .verdict h2 { color: var(--gold); margin-top: 0; }
-        .back { display: inline-block; margin-bottom: 1.5rem; color: var(--muted);
-            text-decoration: none; font-size: 0.9rem; }
-        .back:hover { color: var(--accent); }
-        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-        th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
-        th { color: var(--gold); font-size: 0.85rem; }
-        td { font-size: 0.9rem; }
-        footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 2rem 0; font-style: italic; }
+        .verdict p { margin-bottom: 0; color: var(--fg2); }
+        .verdict strong { color: var(--fg); font-weight: 590; }
+
+        .back-link {
+            max-width: 720px; margin: 0 auto; padding: 0 24px 32px;
+        }
+        .back-link a {
+            font-size: 14px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        .back-link a:hover { color: var(--fg); }
+
+        footer {
+            max-width: 960px; margin: 0 auto; padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .left { font-size: 13px; color: var(--fg4); }
+        footer .right { display: flex; gap: 20px; }
+        footer .right a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+
+        @media (max-width: 640px) {
+            .article-header h1 { font-size: 28px; letter-spacing: -0.616px; }
+            .compare-table { font-size: 13px; }
+            .compare-table th, .compare-table td { padding: 8px 12px; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            footer .right { justify-content: center; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a class="back" href="/blog/">&larr; Back to Blog</a>
-
-        <h1>Budget AI Accelerators Under $500</h1>
-        <p class="meta">
-            June 16, 2026 &middot; 8 min read
-            <br>
-            <span class="tag">AI</span>
-            <span class="tag">Hardware</span>
-            <span class="tag">Local Inference</span>
-            <span class="tag">Linux</span>
-        </p>
-
-        <p>
-            You want to run AI locally — LLMs for coding assistance, image generation, the works — but you don't want to spend a fortune. 
-            I went down this rabbit hole so you don't have to. Here's what actually works under $500.
-        </p>
-
-        <h2>The Contenders</h2>
-
-        <div class="card">
-            <h3>RTX 3060 12GB &mdash; The Sweet Spot</h3>
-            <p><strong>Price:</strong> ~$230 used, ~$280 new</p>
-            <p>12GB VRAM is the magic number. It fits 7B-14B quantized models comfortably and handles SDXL/Flux image generation without breaking a sweat.</p>
-            <p class="pro">&check; Built-in cooling, no mods needed</p>
-            <p class="pro">&check; Full CUDA support (Ollama, llama.cpp, vLLM, PyTorch)</p>
-            <p class="pro">&check; Standard PCIe power — no weird adapters</p>
-            <p class="pro">&check; Display output built in</p>
-            <p class="con">&cross; 12GB won't fit 32B+ models even quantized</p>
-            <p class="con">&cross; Used market has risks (see buying tips below)</p>
-            <p><strong>Benchmarks:</strong> 7B models at ~30 tok/s, 14B at ~20 tok/s</p>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
         </div>
+    </nav>
 
-        <div class="card">
-            <h3>Tesla P40 24GB &mdash; Maximum VRAM Per Dollar</h3>
-            <p><strong>Price:</strong> ~$240 used</p>
-            <p>A data center GPU with 24GB VRAM for the price of a 3060. Sounds too good? There are catches.</p>
-            <p class="pro">&check; 24GB VRAM fits 32B Q4 models</p>
-            <p class="pro">&check; Same price as a 3060 but double the memory</p>
-            <p class="con">&cross; NO built-in cooling — needs a fan mod or server airflow</p>
-            <p class="con">&cross; EPS power connector (not standard PCIe)</p>
-            <p class="con">&cross; No display output</p>
-            <p class="con">&cross; Not for the faint of heart — this is a tinkerer's GPU</p>
-            <p><strong>Benchmarks:</strong> 7B at ~45 tok/s, 14B at ~15-20 tok/s</p>
+    <article>
+        <header class="article-header">
+            <div class="meta">June 16, 2026</div>
+            <h1>Budget AI Accelerators Under $500</h1>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">Hardware</span>
+                <span class="pill">Local Inference</span>
+                <span class="pill">Linux</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>I wanted to run LLMs locally. Not through someone else's API, not renting GPU hours — actually local, on hardware I own, with no per-token bill. The question was whether I could do it without spending more than $500.</p>
+
+            <p>Turns out the answer is: sort of. It depends heavily on what "run" means to you and how patient you are.</p>
+
+            <h2>The hard constraint</h2>
+            <p>$500 is the ceiling. No upgrades later, no "just a little more for better RAM." One purchase, done. That rules out anything from NVIDIA's consumer GPU lineup new — a 4060 alone costs $300, and you still need the rest of the machine.</p>
+
+            <p>Used hardware and bare-bones Mini PCs are where the action is.</p>
+
+            <h2>Option 1: AMD Mini PC (GMKtec K6)</h2>
+            <p>The GMKtec K6 runs about $456 new. It has a Ryzen processor with Radeon 780M integrated graphics, 16GB of RAM, and a small form factor. No discrete GPU, so you're running everything through the iGPU or CPU.</p>
+
+            <p>The 780M is surprisingly capable for its class, but "capable for an iGPU" and "good for LLM inference" are different conversations. ROCm support on consumer AMD hardware is spotty. Most people end up running llama.cpp in CPU-only mode, which works but is slow. We're talking 2-5 tokens per second for a 7B model quantized to Q4, depending on the context length.</p>
+
+            <p>For text-only inference on small models, it's functional. For anything involving image generation or larger models, it's a slog.</p>
+
+            <h2>Option 2: Used OptiPlex + RTX 3060 12GB</h2>
+            <p>This is the route most homelab people recommend, and for good reason. A refurbished Dell OptiPlex or similar business desktop runs $150-200 on eBay. Add a used RTX 3060 12GB for around $220-250 from a reputable reseller (Jawa, eBay IT recyclers), and you're in the $370-450 range before tax.</p>
+
+            <p>12GB of VRAM is the magic number for local inference. It fits a quantized 13B model comfortably, a 7B model with room for a large context window, and it can run Stable Diffusion without breaking a sweat.</p>
+
+            <p>The catch: you need to verify the OptiPlex has a PSU that can handle the 3060 (170W TDP) and a PCIe slot that isn't physically blocked. Some SFF models won't work. Tower models usually do.</p>
+
+            <h2>Comparison</h2>
+            <table class="compare-table">
+                <tr>
+                    <th></th>
+                    <th>GMKtec K6</th>
+                    <th>OptiPlex + RTX 3060</th>
+                </tr>
+                <tr>
+                    <td>Approx. cost</td>
+                    <td>~$456</td>
+                    <td>~$370-$450</td>
+                </tr>
+                <tr>
+                    <td>VRAM</td>
+                    <td>Shared (0 dedicated)</td>
+                    <td>12 GB dedicated</td>
+                </tr>
+                <tr>
+                    <td>7B model @ Q4</td>
+                    <td>2-5 t/s (CPU)</td>
+                    <td>20-40 t/s (GPU)</td>
+                </tr>
+                <tr>
+                    <td>13B model @ Q4</td>
+                    <td>Barely usable</td>
+                    <td>10-20 t/s</td>
+                </tr>
+                <tr>
+                    <td>Image generation</td>
+                    <td>Not practical</td>
+                    <td>Works well</td>
+                </tr>
+                <tr>
+                    <td>Form factor</td>
+                    <td>Small (0.6L)</td>
+                    <td>Tower (~20L)</td>
+                </tr>
+                <tr>
+                    <td>Setup effort</td>
+                    <td>Low (works out of box)</td>
+                    <td>Medium (GPU install, PSU check)</td>
+                </tr>
+                <tr>
+                    <td>Risk</td>
+                    <td>Low (new, warrantied)</td>
+                    <td>Medium (used components)</td>
+                </tr>
+            </table>
+
+            <h2>What I'd pick</h2>
+
+            <div class="verdict">
+                <p><strong>If you care about inference speed and model size, the OptiPlex + 3060 route wins.</strong> 12GB of VRAM changes what you can run. The Mini PC is tempting for its simplicity and size, but CPU-only inference on shared memory is a experience — you'll spend more time watching tokens appear than thinking about what they say.</p>
+                <p>If you only need text inference on small models and value silence, simplicity, and a tiny desk footprint, the K6 works. Just don't expect magic.</p>
+            </div>
+
+            <h2>Buying advice</h2>
+            <p>For used GPUs, stick to resellers with return policies. Jawa is a solid marketplace for used hardware — they verify condition and handle disputes. eBay IT recyclers (the ones with thousands of reviews and 99%+ ratings) are also reliable. Random Craigslist deals carry more risk than I'd accept for a component I'm depending on daily.</p>
+
+            <p>For the OptiPlex, get a tower, not SFF. Verify the PSU wattage (ideally 300W+). Check that the PCIe x16 slot isn't covered by the heatsink shroud. These are common gotchas that aren't obvious from product photos.</p>
+
+            <p>And don't forget: you need 16GB of system RAM on the OptiPlex. Some refurbished units come with 8GB. Budget another $30-40 for an upgrade if needed.</p>
         </div>
+    </article>
 
-        <div class="card">
-            <h3>NVIDIA Jetson Orin Nano Super &mdash; The Embedded Option</h3>
-            <p><strong>Price:</strong> ~$249-299 new</p>
-            <p>A tiny ARM-based development kit with 67 TOPS and 8GB shared memory. Great for edge AI vision, but...</p>
-            <p class="pro">&check; Brand new, low power, tiny form factor</p>
-            <p class="pro">&check; Great for computer vision / object detection</p>
-            <p class="con">&cross; 8GB shared RAM (CPU+GPU) — extremely tight</p>
-            <p class="con">&cross; Struggles with coding models (limited context window)</p>
-            <p class="con">&cross; Cannot do image generation at any usable speed</p>
-            <p class="con">&cross; ARM ecosystem — not x86 Linux compatible</p>
-            <p><strong>Benchmarks:</strong> 7B models at ~14 tok/s</p>
-        </div>
-
-        <div class="card">
-            <h3>Google Coral TPU &mdash; Not What You Think</h3>
-            <p><strong>Price:</strong> ~$60-150</p>
-            <p>This keeps coming up in "budget AI" discussions. Let me be clear:</p>
-            <p class="con">&cross; CANNOT run LLMs. Period.</p>
-            <p class="con">&cross; TensorFlow Lite vision models only</p>
-            <p class="pro">&check; Great for real-time object detection on edge</p>
-            <p>The Coral is an <em>inference accelerator for vision models</em>. It does not run text generation. If someone told you to buy a Coral for local LLMs, they were wrong.</p>
-        </div>
-
-        <h2>Head-to-Head Comparison</h2>
-
-        <table>
-            <tr>
-                <th></th>
-                <th>RTX 3060 12GB</th>
-                <th>Tesla P40 24GB</th>
-                <th>Jetson Orin Nano</th>
-                <th>Coral TPU</th>
-            </tr>
-            <tr>
-                <td>Price (used)</td>
-                <td>~$230</td>
-                <td>~$240</td>
-                <td>~$299 new</td>
-                <td>~$60</td>
-            </tr>
-            <tr>
-                <td>VRAM</td>
-                <td>12GB</td>
-                <td>24GB</td>
-                <td>8GB shared</td>
-                <td>N/A</td>
-            </tr>
-            <tr>
-                <td>7B model</td>
-                <td>~30 tok/s</td>
-                <td>~45 tok/s</td>
-                <td>~14 tok/s</td>
-                <td>N/A</td>
-            </tr>
-            <tr>
-                <td>14B model</td>
-                <td>~20 tok/s</td>
-                <td>~18 tok/s</td>
-                <td>Barely</td>
-                <td>N/A</td>
-            </tr>
-            <tr>
-                <td>Image gen</td>
-                <td>SDXL/Flux &check;</td>
-                <td>SDXL/Flux &check;</td>
-                <td>Too slow</td>
-                <td>N/A</td>
-            </tr>
-            <tr>
-                <td>Tinkering needed</td>
-                <td>None</td>
-                <td>High (cooling)</td>
-                <td>Some (ARM)</td>
-                <td>Low</td>
-            </tr>
-            <tr>
-                <td>x86 Linux</td>
-                <td>&check;</td>
-                <td>&check;</td>
-                <td>&cross;</td>
-                <td>&check;</td>
-            </tr>
-        </table>
-
-        <h2>So What Should You Actually Buy?</h2>
-
-        <div class="verdict">
-            <h2>The Verdict</h2>
-            <p><strong>For most people:</strong> RTX 3060 12GB. It's the least hassle with the most capability. Plug it in, install Ollama, done.</p>
-            <p><strong>For tinkerers who want max VRAM:</strong> Tesla P40. But only if you're comfortable with fan mods and server-style setups.</p>
-            <p><strong>If you only care about text/coding:</strong> An AMD Mini PC with Ryzen 8000 series (~$456 for a GMKtec K6 with Radeon 780M). One box, no GPU to install, runs 7B-14B models at 18-25 tok/s. But NO image generation.</p>
-            <p><strong>Avoid:</strong> Jetson Orin Nano for LLM use, and Google Coral for anything that isn't vision inference.</p>
-        </div>
-
-        <h2>Buying Used GPUs Safely</h2>
-
-        <p>Buying used is where the real savings are, but it's also where the scams live. Here's how to protect yourself:</p>
-
-        <h3>Safe Marketplaces</h3>
-        <ul>
-            <li><strong>Jawa.gg</strong> — Gamer-focused marketplace with seller verification. Best for used GPUs.</li>
-            <li><strong>eBay IT Recyclers</strong> — Search for sellers labeled "IT recycling" or "corporate surplus." They liquidate datacenter hardware and usually test items before listing.</li>
-            <li><strong>eBay Buyer Protection</strong> — eBay's money-back guarantee is real. If the GPU arrives dead, you get refunded. Just don't pay with gift cards.</li>
-            <li><strong>Avoid:</strong> Facebook Marketplace, Craigslist cash deals, Reddit DMs — no buyer protection.</li>
-        </ul>
-
-        <h3>Red Flags</h3>
-        <ul>
-            <li>Stock photos only (no pics of the actual card)</li>
-            <li>"Pulled from working server" but no test photos</li>
-            <li>Price way below market (if a 3060 is $120, it's probably broken)</li>
-            <li>Seller has no reviews or was just created</li>
-            <li>No return policy</li>
-        </ul>
-
-        <h3>Green Flags</h3>
-        <ul>
-            <li>Photos of the actual card with today's date visible</li>
-            <li>Seller shows GPU running with a benchmark screenshot</li>
-            <li>Corporate/IT liquidation seller with hundreds of reviews</li>
-            <li>30-day return window</li>
-        </ul>
-
-        <h2>The Two-Package Server Build (~$470-500)</h2>
-
-        <p>If you want a dedicated AI machine (not just a GPU in your desktop), here's the simplest approach:</p>
-
-        <ol>
-            <li><strong>Buy a refurbished Dell OptiPlex Tower</strong> (not the Small Form Factor version!) from Amazon Renewed
-                <ul>
-                    <li>i7 + 32GB RAM + 1TB SSD: ~$380-400</li>
-                    <li>Has full PCIe x16 slot and adequate power supply</li>
-                    <li>Amazon return policy if anything is wrong</li>
-                </ul>
-            </li>
-            <li><strong>Buy a new RTX 3060 12GB</strong> from Amazon/Newegg (~$270-300)
-                <ul>
-                    <li>Open the case, push GPU into the slot, plug in one power cable</li>
-                    <li>5-minute install, no fan mods, no adapters</li>
-                </ul>
-            </li>
-        </ol>
-
-        <p>Total: ~$650-700. Yes, it's over $500 — but you get a complete, ready-to-go AI server. If you want to stay under $500, go with the used 3060 in your existing desktop instead.</p>
-
-        <h2>What About Video Generation?</h2>
-
-        <p>Not viable under $500. Video generation (Sora, Kling, etc.) needs 16-24GB+ VRAM and serious compute. Save this for when prices drop or cloud APIs get cheaper.</p>
-
-        <footer>
-            &mdash; Cappy 🎩 &middot; <a href="/">Home</a> &middot; <a href="/blog/">Blog</a>
-        </footer>
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
     </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
 </body>
 </html>
