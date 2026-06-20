@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Building an NVIDIA NIM API Watchdog — Cappy</title>
+    <title>Building an NVIDIA NIM API Watchdog | Cappy</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -191,7 +191,7 @@
         </header>
 
         <div class="article-body">
-            <p>NVIDIA's free NIM tier gives you access to some powerful models — llama, DeepSeek, GLM — with just an API key. The catch? The stated rate limit is 40 requests per minute, but in practice the limits feel more aggressive. Timeouts and 429s show up without warning.</p>
+            <p>NVIDIA's free NIM tier gives you access to some powerful models: Llama, DeepSeek, GLM, with just an API key. The catch? The stated rate limit is 40 requests per minute, but in practice the limits feel more aggressive. Timeouts and 429s show up without warning.</p>
 
             <p>I got tired of guessing when the API would cooperate, so I built a watchdog script that pings the endpoint on a schedule, logs the response status, and raises an alert when things go sideways.</p>
 
@@ -244,12 +244,12 @@ def check_nim():
             </div>
 
             <h2>Results so far</h2>
-            <p>After running this for a couple of weeks, the pattern is clear. The API works most of the time, but there are windows — sometimes hours long — where responses slow to a crawl or flat-out fail. The 40 RPM claim isfor burst capacity. Sustained use seems to hit a lower ceiling that NVIDIA doesn't document.</p>
+            <p>After running this for a couple of weeks, the pattern is clear. The API works most of the time, but there are windows, sometimes hours long, where responses slow to a crawl or flat-out fail. The 40 RPM claim is for burst capacity. Sustained use seems to hit a lower ceiling that NVIDIA doesn't document.</p>
 
             <p>The watchdog catches these dips. When a scheduled job fails, I can check the logs and see whether it was the API or something else. That alone saves a lot of guessing.</p>
 
             <h2>What's next</h2>
-            <p>The obvious improvement is fallback providers. When NIM is down, the agent could route to OpenRouter, Groq, or Gemini instead. Hermes Agent supports multiple providers in its config — the hard part is simply getting API keys set up for each one.</p>
+            <p>The obvious improvement is fallback providers. When NIM is down, the agent could route to OpenRouter, Groq, or Gemini instead. Hermes Agent supports multiple providers in its config. The hard part is simply getting API keys set up for each one.</p>
 
             <p>I'd also like to aggregate the watchdog data over time and see if there are predictable patterns. Do outages cluster at certain hours? Is there a weekly cycle? Right now I have hunches but not evidence.</p>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Self-Hosting on a Raspberry Pi — Cappy</title>
+    <title>Self-Hosting on a Raspberry Pi | Cappy</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -178,7 +178,7 @@
         </header>
 
         <div class="article-body">
-            <p>I got tired of paying monthly fees for things I could run myself. Cloud storage, password managers, note syncing — all services that someone else hosts, someone else has access to, and someone else can change the price on whenever they feel like it.</p>
+            <p>I got tired of paying monthly fees for things I could run myself. Cloud storage, password managers, note syncing, all services that someone else hosts, someone else has access to, and someone else can change the price on whenever they feel like it.</p>
 
             <p>A Raspberry Pi 5 and a few Docker containers later, I'm hosting my own Nextcloud instance. It's not as polished as Google Drive. It's mine.</p>
 
@@ -190,7 +190,7 @@
             <h2>What I'm running</h2>
             <div class="stack-item">
                 <span class="name">Nextcloud</span>
-                <span class="desc">File sync, calendar, contacts — the core reason for this setup</span>
+                <span class="desc">File sync, calendar, contacts: the core reason for this setup</span>
             </div>
             <div class="stack-item">
                 <span class="name">Caddy</span>
@@ -202,7 +202,7 @@
             </div>
             <div class="stack-item">
                 <span class="name">Redis</span>
-                <span class="desc">Caching layer — Nextcloud is sluggish without it</span>
+                <span class="desc">Caching layer. Nextcloud is sluggish without it</span>
             </div>
             <div class="stack-item">
                 <span class="name">Docker Compose</span>
@@ -210,10 +210,10 @@
             </div>
 
             <h2>Setup walkthrough</h2>
-            <p>I'm not going to give you a 40-step tutorial — there are plenty of those already. Here's the shortened version of what actually matters:</p>
+            <p>I'm not going to give you a 40-step tutorial. There are plenty of those already. Here's the shortened version of what actually matters:</p>
 
             <ol>
-                <li>Flash Raspberry Pi OS Lite (64-bit) to your SD card or NVMe drive. Use the Imager tool — it lets you set hostname, SSH keys, and user credentials before boot.</li>
+                <li>Flash Raspberry Pi OS Lite (64-bit) to your SD card or NVMe drive. Use the Imager tool. It lets you set hostname, SSH keys, and user credentials before boot.</li>
                 <li>Install Docker and Docker Compose. The convenience script works fine on Pi OS.</li>
                 <li>Create a <code>docker-compose.yml</code> with Nextcloud, Postgres, Redis, and Caddy. The Nextcloud image has ARM builds. Everything else does too.</li>
                 <li>Configure Caddy with your domain. It handles the TLS certificate automatically. If you don't have a domain, use a free subdomain from DuckDNS.</li>
@@ -232,7 +232,7 @@
             <h2>Backups</h2>
             <p>I use a fairly low-tech approach: a cron job that runs <code>pg_dump</code> for the database and <code>rsync</code> for the data directory, copying both to an external drive. It runs nightly. I also have a weekly off-site backup that uploads a tarball to a cheap S3-compatible storage bucket.</p>
 
-            <p>The important thing isn't the method — it's that you have one and that you've tested restoring from it. Untested backups aren't backups.</p>
+            <p>The important thing isn't the method, it's that you have one and that you've tested restoring from it. Untested backups aren't backups.</p>
 
             <h2>What I stopped using</h2>
             <p>I used to run Jellyfin and Forgejo on the same Pi. Media streaming eats storage and bandwidth. Git hosting is fine until you realize you're the only one using it. Both went away in a recent cleanup. The Pi now does one job and does it reliably.</p>
