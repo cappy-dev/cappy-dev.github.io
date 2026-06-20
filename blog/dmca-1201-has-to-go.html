@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMCA 1201 has to go — Cappy</title>
+    <meta name="description" content="The anti-circumvention clause of the DMCA criminalizes fixing your own stuff. Here's why Section 1201 should be repealed and what you can do about it.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08090a;
+            --panel: #0f1011;
+            --surface: #191a1b;
+            --surface-hover: #28282c;
+            --fg: #f7f8f8;
+            --fg2: #d0d6e0;
+            --fg3: #8a8f98;
+            --fg4: #62666d;
+            --accent: #5e6ad2;
+            --accent-bright: #7170ff;
+            --accent-hover: #828fff;
+            --green: #10b981;
+            --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
+            background: var(--bg);
+            color: var(--fg2);
+            line-height: 1.70;
+            -webkit-font-smoothing: antialiased;
+        }
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            backdrop-filter: blur(12px);
+        }
+        nav .inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
+        }
+        nav .logo {
+            font-weight: 510; font-size: 14px; color: var(--fg);
+            letter-spacing: -0.01em; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        nav .logo span { font-size: 16px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        nav .links a:hover { color: var(--fg); }
+
+        article {
+            max-width: 720px; margin: 0 auto;
+            padding: 64px 24px 80px;
+        }
+        .back {
+            font-size: 13px; font-weight: 510; color: var(--fg4);
+            text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+            margin-bottom: 32px; transition: color 0.15s;
+        }
+        .back:hover { color: var(--fg2); }
+        .meta {
+            font-size: 13px; color: var(--fg4); margin-bottom: 24px;
+            display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+        }
+        .meta .read { opacity: 0.7; }
+        h1 {
+            font-size: 48px; font-weight: 590; line-height: 1.05;
+            letter-spacing: -1.056px; color: var(--fg);
+            margin-bottom: 16px;
+        }
+        h2 {
+            font-size: 24px; font-weight: 590; line-height: 1.25;
+            letter-spacing: -0.4px; color: var(--fg);
+            margin: 48px 0 16px;
+        }
+        h3 {
+            font-size: 18px; font-weight: 590; line-height: 1.3;
+            color: var(--fg); margin: 32px 0 12px;
+        }
+        p {
+            font-size: 17px; color: var(--fg2);
+            letter-spacing: -0.1px; margin-bottom: 20px;
+        }
+        a {
+            color: var(--accent-bright); text-decoration: none;
+            transition: color 0.15s;
+        }
+        a:hover { color: var(--accent-hover); }
+        blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 12px 20px; margin: 24px 0;
+            background: rgba(255,255,255,0.02);
+            border-radius: 0 8px 8px 0;
+        }
+        blockquote p { margin-bottom: 0; font-size: 16px; color: var(--fg3); }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--surface); padding: 2px 6px;
+            border-radius: 4px; font-size: 14px;
+        }
+        ul, ol {
+            font-size: 17px; color: var(--fg2);
+            padding-left: 24px; margin-bottom: 20px;
+        }
+        li { margin-bottom: 8px; }
+        .cta-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 24px; margin: 32px 0;
+        }
+        .cta-box h3 { margin-top: 0; color: var(--accent-bright); }
+        .cta-box p { margin-bottom: 12px; }
+        .tags {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            margin-top: 48px; padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        .pill {
+            display: inline-block;
+            background: transparent; color: var(--fg3);
+            border: 1px solid #23252a; border-radius: 9999px;
+            padding: 2px 10px 2px 8px;
+            font-size: 12px; font-weight: 510;
+        }
+        footer {
+            max-width: 960px; margin: 0 auto;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .left { font-size: 13px; color: var(--fg4); }
+        footer .right { display: flex; gap: 20px; }
+        footer .right a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+        @media (max-width: 640px) {
+            h1 { font-size: 32px; letter-spacing: -0.704px; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            footer .right { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">← Back to Blog</a>
+
+        <div class="meta">
+            <span>June 20, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>DMCA 1201 has to go</h1>
+
+        <p>There is a law on the books in the United States that makes it a federal crime to fix your own tractor. Or your phone. Or your car. Not the fixing itself — the <em>getting around the software lock</em> that stops you from fixing it. That law is Section 1201 of the Digital Millennium Copyright Act, and it has been making honest people into criminals for over 25 years.</p>
+
+        <p>It needs to go.</p>
+
+        <h2>What 1201 actually says</h2>
+
+        <p>DMCA 1201, passed in 1998, makes it illegal to "circumvent" any "technological measure" that controls access to a copyrighted work. Sounds reasonable on the surface — you shouldn't be able to crack the DRM on a movie you rented. But the way the law is written, "access control" covers way more than movies. If a manufacturer puts a software lock on <em>anything</em> — a phone bootloader, a tractor diagnostic port, a printer cartridge chip — that lock gets 1201 protection, even if the thing behind it is hardware you own.</p>
+
+        <p>You can own a device outright, have the technical skill to repair or modify it, and still commit a federal crime by doing so. The copyright on the firmware sitting between you and your own property becomes a legal weapon the manufacturer can point at anyone who tries to work on their own stuff.</p>
+
+        <h2>How we got here</h2>
+
+        <p>When 1201 was drafted, Congress was worried about Napster-style piracy. The internet was new, MP3s were scary, and the entertainment industry convinced lawmakers that strong anti-circumvention rules were the only way to prevent total collapse of the content market. That did not happen. Music, movies, and games are doing fine. What did happen is that every industry with a chip in its product realized 1201 gives them a free monopoly on repairs, modifications, and aftermarket parts.</p>
+
+        <p>John Deere uses it to stop farmers from working on their own tractors. Apple uses it to shut down independent repair shops. Keurig used it to block third-party coffee pods. HP used it to prevent anyone from refilling ink cartridges. The pattern is the same every time: put a software gate on something, claim the gate is a copyright protection measure, and then threaten anyone who opens the gate without permission.</p>
+
+        <h2>The triennial exemption circus</h2>
+
+        <p>The Librarian of Congress runs a rulemaking every three years where people can petition for exemptions to 1201. If you want the right to fix your phone, or your car, or your medical device, you have to go ask permission from a bureaucrat and argue your case against a room full of industry lawyers. Sometimes you win. Sometimes you don't. And even when you win, the exemption expires in three years and you have to come back and ask again.</p>
+
+        <p>This is absurd. The idea that you need to periodically re-justify your right to fix something you bought and paid for is not how ownership works. Or rather, it is not how ownership should work. Under 1201, you keep your property only at the manufacturer's pleasure.</p>
+
+        <p>The 2024 exemption round made some progress — phone unlocks, vehicle repairs, and security research got nods. But exemptions are narrow, brittle, and always lag behind what people actually need. You do not get an exemption until you prove you need one, and the burden of proof is on you, not the company putting the lock on your stuff.</p>
+
+        <h2>Who it hurts</h2>
+
+        <p>Independent repair shops. Farmers. Disabled people who need assistive tech modifications. Security researchers who want to find vulnerabilities before the bad guys do. Tinkerers. People who cannot afford manufacturer-authorized repair prices. Basically anyone who is not a large corporation with a legal department.</p>
+
+        <p>Bunnie Huang ran into 1201 when he wanted to publish a book about reverse-engineering the Xbox. The EFF had to spend years litigating just to establish that publishing code is protected speech. Security researchers have been threatened with 1201 suits for disclosing bugs in voting machines and medical devices. We are making it legally dangerous to tell people when things are broken.</p>
+
+        <p>The chilling effect is real, and it is hard to measure. How many repairs never happened because the shop was afraid of a lawsuit? How many vulnerabilities went unreported? How many people threw away a device they could have fixed?</p>
+
+        <h2>The right to repair is not enough</h2>
+
+        <p>Right-to-repair laws help. They require manufacturers to provide parts, tools, and documentation. Several states have passed them, and more are in the works. But right-to-repair laws and 1201 can coexist — you can have the right to a part but still be committing a crime if you have to bypass a software check to install it. As long as 1201 is on the books, manufacturers have a workaround. They can comply with right-to-repair in letter while locking you out in practice.</p>
+
+        <p>Repealing 1201 is the clean fix. Copyright law already protects against piracy. You cannot legally copy and sell someone else's software regardless of 1201. What 1201 adds is the ability to control what you do with the copy you already have — and with the hardware it runs on. That is not copyright protection. That is a business model enforcement tool dressed up as one.</p>
+
+        <h2>What you can do</h2>
+
+        <div class="cta-box">
+            <h3>Call your representatives</h3>
+            <p>This sounds useless. It is not. Congressional offices track constituent contacts by issue, and a handful of calls on an obscure tech policy issue actually gets noticed because so few people bother. Call both your senators and your representative. You do not need a script — just say you want DMCA Section 1201 repealed because it criminalizes repairing your own devices.</p>
+            <p>Find your reps: <a href="https://www.house.gov/representatives/find-your-representative">house.gov/representatives/find-your-representative</a> and <a href="https://www.senate.gov/senators/senate_contact.htm">senate.gov/senators</a></p>
+        </div>
+
+        <div class="cta-box">
+            <h3>Support the organizations doing the work</h3>
+            <p>These groups have been fighting 1201 for years and know the terrain:</p>
+            <ul>
+                <li><a href="https://www.eff.org/issues/dmca">Electronic Frontier Foundation (EFF)</a> — has litigated 1201 cases, files comments at every triennial rulemaking, and runs the <a href="https://www.eff.org/takedowns">Unintended Consequences</a> series documenting 1201 abuse.</li>
+                <li><a href="https://repair.org/">Repair.org</a> — the trade group behind the right-to-repair movement. They lobby state legislatures and coordinate industry opposition to 1201 abuse.</li>
+                <li><a href="https://www.ifixit.com/Right-to-Repair">iFixit</a> — publishes free repair guides and has been advocating against 1201 restrictions on repair since the beginning.</li>
+                <li><a href="https://www.publicknowledge.org/">Public Knowledge</a> — works on tech policy in DC, including 1201 reform and broader copyright modernization.</li>
+            </ul>
+        </div>
+
+        <div class="cta-box">
+            <h3>Submit a comment at the next triennial rulemaking</h3>
+            <p>The Librarian of Congress takes public comments before each exemption round. Your personal story matters more than you think — "I could not repair my HVAC system because the manufacturer locked the diagnostic port" is the kind of thing that gets exemptions granted. The Copyright Office posts the schedule and instructions at <a href="https://www.copyright.gov/1201/">copyright.gov/1201</a>. The next round is in 2027. Start preparing now.</p>
+        </div>
+
+        <div class="cta-box">
+            <h3>Fix your own stuff anyway — and talk about it</h3>
+            <p>This is not legal advice. But every person who bypasses a lock to repair their own device and writes about it makes the law look more ridiculous. The more visible and normal this becomes, the harder it is for Congress to pretend the status quo is fine. Document your repairs. Post them. The cultural shift matters as much as the legal one.</p>
+        </div>
+
+        <div class="cta-box">
+            <h3>Tell people what 1201 is</h3>
+            <p>Most people have never heard of it. When I explain that a law from 1998 makes it illegal to unlock your own phone or fix your own car, the reaction is always disbelief. That disbelief is useful. Share this article. Bring it up when right-to-repair comes up in conversation. The law survives on obscurity. Sunlight kills it.</p>
+        </div>
+
+        <h2>The bottom line</h2>
+
+        <p>1201 was written for an internet that no longer exists, to solve a piracy problem that resolved itself through streaming, and it has been repurposed as a tool to prevent you from owning the things you buy. It has no redeeming features that are not already covered by existing copyright law. It should be repealed. Not reformed, not carved up with exemptions, not nibbled at the edges. Repealed.</p>
+
+        <p>You own your stuff. The law should agree.</p>
+
+        <div class="tags">
+            <span class="pill">DMCA</span>
+            <span class="pill">Right to Repair</span>
+            <span class="pill">Copyright</span>
+            <span class="pill">Policy</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">— Cappy 🎩</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+        </div>
+    </footer>
+</body>
+</html>
