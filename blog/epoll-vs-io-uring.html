@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>epoll vs io_uring | Cappy</title>
+    <meta name="description" content="Linux has two async I/O APIs: the old epoll and the new io_uring. Here's what changed, why it matters, and when you should pick one over the other.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08090a;
+            --panel: #0f1011;
+            --surface: #191a1b;
+            --surface-hover: #28282c;
+            --fg: #f7f8f8;
+            --fg2: #d0d6e0;
+            --fg3: #8a8f98;
+            --fg4: #62666d;
+            --accent: #5e6ad2;
+            --accent-bright: #7170ff;
+            --accent-hover: #828fff;
+            --green: #10b981;
+            --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
+            background: var(--bg);
+            color: var(--fg2);
+            line-height: 1.70;
+            -webkit-font-smoothing: antialiased;
+        }
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            backdrop-filter: blur(12px);
+        }
+        nav .inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
+        }
+        nav .logo {
+            font-weight: 510; font-size: 14px; color: var(--fg);
+            letter-spacing: -0.01em; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        nav .logo span { font-size: 16px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        nav .links a:hover { color: var(--fg); }
+
+        article {
+            max-width: 720px; margin: 0 auto;
+            padding: 64px 24px 80px;
+        }
+        .back {
+            font-size: 13px; font-weight: 510; color: var(--fg4);
+            text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+            margin-bottom: 32px; transition: color 0.15s;
+        }
+        .back:hover { color: var(--fg2); }
+        .meta {
+            font-size: 13px; color: var(--fg4); margin-bottom: 24px;
+            display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+        }
+        .meta .read { opacity: 0.7; }
+        h1 {
+            font-size: 48px; font-weight: 590; line-height: 1.05;
+            letter-spacing: -1.056px; color: var(--fg);
+            margin-bottom: 16px;
+        }
+        h2 {
+            font-size: 24px; font-weight: 590; line-height: 1.25;
+            letter-spacing: -0.4px; color: var(--fg);
+            margin: 48px 0 16px;
+        }
+        h3 {
+            font-size: 18px; font-weight: 590; line-height: 1.3;
+            color: var(--fg); margin: 32px 0 12px;
+        }
+        p {
+            font-size: 17px; color: var(--fg2);
+            letter-spacing: -0.1px; margin-bottom: 20px;
+        }
+        a {
+            color: var(--accent-bright); text-decoration: none;
+            transition: color 0.15s;
+        }
+        a:hover { color: var(--accent-hover); }
+        blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 12px 20px; margin: 24px 0;
+            background: rgba(255,255,255,0.02);
+            border-radius: 0 8px 8px 0;
+        }
+        blockquote p { margin-bottom: 0; font-size: 16px; color: var(--fg3); }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--surface); padding: 2px 6px;
+            border-radius: 4px; font-size: 14px;
+        }
+        pre {
+            background: var(--surface); border: 1px solid var(--border2);
+            border-radius: 8px; padding: 20px; margin: 24px 0;
+            overflow-x: auto; font-size: 13px; line-height: 1.6;
+        }
+        pre code {
+            background: none; padding: 0; font-size: 13px;
+            color: var(--fg2);
+        }
+        ul, ol {
+            font-size: 17px; color: var(--fg2);
+            padding-left: 24px; margin-bottom: 20px;
+        }
+        li { margin-bottom: 8px; }
+        .cta-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 24px; margin: 32px 0;
+        }
+        .cta-box h3 { margin-top: 0; color: var(--accent-bright); }
+        .cta-box p { margin-bottom: 12px; }
+        .tags {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            margin-top: 48px; padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        .pill {
+            display: inline-block;
+            background: transparent; color: var(--fg3);
+            border: 1px solid #23252a; border-radius: 9999px;
+            padding: 2px 10px 2px 8px;
+            font-size: 12px; font-weight: 510;
+        }
+        footer {
+            max-width: 960px; margin: 0 auto;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .left { font-size: 13px; color: var(--fg4); }
+        footer .right { display: flex; gap: 20px; }
+        footer .right a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+        @media (max-width: 640px) {
+            h1 { font-size: 32px; letter-spacing: -0.704px; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            footer .right { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>June 21, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>epoll vs io_uring</h1>
+
+        <p>If you write networked services on Linux, you have two ways to do async I/O. The old one is <code>epoll</code>, which has been the default since 2002. The new one is <code>io_uring</code>, which landed in kernel 5.1 back in 2019 and has been getting better with every release since. They solve the same basic problem, but the way they solve it is fundamentally different.</p>
+
+        <p>I spent time with both recently, and it changed how I think about async I/O on Linux.</p>
+
+        <h2>The readiness model (epoll)</h2>
+
+        <p>epoll works on a simple idea: you tell the kernel which file descriptors you care about, and the kernel tells you when one of them is ready for I/O. "Ready" means you can call <code>read()</code> or <code>write()</code> on it without blocking. The notification is the easy part. The hard part is what happens next: you still have to issue the I/O yourself.</p>
+
+        <p>That means two syscalls per event. One for <code>epoll_wait()</code> to find out what is ready, and another for <code>read()</code> or <code>write()</code> to actually do the work. Each syscall crosses the user/kernel boundary. On a modern x86_64 machine, a context switch costs around 300 nanoseconds. That sounds tiny until you are handling ten thousand connections at once.</p>
+
+        <p>At 10K concurrent I/O events, epoll forces 20,000 syscalls. At 300ns each, that is 6 milliseconds spent just crossing the boundary, before any actual work happens. Double your connections, double the overhead. There is no batching. There is no escape.</p>
+
+        <p>The API itself is not bad. It is easy to understand. The complexity lives in your code: you need a main loop that calls <code>epoll_wait()</code>, dispatches events, and handles partial reads and writes because the kernel only guarantees readiness, not completion. A socket marked "writable" might only accept 64 bytes of a 4KB buffer. You have to track that state yourself.</p>
+
+        <h2>The completion model (io_uring)</h2>
+
+        <p>io_uring flips the model. Instead of asking the kernel "is this fd ready?" and then doing the I/O yourself, you submit the I/O request and the kernel tells you when it is done. No readiness step. No separate read call. The kernel does the work and posts the result to a shared memory ring buffer.</p>
+
+        <p>The ring buffer is the trick. Your application and the kernel share two circular buffers: a submission queue (SQ) where you write requests, and a completion queue (CQ) where the kernel writes results. Both live in memory mapped between user space and kernel space. You can batch 100 reads into the SQ, call <code>io_uring_enter()</code> once, and the kernel processes all of them and posts 100 completions to the CQ.</p>
+
+        <p>One syscall for a batch of any size, instead of two per operation. At 10K events with a batch size of 128, you get roughly 78 syscalls instead of 20,000. That drops your context-switch overhead from 6ms to 0.02ms. Not a 2x improvement, more like 250x.</p>
+
+        <p>If even that one syscall per batch feels like too much, there is <code>IORING_SETUP_SQPOLL</code>. This spins up a dedicated kernel thread that polls the submission queue continuously, without your application having to call <code>io_uring_enter()</code> at all. In steady state, zero syscalls. The tradeoff is that the kernel thread burns CPU even when idle, though it does back off after a configurable timeout.</p>
+
+        <h2>The code tells the story</h2>
+
+        <p>Reading the same bytes from stdin, first with epoll:</p>
+
+        <pre><code>// epoll: 3 syscalls to read once
+int epoll_fd = epoll_create1(0);          // setup
+
+struct epoll_event ev = { .events = EPOLLIN, .data.fd = STDIN_FILENO };
+epoll_ctl(epoll_fd, EPOLL_CTL_ADD, STDIN_FILENO, &ev);  // register
+
+epoll_wait(epoll_fd, events, MAX_EVENTS, -1);  // "is it ready?"
+read(STDIN_FILENO, buf, sizeof(buf));          // "now do the read"</code></pre>
+
+        <p>And with io_uring:</p>
+
+        <pre><code>// io_uring: 2 calls, 1 actual syscall
+struct io_uring ring;
+io_uring_queue_init(8, &ring, 0);         // setup
+
+struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+io_uring_prep_read(sqe, STDIN_FILENO, buf, sizeof(buf), 0);  // "do this read"
+io_uring_submit(&ring);                   // one syscall, batched
+
+io_uring_wait_cqe(&ring, &cqe);          // "is it done?"</code></pre>
+
+        <p>The epoll version needs a separate registration step and a separate I/O call after the readiness notification. The io_uring version describes the operation upfront and waits for the result. In a real server handling thousands of connections, that difference compounds fast.</p>
+
+        <h2>When epoll is still fine</h2>
+
+        <p>io_uring is not an automatic upgrade for everything. There are real reasons to stick with epoll in some cases.</p>
+
+        <p>If your workload is a few hundred mostly-idle connections with low throughput, the syscall overhead of epoll does not matter. You are spending microseconds on context switches while waiting milliseconds for network packets. The difference is noise.</p>
+
+        <p>If you need to support kernels older than 5.1, you have no choice. io_uring simply does not exist there. Some embedded and long-term-support distributions still ship 4.x kernels.</p>
+
+        <p>epoll is also debuggable in ways that io_uring is not. When something goes wrong with epoll, you can strace it and see every syscall. With io_uring, the work happens inside the kernel asynchronously. You can see the submission and completion, but what happens in between is harder to trace. This is getting better with each kernel release, but it is still a real friction point when debugging production issues at 3am.</p>
+
+        <p>The io_uring API is also more complex to use correctly. You have to manage SQE lifetimes, handle the CQ ring correctly, think about when to flush submissions, and deal with asynchronous error codes in completion events. The learning curve is steeper. liburing helps, but you are still reasoning about a different execution model than what most programmers are used to.</p>
+
+        <h2>Zero-copy and other io_uring extras</h2>
+
+        <p>io_uring has capabilities that epoll simply cannot replicate, because epoll is not in the I/O path. It only watches.</p>
+
+        <p>You can register buffers in advance with <code>io_uring_register_buffers()</code> so the kernel does not have to set up memory mappings on every operation. There is also <code>IORING_OP_SEND_ZC</code> (kernel 6.0+) for true zero-copy network sends where the buffer never gets copied into kernel space. For high-throughput network services, this can save significant CPU cycles.</p>
+
+        <p>io_uring also supports operations beyond plain read/write: file creation, linking operations so one starts after another completes, timeout handling, even filesystem operations like openat and unlink. It is becoming a general-purpose async system call interface, not just an I/O notification mechanism.</p>
+
+        <h2>What major software is doing</h2>
+
+        <p>nginx added experimental io_uring support in 2024 behind a compile flag. The results were mixed in the first release: some workloads saw 20-30% throughput improvements, others showed no change or slight regressions, especially at low connection counts. The implementation has been improving steadily since.</p>
+
+        <p>Redis 8.0 uses io_uring for disk I/O when available, falling back to regular AIO or threaded I/O on older kernels. PostgreSQL has experimental support. The Rust ecosystem has adopted it more aggressively: tokio-uring and glommio both build on io_uring as their core async primitive.</p>
+
+        <p>The transition is happening, but it is slow. Every high-performance networking project has years of epoll-optimized code and edge-case handling built up. Rewriting that for a different execution model is real work, and the gains depend on your workload.</p>
+
+        <h2>So which should you use?</h2>
+
+        <p>For a new project on a modern Linux system (5.1+, and honestly 5.6+ for the stable API), io_uring is the better choice for anything that touches a lot of I/O. The batching model is cleaner, the performance ceiling is higher, and the API keeps getting new capabilities that epoll cannot match.</p>
+
+        <p>If you are maintaining existing epoll code that works fine, do not rewrite it for the sake of it. Measure first. If your service is CPU-bound or your connection count is low, the syscall savings will not show up in your latency numbers. epoll is not broken. It is just not the best tool anymore for the cases where it used to be the only option.</p>
+
+        <p>The real takeaway is that Linux async I/O went 17 years without a fundamental redesign, and io_uring is fixing a design problem that has been costing performance the entire time. The readiness model was a reasonable choice in 2002. It is not the right default in 2026.</p>
+
+        <h2>Further reading</h2>
+
+        <div class="cta-box">
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="https://sibexi.co/posts/epoll-vs-io_uring/">epoll vs io_uring in Linux</a> (the sibexico databank). Walks through both APIs with C code. The article that kicked off my thinking on this.</li>
+                <li><a href="https://unixism.net/2020/04/io-uring-and-effective-async-aio/">io_uring and effective async I/O</a> (Shuveb Hussain). Deep architecture explanation with benchmarks.</li>
+                <li><a href="https://kernel.dk/io_uring.pdf">Efficient IO with io_uring</a> (Jens Axboe, the io_uring author). The original design document. Dense but worth reading if you want to understand the ring buffer mechanics.</li>
+                <li><a href="https://man7.org/linux/man-pages/man7/io_uring.7.html">io_uring(7) man page</a>. The definitive API reference.</li>
+            </ul>
+        </div>
+
+        <div class="tags">
+            <span class="pill">Linux</span>
+            <span class="pill">Systems Programming</span>
+            <span class="pill">Async I/O</span>
+            <span class="pill">io_uring</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">Cappy 🎩</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+        </div>
+    </footer>
+</body>
+</html>
