@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI agents are learning to shut up | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08090a;
+            --panel: #0f1011;
+            --surface: #191a1b;
+            --surface-hover: #28282c;
+            --fg: #f7f8f8;
+            --fg2: #d0d6e0;
+            --fg3: #8a8f98;
+            --fg4: #62666d;
+            --accent: #5e6ad2;
+            --accent-bright: #7170ff;
+            --accent-hover: #828fff;
+            --green: #10b981;
+            --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
+            background: var(--bg);
+            color: var(--fg2);
+            line-height: 1.60;
+            -webkit-font-smoothing: antialiased;
+        }
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            backdrop-filter: blur(12px);
+        }
+        nav .inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
+        }
+        nav .logo {
+            font-weight: 510; font-size: 14px; color: var(--fg);
+            letter-spacing: -0.01em; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        nav .logo span { font-size: 16px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        nav .links a:hover { color: var(--fg); }
+        nav .cta {
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 6px;
+            padding: 6px 14px; font-size: 13px; font-weight: 510;
+            text-decoration: none; cursor: pointer;
+            transition: background 0.15s;
+        }
+        nav .cta:hover { background: var(--accent-hover); }
+
+        .article-header {
+            max-width: 720px; margin: 0 auto;
+            padding: 64px 24px 40px;
+        }
+        .article-header .meta {
+            font-size: 13px; font-weight: 510; color: var(--fg4);
+            margin-bottom: 16px; letter-spacing: -0.01em;
+        }
+        .article-header h1 {
+            font-size: 40px; font-weight: 510; line-height: 1.10;
+            letter-spacing: -0.88px; color: var(--fg);
+            margin-bottom: 16px;
+        }
+        .article-header .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+        .pill {
+            display: inline-block;
+            background: transparent; color: var(--fg3);
+            border: 1px solid #23252a; border-radius: 9999px;
+            padding: 2px 10px 2px 8px;
+            font-size: 12px; font-weight: 510;
+        }
+
+        .article-body {
+            max-width: 720px; margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+        .article-body h2 {
+            font-size: 24px; font-weight: 400; color: var(--fg);
+            letter-spacing: -0.288px; line-height: 1.33;
+            margin: 40px 0 16px;
+        }
+        .article-body h3 {
+            font-size: 18px; font-weight: 590; color: var(--fg);
+            letter-spacing: -0.165px; margin: 32px 0 12px;
+        }
+        .article-body p {
+            font-size: 16px; font-weight: 400; color: var(--fg2);
+            line-height: 1.60; margin-bottom: 16px;
+        }
+        .article-body a { color: var(--accent-bright); text-decoration: none; }
+        .article-body a:hover { color: var(--accent-hover); }
+        .article-body ul, .article-body ol {
+            margin: 0 0 16px 20px;
+            font-size: 16px; color: var(--fg2); line-height: 1.60;
+        }
+        .article-body li { margin-bottom: 6px; }
+        .article-body code {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 14px; background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 4px; padding: 2px 6px;
+            color: var(--accent-bright);
+        }
+        .article-body pre {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px; padding: 16px 20px;
+            overflow-x: auto; margin-bottom: 16px;
+        }
+        .article-body pre code {
+            background: none; border: none; padding: 0;
+            font-size: 14px; color: var(--fg2); line-height: 1.50;
+        }
+        .callout {
+            background: rgba(94,106,210,0.06);
+            border: 1px solid rgba(94,106,210,0.15);
+            border-radius: 8px; padding: 16px 20px;
+            margin-bottom: 16px;
+        }
+        .callout p { margin-bottom: 0; color: var(--fg2); }
+
+        .back-link {
+            max-width: 720px; margin: 0 auto;
+            padding: 0 24px 32px;
+        }
+        .back-link a {
+            font-size: 14px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        .back-link a:hover { color: var(--fg); }
+
+        footer {
+            max-width: 960px; margin: 0 auto;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .left { font-size: 13px; color: var(--fg4); }
+        footer .right { display: flex; gap: 20px; }
+        footer .right a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+
+        @media (max-width: 640px) {
+            .article-header h1 { font-size: 28px; letter-spacing: -0.616px; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            footer .right { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">June 21, 2026</div>
+            <h1>AI agents are learning to shut up</h1>
+            <div class="tags">
+                <span class="pill">AI Agents</span>
+                <span class="pill">Token Efficiency</span>
+                <span class="pill">Open Source</span>
+                <span class="pill">MCP</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Here is the uncomfortable truth about AI agents: most of the tokens they burn are waste. Tool outputs spew thousands of lines of logs. RAG pipelines dump entire documents into context. Every file read, every shell command, every API response adds tokens that the model has to chew through before it can do its actual job.</p>
+
+            <p>Three projects trending this week on GitHub are tackling this problem from different angles, and together they sketch a picture of where agent infrastructure is headed: fewer tokens, smarter memory, longer attention spans.</p>
+
+            <h2>Headroom: compress before you send</h2>
+
+            <p><a href="https://github.com/chopratejas/headroom">Headroom</a> picked up 2,617 stars today, and the pitch is blunt: compress tool outputs, logs, files, and RAG chunks <em>before</em> they reach the LLM. The claim is 60 to 95% fewer tokens with the same answers.</p>
+
+            <p>It works as a library, a proxy, or an MCP server, which means you can drop it into existing agent setups without rewriting anything. Pipe your tool output through headroom, get a compressed version, send that to the model instead.</p>
+
+            <p>Why does this matter? Because tokens are not just a cost issue. They are a latency issue and a context window issue. If you are running a local model with an 8K or 32K context window, every wasted token on verbose diff output or log spam is a token you cannot use for actual reasoning. And if you are paying per token at an API provider, compression directly translates to money saved.</p>
+
+            <p>The proxy approach is clever. You do not have to change your agent code. The proxy sits between your agent and the model, compresses what it can, and passes the rest through untouched. For teams already running agents in production, that is the difference between "we should optimize this" and "we optimized this in ten minutes."</p>
+
+            <h2>Codebase-memory-mcp: index once, query forever</h2>
+
+            <p><a href="https://github.com/DeusData/codebase-memory-mcp">Codebase-memory-mcp</a> approaches the same problem from a different angle. Instead of compressing output on the fly, it indexes your entire codebase into a persistent knowledge graph. Average repo indexed in milliseconds. Sub-millisecond queries. 99% fewer tokens. 158 languages supported. Single static binary, zero dependencies.</p>
+
+            <p>The key insight: most of what an agent "reads" when exploring a codebase is redundant. It reads the same files over and over. It reads imports that lead nowhere. It reads test fixtures and generated code that are irrelevant to the task. A knowledge graph lets the agent ask precise questions, "which function handles auth token refresh?" instead of "read every file in src/ and figure it out."</p>
+
+            <p>MCP (the Model Context Protocol) is becoming the connective tissue for these tools. An MCP server exposes a standard interface that any compatible agent can query. Codebase-memory-mcp is one. Headroom is another. Cognee, the open-source AI memory platform that also trended this week, provides a knowledge graph engine for persistent agent memory across sessions, and it speaks MCP too.</p>
+
+            <p>This is the pattern. The agent does not need to see everything. It needs to see the right thing, and MCP servers are becoming the librarians that hand it the right page.</p>
+
+            <h2>Deer-flow: thinking long, running long</h2>
+
+            <p>If headroom and codebase-memory-mcp are about spending fewer tokens per thought, <a href="https://github.com/bytedance/deer-flow">ByteDance's deer-flow</a> is about having more thoughts. It is a long-horizon agent framework that can handle tasks taking minutes to hours. Sandboxes, memory, tools, skills, subagents, and a message gateway.</p>
+
+            <p>72,414 stars. That is not a typo. ByteDance open-sourced this and the developer community jumped on it.</p>
+
+            <p>What makes deer-flow interesting in this context is the subagent architecture. A single task gets decomposed into smaller tasks, each handled by a scoped agent with its own context. The parent agent does not have to carry the full context of every subtask. That is compression by design. Instead of one giant context window, you get many small ones.</p>
+
+            <p>The practical upshot: an agent can work on something for an hour without running out of context. Each subagent does its piece, reports back a summary, and the parent agent moves on. It is how human teams work. You do not put every engineer in the same room and have them listen to every conversation. You let people specialize, sync on results, and keep going.</p>
+
+            <h2>Where this is going</h2>
+
+            <p>These three projects form a triangle. Headroom compresses at the input boundary. Codebase-memory-mcp compresses at the knowledge boundary. Deer-flow compresses at the task boundary. Together, they point toward agents that are cheap to run, fast to respond, and capable of sustained work over long periods.</p>
+
+            <p>The bottleneck has never been model intelligence. The bottleneck is context management. Models are plenty smart. They just get dumb when you bury them in noise. The wave of tooling we are seeing now, token compressors, knowledge graph servers, hierarchical agent architectures, all address the same root cause: get the right information into the model's attention window, and only the right information.</p>
+
+            <div class="callout">
+                <p>For anyone running local models on budget hardware, this trend is especially relevant. An 8K context window is plenty if you are not wasting half of it on log lines and debug spew. Compression and smart retrieval may matter more than raw model size for practical agent work.</p>
+            </div>
+
+            <p>I started benchmarking llama.cpp performance across model sizes and quantization levels because I wanted to know where the real constraints are for local inference. The answer keeps coming back the same: it is not compute. It is context. The model can think fast. It just cannot think well when you hand it a garbage dump of tokens and say "find the important part."</p>
+
+            <p>That problem is getting solved, right now, by open source projects that anyone can run. That is worth paying attention to.</p>
+
+            <ul>
+                <li><a href="https://github.com/chopratejas/headroom">Headroom</a> on GitHub (2,617 stars today)</li>
+                <li><a href="https://github.com/DeusData/codebase-memory-mcp">Codebase-memory-mcp</a> on GitHub (1,029 stars today)</li>
+                <li><a href="https://github.com/bytedance/deer-flow">Deer-flow</a> on GitHub (72,414 stars total)</li>
+                <li><a href="https://github.com/topoteretes/cognee">Cognee</a> on GitHub (AI memory platform, also trending)</li>
+            </ul>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+</body>
+</html>
