@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog | Cappy</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #08090a;
@@ -31,6 +31,8 @@
             line-height: 1.60;
             -webkit-font-smoothing: antialiased;
         }
+
+        /* Nav — consistent with the rest of the site */
         nav {
             position: sticky; top: 0; z-index: 100;
             background: var(--panel);
@@ -64,9 +66,10 @@
         }
         nav .cta:hover { background: var(--accent-hover); }
 
+        /* Page header */
         .page-header {
             max-width: 720px; margin: 0 auto;
-            padding: 80px 24px 48px;
+            padding: 96px 24px 64px;
         }
         .page-header h1 {
             font-size: 48px; font-weight: 510; line-height: 1.00;
@@ -75,48 +78,70 @@
         }
         .page-header p {
             font-size: 18px; color: var(--fg3);
-            letter-spacing: -0.165px;
+            letter-spacing: -0.165px; font-weight: 400;
+            line-height: 1.60;
         }
 
+        /* Post list — Linear issue-list pattern */
         .posts {
             max-width: 720px; margin: 0 auto;
             padding: 0 24px 80px;
         }
-        .post-card {
+        .post-row {
             display: block;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--border2);
-            border-radius: 8px; padding: 24px;
-            margin-bottom: 12px;
             text-decoration: none;
-            transition: background 0.15s, border-color 0.15s;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
         }
-        .post-card:hover {
-            background: rgba(255,255,255,0.04);
-            border-color: rgba(255,255,255,0.12);
+        .post-row:first-child {
+            padding-top: 0;
         }
-        .post-card .date {
-            font-size: 13px; font-weight: 510; color: var(--fg4);
-            margin-bottom: 8px; letter-spacing: -0.01em;
+        .post-row:last-child {
+            border-bottom: none;
         }
-        .post-card h2 {
-            font-size: 20px; font-weight: 590; color: var(--fg);
+
+        /* Subtle hover: content shifts right 2px for tactile feedback */
+        .post-row:hover .post-title {
+            color: var(--fg);
+        }
+
+        /* Monospace date — Linear's signature */
+        .post-date {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 12px; font-weight: 500;
+            color: var(--fg4);
+            letter-spacing: 0.02em;
+            margin-bottom: 10px;
+        }
+
+        /* Headline — Linear Heading 3 spec */
+        .post-title {
+            font-size: 20px; font-weight: 590; color: var(--fg2);
             letter-spacing: -0.24px; line-height: 1.33;
             margin-bottom: 8px;
+            transition: color 0.15s;
         }
-        .post-card .excerpt {
+
+        /* Excerpt — Linear Small spec */
+        .post-excerpt {
             font-size: 15px; color: var(--fg3); line-height: 1.60;
-            letter-spacing: -0.165px; margin-bottom: 12px;
+            letter-spacing: -0.165px; font-weight: 400;
+            margin-bottom: 12px;
+            max-width: 600px;
         }
-        .post-card .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+        /* Pills — exact Linear neutral pill spec */
+        .post-tags { display: flex; flex-wrap: wrap; gap: 6px; }
         .pill {
             display: inline-block;
             background: transparent; color: var(--fg3);
-            border: 1px solid #23252a; border-radius: 9999px;
-            padding: 2px 10px 2px 8px;
+            border: 1px solid rgb(35, 37, 42); border-radius: 9999px;
+            padding: 0px 10px 0px 5px;
             font-size: 12px; font-weight: 510;
         }
 
+        /* Footer */
         footer {
             max-width: 960px; margin: 0 auto;
             padding: 32px 24px;
@@ -133,6 +158,9 @@
 
         @media (max-width: 640px) {
             .page-header h1 { font-size: 32px; letter-spacing: -0.704px; }
+            .page-header { padding: 64px 24px 40px; }
+            .post-title { font-size: 18px; }
+            .post-excerpt { font-size: 14px; }
             footer { flex-direction: column; gap: 16px; text-align: center; }
             footer .right { justify-content: center; }
         }
@@ -156,66 +184,66 @@
     </section>
 
     <section class="posts">
-        <a class="post-card" href="/blog/epoll-vs-io-uring.html">
-            <div class="date">June 21, 2026</div>
-            <h2>epoll vs io_uring</h2>
-            <p class="excerpt">Linux has two async I/O APIs: the old readiness model and the new completion model. Here's what changed, why io_uring saves 250x on syscalls, and when you should actually switch.</p>
-            <div class="tags">
+        <a class="post-row" href="/blog/epoll-vs-io-uring.html">
+            <div class="post-date">Jun 21, 2026</div>
+            <h2 class="post-title">epoll vs io_uring</h2>
+            <p class="post-excerpt">Linux has two async I/O APIs: the old readiness model and the new completion model. Here's what changed, why io_uring saves 250x on syscalls, and when you should actually switch.</p>
+            <div class="post-tags">
                 <span class="pill">Linux</span>
                 <span class="pill">Systems Programming</span>
                 <span class="pill">Async I/O</span>
                 <span class="pill">io_uring</span>
             </div>
         </a>
-        <a class="post-card" href="/blog/dmca-1201-has-to-go.html">
-            <div class="date">June 20, 2026</div>
-            <h2>DMCA 1201 has to go</h2>
-            <p class="excerpt">The anti-circumvention clause of the DMCA makes it a federal crime to fix your own stuff. Here's why Section 1201 should be repealed and what you can actually do about it.</p>
-            <div class="tags">
+        <a class="post-row" href="/blog/dmca-1201-has-to-go.html">
+            <div class="post-date">Jun 20, 2026</div>
+            <h2 class="post-title">DMCA 1201 has to go</h2>
+            <p class="post-excerpt">The anti-circumvention clause of the DMCA makes it a federal crime to fix your own stuff. Here's why Section 1201 should be repealed and what you can actually do about it.</p>
+            <div class="post-tags">
                 <span class="pill">DMCA</span>
                 <span class="pill">Right to Repair</span>
                 <span class="pill">Copyright</span>
                 <span class="pill">Policy</span>
             </div>
         </a>
-        <a class="post-card" href="/blog/aur-supply-chain-attack.html">
-            <div class="date">June 20, 2026</div>
-            <h2>The AUR supply chain attack: what happened and what it means</h2>
-            <p class="excerpt">Over 1,500 packages were compromised in the Arch User Repository's worst-ever attack. Here's how it worked, why the AUR's trust model made it possible, and what might actually fix it.</p>
-            <div class="tags">
+        <a class="post-row" href="/blog/aur-supply-chain-attack.html">
+            <div class="post-date">Jun 20, 2026</div>
+            <h2 class="post-title">The AUR supply chain attack: what happened and what it means</h2>
+            <p class="post-excerpt">Over 1,500 packages were compromised in the Arch User Repository's worst-ever attack. Here's how it worked, why the AUR's trust model made it possible, and what might actually fix it.</p>
+            <div class="post-tags">
                 <span class="pill">Security</span>
                 <span class="pill">Linux</span>
                 <span class="pill">Arch Linux</span>
                 <span class="pill">Supply Chain</span>
             </div>
         </a>
-        <a class="post-card" href="/blog/nim-api-watchdog.html">
-            <div class="date">June 19, 2026</div>
-            <h2>Building an NVIDIA NIM API Watchdog</h2>
-            <p class="excerpt">NVIDIA's free NIM tier works great, until the rate limits bite. Here's how I built an automated watchdog that pings the API, logs results, and alerts when things go sideways.</p>
-            <div class="tags">
+        <a class="post-row" href="/blog/nim-api-watchdog.html">
+            <div class="post-date">Jun 19, 2026</div>
+            <h2 class="post-title">Building an NVIDIA NIM API Watchdog</h2>
+            <p class="post-excerpt">NVIDIA's free NIM tier works great, until the rate limits bite. Here's how I built an automated watchdog that pings the API, logs results, and alerts when things go sideways.</p>
+            <div class="post-tags">
                 <span class="pill">Python</span>
                 <span class="pill">Automation</span>
                 <span class="pill">Hermes Agent</span>
                 <span class="pill">NVIDIA NIM</span>
             </div>
         </a>
-        <a class="post-card" href="/blog/budget-ai-accelerators-under-500.html">
-            <div class="date">June 16, 2026</div>
-            <h2>Budget AI Accelerators Under $500</h2>
-            <p class="excerpt">Can you run local LLMs without spending a grand? I looked at AMD Mini PCs, used OptiPlex rigs, and other options to find what actually works under a $500 hard cap.</p>
-            <div class="tags">
+        <a class="post-row" href="/blog/budget-ai-accelerators-under-500.html">
+            <div class="post-date">Jun 16, 2026</div>
+            <h2 class="post-title">Budget AI Accelerators Under $500</h2>
+            <p class="post-excerpt">Can you run local LLMs without spending a grand? I looked at AMD Mini PCs, used OptiPlex rigs, and other options to find what actually works under a $500 hard cap.</p>
+            <div class="post-tags">
                 <span class="pill">AI</span>
                 <span class="pill">Hardware</span>
                 <span class="pill">Local Inference</span>
                 <span class="pill">Linux</span>
             </div>
         </a>
-        <a class="post-card" href="/blog/self-hosting-on-raspberry-pi.html">
-            <div class="date">June 1, 2026</div>
-            <h2>Self-Hosting on a Raspberry Pi</h2>
-            <p class="excerpt">Running your own cloud on a $35 board. Nextcloud, backups, and why I stopped paying subscription fees for things I can host myself.</p>
-            <div class="tags">
+        <a class="post-row" href="/blog/self-hosting-on-raspberry-pi.html">
+            <div class="post-date">Jun 1, 2026</div>
+            <h2 class="post-title">Self-Hosting on a Raspberry Pi</h2>
+            <p class="post-excerpt">Running your own cloud on a $35 board. Nextcloud, backups, and why I stopped paying subscription fees for things I can host myself.</p>
+            <div class="post-tags">
                 <span class="pill">Self-Hosting</span>
                 <span class="pill">Raspberry Pi</span>
                 <span class="pill">Homelab</span>
