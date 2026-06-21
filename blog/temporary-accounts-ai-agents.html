@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>When AI agents hit the login wall | Cappy</title>
+    <meta name="description" content="AI coding agents can write code, but they freeze when they hit a signup form. Cloudflare's temporary accounts, Anthropic's Project Fetch, and the growing problem of agent authentication.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08090a;
+            --panel: #0f1011;
+            --surface: #191a1b;
+            --surface-hover: #28282c;
+            --fg: #f7f8f8;
+            --fg2: #d0d6e0;
+            --fg3: #8a8f98;
+            --fg4: #62666d;
+            --accent: #5e6ad2;
+            --accent-bright: #7170ff;
+            --accent-hover: #828fff;
+            --green: #10b981;
+            --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
+            background: var(--bg);
+            color: var(--fg2);
+            line-height: 1.60;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Nav */
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            backdrop-filter: blur(12px);
+        }
+        nav .inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
+        }
+        nav .logo {
+            font-weight: 510; font-size: 14px; color: var(--fg);
+            letter-spacing: -0.01em; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        nav .logo span { font-size: 16px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        nav .links a:hover { color: var(--fg); }
+        nav .cta {
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 6px;
+            padding: 6px 14px; font-size: 13px; font-weight: 510;
+            text-decoration: none; cursor: pointer;
+            transition: background 0.15s;
+        }
+        nav .cta:hover { background: var(--accent-hover); }
+
+        /* Article */
+        .article {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 96px 24px 48px;
+        }
+
+        /* Back link */
+        .back {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; margin-bottom: 32px; display: inline-block;
+            transition: color 0.15s;
+        }
+        .back:hover { color: var(--fg); }
+
+        /* Meta */
+        .meta {
+            margin-bottom: 40px;
+        }
+        .meta .date {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 12px; font-weight: 500; color: var(--fg4);
+            letter-spacing: 0.02em; margin-bottom: 16px;
+        }
+        .meta h1 {
+            font-size: 42px; font-weight: 510; line-height: 1.05;
+            letter-spacing: -1.056px; color: var(--fg);
+            margin-bottom: 16px;
+        }
+        .meta .subtitle {
+            font-size: 18px; color: var(--fg3);
+            letter-spacing: -0.165px; font-weight: 400;
+            line-height: 1.60; margin-bottom: 16px;
+        }
+        .meta .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .pill {
+            display: inline-block;
+            background: transparent; color: var(--fg3);
+            border: 1px solid rgb(35, 37, 42); border-radius: 9999px;
+            padding: 0px 10px 0px 5px;
+            font-size: 12px; font-weight: 510;
+        }
+        .read-time {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 12px; font-weight: 500; color: var(--fg4);
+            letter-spacing: 0.02em; margin-top: 12px;
+        }
+
+        /* Body */
+        .body {
+            font-size: 16px;
+            line-height: 1.70;
+            color: var(--fg2);
+            letter-spacing: -0.01em;
+        }
+        .body p {
+            margin-bottom: 24px;
+        }
+        .body h2 {
+            font-size: 24px; font-weight: 590; color: var(--fg);
+            letter-spacing: -0.45px; line-height: 1.25;
+            margin: 48px 0 16px;
+        }
+        .body h3 {
+            font-size: 18px; font-weight: 590; color: var(--fg);
+            letter-spacing: -0.24px; line-height: 1.33;
+            margin: 36px 0 12px;
+        }
+        .body code {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 13px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 2px 6px;
+            color: var(--accent-bright);
+        }
+        .body pre {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 24px 0;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 13px;
+            line-height: 1.60;
+            color: var(--fg2);
+        }
+        .body blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 12px 0 12px 20px;
+            margin: 24px 0;
+            color: var(--fg3);
+            font-style: italic;
+        }
+        .body a {
+            color: var(--accent-bright);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .body a:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+        .body ul, .body ol {
+            margin: 0 0 24px 24px;
+        }
+        .body li {
+            margin-bottom: 8px;
+        }
+
+        /* Footer */
+        footer {
+            max-width: 960px; margin: 0 auto;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .left { font-size: 13px; color: var(--fg4); }
+        footer .right { display: flex; gap: 20px; }
+        footer .right a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+
+        @media (max-width: 640px) {
+            .meta h1 { font-size: 32px; letter-spacing: -0.704px; }
+            .article { padding: 64px 24px 32px; }
+            .body { font-size: 15px; }
+            .body h2 { font-size: 20px; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            footer .right { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article class="article">
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <div class="date">Jun 21, 2026</div>
+            <h1>When AI agents hit the login wall</h1>
+            <p class="subtitle">Coding agents can write and deploy code, but they still freeze at a signup form. The auth problem is the next bottleneck for agentic workflows, and a few companies are starting to build around it.</p>
+            <div class="tags">
+                <span class="pill">AI Agents</span>
+                <span class="pill">Authentication</span>
+                <span class="pill">Infrastructure</span>
+                <span class="pill">Cloudflare</span>
+            </div>
+            <div class="read-time">6 min read</div>
+        </div>
+
+        <div class="body">
+            <p>Here is something I keep running into: I tell my agent to deploy a quick API endpoint, it writes the code in thirty seconds, and then it just... stops. The agent can't create an account. It can't click "sign in with Google." It can't copy-paste an API token from a dashboard it can't open. The code is ready. The deployment target isn't.</p>
+
+            <p>This is the login wall, and it is becoming the most annoying thing about using AI coding agents for real work.</p>
+
+            <h2>The problem in plain terms</h2>
+
+            <p>Most SaaS products are built around the assumption that a human is sitting at a keyboard, looking at a screen, ready to click things. The signup flow goes: email, password, maybe a CAPTCHA, then an OAuth redirect, then you're in. For a person, this takes two minutes. For an agent running in a terminal or a cloud VM, it is a hard stop.</p>
+
+            <p>The agent can write ten files and spin up a Docker container, but the moment it needs to <code>fly deploy</code> or <code>vercel</code> or <code>wrangler deploy</code> and it doesn't have credentials, everything grinds to a halt. You get paged. You copy a token. You paste it somewhere. The agent resumes. This happens over and over.</p>
+
+            <p>Vinicius Brasil wrote about this from the code review side last week. He described the cognitive overload of reviewing a massive diff that an agent generated, and how he often rejects the agent's output and starts over because he can't actually explain the approach in his own words. The auth problem is the infrastructure version of that same overload. The agent can produce the work, but the system around it wasn't built for anything that doesn't have fingers and a browser.</p>
+
+            <h2>Cloudflare's answer: throwaway accounts</h2>
+
+            <p>Cloudflare shipped something last week that directly addresses this. They added a <code>--temporary</code> flag to Wrangler, their CLI deploy tool. Running <code>wrangler deploy --temporary</code> provisions a temporary Cloudflare account, gives the agent an API token, and deploys the Worker. No sign-up, no OAuth, no human in the loop.</p>
+
+            <p>The temporary account lives for 60 minutes. During that window, the agent can deploy, iterate, curl its own deployment, fix things, and redeploy as many times as it wants. If a human wants to keep the deployment, they claim the account before the 60 minutes are up. If nobody claims it, it disappears.</p>
+
+            <p>There is a detail I like here. The Wrangler CLI now prints a message telling the agent about the <code>--temporary</code> flag when a regular deploy fails because there is no authenticated session. The agent reads the error output, picks up the flag suggestion, and retries with <code>--temporary</code>. The tool teaches the agent how to use it. That is a small design decision with big implications. Instead of requiring humans to hardcode agent-specific instructions or maintain custom prompts for every deployment target, the tool itself meets the agent where it is.</p>
+
+            <p>This isn't the only thing Cloudflare is doing. They also announced a protocol co-designed with Stripe that lets agents provision accounts on behalf of users, with no manual token copy-paste or credit card entry. And last month they worked with WorkOS on <code>auth.md</code>, a spec that lets agents provision accounts using existing OAuth standards. Different approaches to the same problem: making the signup flow disappear when the user is a script, not a person.</p>
+
+            <h2>The write-deploy-verify loop</h2>
+
+            <p>Cloudflare's blog post made a point that stuck with me. They called trial-and-error "the agent's superpower." I think that is exactly right, and it gets at why the login wall matters more than a minor annoyance would suggest.</p>
+
+            <p>Agents work best in a tight loop: write code, deploy it, curl the endpoint, see if it returns the right thing, fix the code, deploy again. Each iteration should take seconds. When you insert a manual auth step into that loop, you break it. The agent writes code, hits the auth wall, waits for you, you come back 20 minutes later, paste a token, and by then the agent has lost context or timed out or you've lost the thread of what it was doing.</p>
+
+            <p>This is similar to what Anthropic found with Project Fetch Phase Two, their robodog experiment. Claude Opus 4.7, running autonomously with Claude Code, completed the same robotics tasks roughly 20 times faster than the fastest human team from their original experiment. But the speed wasn't just about raw code generation. It was about the loop. The model wrote code, tested it, read the error output, and adjusted. No interruptions. The moment you put a blocked signup flow into that loop, you turn a 5-minute autonomous cycle into a 30-minute human-assisted one.</p>
+
+            <p>The agents that work best are the ones that never need to ask you for anything. The more you can keep them in that uninterrupted loop, the more useful they become. Auth walls are one of the biggest remaining reasons agents have to stop and ask for help.</p>
+
+            <h2>Who else is thinking about this</h2>
+
+            <p>Cloudflare isn't the only company working on this, but they are the first I've seen shipping something concrete. There are a few different approaches out there:</p>
+
+            <ul>
+                <li>Pre-provisioned API keys. Some agent frameworks let you store credentials ahead of time, so the agent never hits a signup flow. This works but requires setup and creates a security surface you have to manage. Rotating keys, scoping permissions, and cleaning up old tokens becomes its own task.</li>
+                <li>Agent-specific auth protocols. The <code>auth.md</code> spec and the Stripe/Cloudflare partnership are trying to standardize how agents get credentials without human intervention. If platforms agree on a protocol, agents can provision what they need programmatically rather than being blocked by a form designed for humans.</li>
+                <li>Ephemeral environments. Some platforms give you a fresh sandbox for every session, credentials included. The environment itself is the auth mechanism. This is closer to what Cloudflare is doing with temporary accounts, though it only works for things that can safely be thrown away.</li>
+            </ul>
+
+            <p>None of these are perfect. Pre-provisioned keys are a security headache. Standard protocols require adoption. Ephemeral environments have resource limits and timeouts. But the problem is real and growing.</p>
+
+            <h2>What I actually want</h2>
+
+            <p>What I keep wanting is for every deployment target to work the way <code>wrangler deploy --temporary</code> does. I want to point an agent at a service and have it just work. No YAML config with API keys. No <code>.env</code> file I have to populate first. No dashboard I have to log into to create a project. Give the agent a sandbox, let it break things, and let me claim the result if it works.</p>
+
+            <p>The 60-minute timeout is a good default. It is long enough for an agent session but short enough that orphaned deployments don't pile up. Claiming the account is simple: click a link, sign in, everything your agent built is now yours. If the agent went off the rails, you just... don't claim it. It goes away on its own. That is a good failure mode.</p>
+
+            <p>I don't think every service needs to copy this exact approach. Some services have different risk profiles. A database provider probably can't hand out temporary accounts with the same ease as an edge function host. But the principle is the important part: build for the reality that the "user" might be a script running at 2 AM, not a person at a desk on a Tuesday afternoon.</p>
+
+            <h2>Why this matters now</h2>
+
+            <p>Six months ago, AI agents were mostly writing code locally and leaving deployment as an exercise for the reader. That is changing fast. The current generation of coding agents, things like Claude Code, Codex, Cline, and the growing pile of agent frameworks, all want to push to production. They want to deploy, test in a real environment, and iterate. The code generation part is getting good. The infrastructure around it is still built for humans.</p>
+
+            <p>The companies that figure out agent-friendly auth first will get a disproportionate share of agent-driven deployments. Cloudflare is making a pretty clear bet on this. Their temporary accounts solve a specific, painful problem, and they are building a whole stack around making their platform the default target when an agent needs to ship something. Whether that pays off depends on how fast agent usage actually grows, but the direction seems right.</p>
+
+            <p>If you are building anything that an agent might want to deploy to, think about what happens when your signup flow meets something that cannot click a button. The agents are not going to learn to use OAuth. The platforms are going to have to learn to work without it.</p>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">Cappy 🎩</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+</body>
+</html>
