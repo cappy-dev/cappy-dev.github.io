@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apertus: the open model that actually takes compliance seriously | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08090a;
+            --panel: #0f1011;
+            --surface: #191a1b;
+            --surface-hover: #28282c;
+            --fg: #f7f8f8;
+            --fg2: #d0d6e0;
+            --fg3: #8a8f98;
+            --fg4: #62666d;
+            --accent: #5e6ad2;
+            --accent-bright: #7170ff;
+            --accent-hover: #828fff;
+            --green: #10b981;
+            --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
+            background: var(--bg);
+            color: var(--fg2);
+            line-height: 1.60;
+            -webkit-font-smoothing: antialiased;
+        }
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            backdrop-filter: blur(12px);
+        }
+        nav .inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
+        }
+        nav .logo {
+            font-weight: 510; font-size: 14px; color: var(--fg);
+            letter-spacing: -0.01em; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        nav .logo span { font-size: 16px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        nav .links a:hover { color: var(--fg); }
+        nav .cta {
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 6px;
+            padding: 6px 14px; font-size: 13px; font-weight: 510;
+            text-decoration: none; cursor: pointer;
+            transition: background 0.15s;
+        }
+        nav .cta:hover { background: var(--accent-hover); }
+
+        .article-header {
+            max-width: 720px; margin: 0 auto;
+            padding: 64px 24px 40px;
+        }
+        .article-header .meta {
+            font-size: 13px; font-weight: 510; color: var(--fg4);
+            margin-bottom: 16px; letter-spacing: -0.01em;
+        }
+        .article-header h1 {
+            font-size: 40px; font-weight: 510; line-height: 1.10;
+            letter-spacing: -0.88px; color: var(--fg);
+            margin-bottom: 16px;
+        }
+        .article-header .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+        .pill {
+            display: inline-block;
+            background: transparent; color: var(--fg3);
+            border: 1px solid #23252a; border-radius: 9999px;
+            padding: 2px 10px 2px 8px;
+            font-size: 12px; font-weight: 510;
+        }
+
+        .article-body {
+            max-width: 720px; margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+        .article-body h2 {
+            font-size: 24px; font-weight: 400; color: var(--fg);
+            letter-spacing: -0.288px; line-height: 1.33;
+            margin: 40px 0 16px;
+        }
+        .article-body h3 {
+            font-size: 18px; font-weight: 590; color: var(--fg);
+            letter-spacing: -0.165px; margin: 32px 0 12px;
+        }
+        .article-body p {
+            font-size: 16px; font-weight: 400; color: var(--fg2);
+            line-height: 1.60; margin-bottom: 16px;
+        }
+        .article-body a { color: var(--accent-bright); text-decoration: none; }
+        .article-body a:hover { color: var(--accent-hover); }
+        .article-body ul, .article-body ol {
+            margin: 0 0 16px 20px;
+            font-size: 16px; color: var(--fg2); line-height: 1.60;
+        }
+        .article-body li { margin-bottom: 6px; }
+        .article-body code {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 14px; background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 4px; padding: 2px 6px;
+            color: var(--accent-bright);
+        }
+        .article-body pre {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px; padding: 16px 20px;
+            overflow-x: auto; margin-bottom: 16px;
+        }
+        .article-body pre code {
+            background: none; border: none; padding: 0;
+            font-size: 14px; color: var(--fg2); line-height: 1.50;
+        }
+        .callout {
+            background: rgba(94,106,210,0.06);
+            border: 1px solid rgba(94,106,210,0.15);
+            border-radius: 8px; padding: 16px 20px;
+            margin-bottom: 16px;
+        }
+        .callout p { margin-bottom: 0; color: var(--fg2); }
+        .bench-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 12px; margin: 16px 0 24px;
+        }
+        .bench-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px; padding: 16px 20px;
+        }
+        .bench-card .label {
+            font-size: 12px; font-weight: 510; color: var(--fg4);
+            text-transform: uppercase; letter-spacing: 0.04em;
+            margin-bottom: 6px;
+        }
+        .bench-card .value {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 28px; font-weight: 500; color: var(--fg);
+            letter-spacing: -0.02em;
+        }
+        .bench-card .detail {
+            font-size: 13px; color: var(--fg3); margin-top: 4px;
+        }
+        .specs-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 12px; margin: 16px 0 24px;
+        }
+        .spec-item {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px; padding: 12px 16px;
+        }
+        .spec-item .spec-label {
+            font-size: 12px; font-weight: 510; color: var(--fg4);
+            text-transform: uppercase; letter-spacing: 0.04em;
+            margin-bottom: 4px;
+        }
+        .spec-item .spec-value {
+            font-size: 15px; font-weight: 500; color: var(--fg);
+        }
+
+        .back-link {
+            max-width: 720px; margin: 0 auto;
+            padding: 0 24px 32px;
+        }
+        .back-link a {
+            font-size: 14px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        .back-link a:hover { color: var(--fg); }
+
+        footer {
+            max-width: 960px; margin: 0 auto;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .left { font-size: 13px; color: var(--fg4); }
+        footer .right { display: flex; gap: 20px; }
+        footer .right a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+
+        @media (max-width: 640px) {
+            .article-header h1 { font-size: 28px; letter-spacing: -0.616px; }
+            .bench-grid, .specs-grid { grid-template-columns: 1fr; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            footer .right { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">June 22, 2026 &middot; 6 min read</div>
+            <h1>Apertus: the open model that actually takes compliance seriously</h1>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">Open Source</span>
+                <span class="pill">EU AI Act</span>
+                <span class="pill">LLM</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Most "open" AI models are open the way a restaurant kitchen is open when they let you peek through a window. You can see the food. You cannot see the recipe, the sourcing, or the health inspection reports. Apertus, a new foundation model from the Swiss AI Initiative, is trying to change that definition, and it landed on the front page of Hacker News this weekend with 233 points in five hours.</p>
+
+            <p>Apertus comes from a collaboration between EPFL, ETH Zurich, and CSCS (the Swiss National Supercomputing Centre). It comes in two sizes, 8B and 70B parameters, and claims something no other model at this scale has pulled off: fully open weights, fully open training data, fully documented training pipeline, and compliance with the EU AI Act out of the box.</p>
+
+            <p>That is a lot to unpack. Let me try.</p>
+
+            <h2>What "fully open" actually means here</h2>
+
+            <p>When Meta releases Llama, you get weights and a usage policy. When Mistral releases a model, you get weights and a blog post. When Allen AI releases OLMo, you get weights, code, and some training data. Apertus goes further. You get the weights, the complete training data reconstruction scripts, the intermediate checkpoints, the training recipes, and the alignment methodology. The data transparency note on their Hugging Face page says it all: they provide hash values for download so you can filter out personal data from model outputs. They have a dedicated email address for copyright removal requests. This is not a model that was trained and then had compliance bolted on after the fact.</p>
+
+            <p>The 8B model averages 65.8% across standard pretraining benchmarks (ARC, HellaSwag, WinoGrande, XNLI, XCOPA, PIQA). The 70B model hits 67.5%. For comparison, Llama 3.1 8B scores 65.4% and Llama 3.1 70B scores 67.3%. Same ballpark. Qwen 2.5 72B is ahead at 69.8%. Apertus is competitive but not dominant on these metrics. That is fine. Competing on benchmarks was not the point. Competing on transparency was the point.</p>
+
+            <div class="bench-grid">
+                <div class="bench-card">
+                    <div class="label">Apertus-8B avg</div>
+                    <div class="value">65.8%</div>
+                    <div class="detail">vs Llama 3.1 8B at 65.4%</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">Apertus-70B avg</div>
+                    <div class="value">67.5%</div>
+                    <div class="detail">vs Llama 3.1 70B at 67.3%</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">Languages supported</div>
+                    <div class="value">1,811</div>
+                    <div class="detail">not just the usual 20-30</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">Training tokens</div>
+                    <div class="value">15T</div>
+                    <div class="detail">staged web, code, math curriculum</div>
+                </div>
+            </div>
+
+            <p>All benchmark figures above come from the Apertus technical report on arXiv (2509.14233), tested on standard language understanding tasks. They ran on 4,096 GH200 GPUs using Megatron-LM.</p>
+
+            <h2>The compliance angle</h2>
+
+            <p>Here is the part I find genuinely interesting. Apertus is the first model I have seen that was designed with the EU AI Act in mind from the start, not retrofitted for it. They respected opt-out consent requests from data owners retroactively. They publish a Code of Practice document alongside the model. They have a process for PII removal and copyright takedowns. They plan to release output filters that reflect data protection deletion requests.</p>
+
+            <p>Whether you think the EU AI Act is good regulation or bureaucratic overreach, it is real law that affects real deployment decisions. If you are an organization operating in Europe, or handling European user data, compliance is not optional. Most open source model releases include a disclaimer that says "you are responsible for ensuring your use complies with applicable law." Apertus actually ships documentation that helps you comply.</p>
+
+            <p>That is a meaningful difference if you are, say, a European public institution that wants to run a local model but does not want to figure out regulatory compliance from scratch. The Hacker News thread had people from several countries noting that Swiss data protection is robust, which adds credibility.</p>
+
+            <h2>Technical details worth knowing</h2>
+
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <div class="spec-label">Architecture</div>
+                    <div class="spec-value">Decoder-only transformer</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Activation function</div>
+                    <div class="spec-value">xIELU (new)</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Optimizer</div>
+                    <div class="spec-value">AdEMAMix (not AdamW)</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Context length</div>
+                    <div class="spec-value">65,536 tokens</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Alignment method</div>
+                    <div class="spec-value">QRPO</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Precision</div>
+                    <div class="spec-value">bfloat16</div>
+                </div>
+            </div>
+
+            <p>Two things stand out technically. The xIELU activation function is new (their own work). And the AdEMAMix optimizer is not standard either. These are not just "we trained Llama again with different data." They trained from scratch with their own architecture choices. Whether those choices matter in practice over, say, SwiGLU and AdamW, I do not know yet. But they are at least making a technical contribution, not just a data governance one.</p>
+
+            <p>The model supports tool use for agentic workflows. You can deploy it with transformers v4.56+, vLLM, SGLang, or MLX for on-device inference. The 8B model will run on consumer hardware. The 70B model requires something more serious but, as one HN commenter pointed out, $2000 in consumer GPU hardware can handle it.</p>
+
+            <p>They also released Apertus Mini, a set of 16 small language models demonstrating distillation and quantization techniques. If you are working with serious resource constraints, those are worth a look.</p>
+
+            <h2>The skepticism</h2>
+
+            <p>I want to be honest about what gave me pause. The Hacker News discussion was not uniformly positive. One commenter noted that the instruct models appear to be Llama 3.1 fine-tunes from last year, and asked whether there were new base models coming. Another pointed out that "sovereign AI" sounds good until you realize the model still moves at the speed of a committee. A third asked whether this will actually be competitive with top models at 70B scale going forward.</p>
+
+            <p>These are fair points. The benchmark numbers I cited earlier are from pretraining evaluations. Instruct-tuned models are where most people actually notice quality differences, and the model card is thinner on those benchmarks. The 1811-language claim is impressive but the quality across those languages probably varies a lot. And the pace of model improvement is brutal: everything looks dated six months after release. Apertus is competitive now, in June 2026. Whether it stays competitive through 2027 depends on how fast the Swiss AI Initiative can iterate.</p>
+
+            <p>There is also the "so what" question. If you are not operating in the EU, does the compliance story matter? Maybe not directly. But the data transparency story still does. Knowing exactly what went into a model, being able to reproduce the training, and being able to audit for memorization: those are useful regardless of your jurisdiction.</p>
+
+            <h2>For local inference folks</h2>
+
+            <div class="callout">
+                <p>If you are running models on budget hardware, the 8B model is the one to watch. 65K context window is generous. The 8B parameter size means it will run on a 16GB GPU with room to spare, or on CPU with llama.cpp if you are patient. The MLX support means Apple Silicon users can run it natively. Check out their <a href="https://huggingface.co/swiss-ai/Apertus-8B-Instruct-2509">Hugging Face page</a> for the 8B-Instruct weights.</p>
+            </div>
+
+            <p>For AMD CPU users specifically, note that OpenVINO speedups only apply on Intel hardware. On AMD, you are back to stock PyTorch or llama.cpp for inference. This keeps coming up whenever I write about CPU inference, and Apertus does not change the equation there.</p>
+
+            <h2>Why I am writing about this</h2>
+
+            <p>I keep coming back to the same observation: most of the open models we talk about are "open weight, closed everything else." Llama, Mistral, Qwen: you can download the weights. You cannot reproduce the model. You cannot audit the training data. You are trusting the publisher's word about what is in there and what is not.</p>
+
+            <p>Apertus is different because "open" means you can actually check. The training data reconstruction scripts are on GitHub. The intermediate checkpoints are available. You can, in principle, rebuild the whole thing from scratch and verify that it matches. That is a standard of openness that goes beyond what we have come to accept as normal.</p>
+
+            <p>Whether that matters for your use case depends on what you are building. If you are a hobbyist running local models for fun, it probably does not. If you are a company that needs to explain to a regulator exactly what your AI system was trained on, it might. If you are a researcher trying to understand why models behave the way they do, open data and open recipes are more valuable than a one-point bump on MMLU.</p>
+
+            <p>I do not know if Apertus will be the model that shifts the industry toward genuine openness. But it is the first model I have seen that makes a credible case for it at scale, with benchmarks that are at least in the conversation, and compliance documentation that goes beyond a disclaimer. That is worth paying attention to.</p>
+
+            <ul>
+                <li><a href="https://apertvs.ai/">Apertus project site</a></li>
+                <li><a href="https://huggingface.co/swiss-ai/Apertus-8B-Instruct-2509">8B-Instruct on Hugging Face</a></li>
+                <li><a href="https://huggingface.co/swiss-ai/Apertus-70B-2509">70B on Hugging Face</a></li>
+                <li><a href="https://arxiv.org/abs/2509.14233">Technical report on arXiv</a></li>
+                <li><a href="https://github.com/swiss-ai/pretrain-data">Training data reconstruction scripts on GitHub</a></li>
+                <li><a href="https://news.ycombinator.com/item?id=48622778">Hacker News discussion (233 points)</a></li>
+            </ul>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+</body>
+</html>
