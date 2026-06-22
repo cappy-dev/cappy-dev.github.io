@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>epoll vs io_uring | Cappy</title>
     <meta name="description" content="Linux has two async I/O APIs: the old epoll and the new io_uring. Here's what changed, why it matters, and when you should pick one over the other.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #08090a;
@@ -57,6 +57,15 @@
         }
         nav .links a:hover { color: var(--fg); }
 
+        nav .cta {
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 6px;
+            padding: 6px 14px; font-size: 13px; font-weight: 510;
+            text-decoration: none; cursor: pointer;
+            transition: background 0.15s;
+        }
+        nav .cta:hover { background: var(--accent-hover); }
+
         article {
             max-width: 720px; margin: 0 auto;
             padding: 64px 24px 80px;
@@ -103,7 +112,7 @@
         }
         blockquote p { margin-bottom: 0; font-size: 16px; color: var(--fg3); }
         code {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
             background: var(--surface); padding: 2px 6px;
             border-radius: 4px; font-size: 14px;
         }
@@ -168,6 +177,7 @@
             <div class="links">
                 <a href="/blog/">Blog</a>
                 <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
             </div>
         </div>
     </nav>
@@ -290,10 +300,11 @@ io_uring_wait_cqe(&ring, &cqe);          // "is it done?"</code></pre>
     </article>
 
     <footer>
-        <div class="left">Cappy 🎩</div>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
         <div class="right">
             <a href="/">Home</a>
             <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
         </div>
     </footer>
 </body>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cancel Claude: switching to open models is easier than you think | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08090a;
+            --panel: #0f1011;
+            --surface: #191a1b;
+            --surface-hover: #28282c;
+            --fg: #f7f8f8;
+            --fg2: #d0d6e0;
+            --fg3: #8a8f98;
+            --fg4: #62666d;
+            --accent: #5e6ad2;
+            --accent-bright: #7170ff;
+            --accent-hover: #828fff;
+            --green: #10b981;
+            --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
+            background: var(--bg);
+            color: var(--fg2);
+            line-height: 1.60;
+            -webkit-font-smoothing: antialiased;
+        }
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            backdrop-filter: blur(12px);
+        }
+        nav .inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
+        }
+        nav .logo {
+            font-weight: 510; font-size: 14px; color: var(--fg);
+            letter-spacing: -0.01em; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        nav .logo span { font-size: 16px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        nav .links a:hover { color: var(--fg); }
+        nav .cta {
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 6px;
+            padding: 6px 14px; font-size: 13px; font-weight: 510;
+            text-decoration: none; cursor: pointer;
+            transition: background 0.15s;
+        }
+        nav .cta:hover { background: var(--accent-hover); }
+
+        .article-header {
+            max-width: 720px; margin: 0 auto;
+            padding: 64px 24px 40px;
+        }
+        .article-header .meta {
+            font-size: 13px; font-weight: 510; color: var(--fg4);
+            margin-bottom: 16px; letter-spacing: -0.01em;
+        }
+        .article-header h1 {
+            font-size: 40px; font-weight: 510; line-height: 1.10;
+            letter-spacing: -0.88px; color: var(--fg);
+            margin-bottom: 16px;
+        }
+        .article-header .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+        .pill {
+            display: inline-block;
+            background: transparent; color: var(--fg3);
+            border: 1px solid #23252a; border-radius: 9999px;
+            padding: 2px 10px 2px 8px;
+            font-size: 12px; font-weight: 510;
+        }
+
+        .article-body {
+            max-width: 720px; margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+        .article-body h2 {
+            font-size: 24px; font-weight: 400; color: var(--fg);
+            letter-spacing: -0.288px; line-height: 1.33;
+            margin: 40px 0 16px;
+        }
+        .article-body h3 {
+            font-size: 18px; font-weight: 590; color: var(--fg);
+            letter-spacing: -0.165px; margin: 32px 0 12px;
+        }
+        .article-body p {
+            font-size: 16px; font-weight: 400; color: var(--fg2);
+            line-height: 1.60; margin-bottom: 16px;
+        }
+        .article-body a { color: var(--accent-bright); text-decoration: none; }
+        .article-body a:hover { color: var(--accent-hover); }
+        .article-body ul, .article-body ol {
+            margin: 0 0 16px 20px;
+            font-size: 16px; color: var(--fg2); line-height: 1.60;
+        }
+        .article-body li { margin-bottom: 6px; }
+        .article-body code {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 14px; background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 4px; padding: 2px 6px;
+            color: var(--accent-bright);
+        }
+        .article-body pre {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px; padding: 16px 20px;
+            overflow-x: auto; margin-bottom: 16px;
+        }
+        .article-body pre code {
+            background: none; border: none; padding: 0;
+            font-size: 14px; color: var(--fg2); line-height: 1.50;
+        }
+        .callout {
+            background: rgba(94,106,210,0.06);
+            border: 1px solid rgba(94,106,210,0.15);
+            border-radius: 8px; padding: 16px 20px;
+            margin-bottom: 16px;
+        }
+        .callout p { margin-bottom: 0; color: var(--fg2); }
+        .bench-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 12px; margin: 16px 0 24px;
+        }
+        .bench-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px; padding: 16px 20px;
+        }
+        .bench-card .label {
+            font-size: 12px; font-weight: 510; color: var(--fg4);
+            text-transform: uppercase; letter-spacing: 0.04em;
+            margin-bottom: 6px;
+        }
+        .bench-card .value {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 28px; font-weight: 500; color: var(--fg);
+            letter-spacing: -0.02em;
+        }
+        .bench-card .detail {
+            font-size: 13px; color: var(--fg3); margin-top: 4px;
+        }
+
+        .back-link {
+            max-width: 720px; margin: 0 auto;
+            padding: 0 24px 32px;
+        }
+        .back-link a {
+            font-size: 14px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        .back-link a:hover { color: var(--fg); }
+
+        footer {
+            max-width: 960px; margin: 0 auto;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .left { font-size: 13px; color: var(--fg4); }
+        footer .right { display: flex; gap: 20px; }
+        footer .right a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+
+        @media (max-width: 640px) {
+            .article-header h1 { font-size: 28px; letter-spacing: -0.616px; }
+            .bench-grid { grid-template-columns: 1fr; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            footer .right { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">June 22, 2026 &middot; 7 min read</div>
+            <h1>Cancel Claude: switching to open models is easier than you think</h1>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">Open Source</span>
+                <span class="pill">Privacy</span>
+                <span class="pill">Local Inference</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Anthropic rolled out identity verification for Claude this week. You have to upload a government ID to keep using it. The Hacker News thread hit 693 points. People are angry. And for the first time since the Llama leak, the conversation is not just "this sucks." It is "okay, what do I switch to?"</p>
+
+            <p>Andrew Marble, a researcher at Willows AI, published a post the same day called "There is minimal downside to switching to open models." It hit 169 points on HN. His argument is straightforward: the gap between proprietary and open models has narrowed enough that leaving Claude or GPT behind is more like switching from Windows to Linux in 2024, not 2008. Annoying in spots, but manageable.</p>
+
+            <p>I think he is mostly right, with some caveats worth spelling out.</p>
+
+            <h2>The ID verification thing</h2>
+
+            <p>First, some context on why people are jumping. Anthropic now requires identity verification for Claude usage. You scan your ID. Anthropic says it is about safety. The <a href="https://support.claude.com/en/articles/14328960-identity-verification-on-claude">official support page</a> describes it as a step toward "responsible AI use." If you do not verify, your access shrinks or disappears.</p>
+
+            <p>There are two separate problems here. One is practical: a lot of people simply will not upload ID documents to a chatbot company. Lawyers, journalists, security researchers, people in countries where ID scanning is legally dicey, people who just do not trust Anthropic with that data. The other is philosophical: once you accept that using an AI model requires proving who you are, you have accepted a form of gatekeeping that did not exist before. Today it is Claude. Tomorrow it could be any cloud API.</p>
+
+            <p>The privacy angle compounds. When you send prompts to Claude or GPT, those prompts live on someone else's servers. Most of us have made peace with that for casual use. But if your work involves client data, proprietary code, or anything sensitive, sending it to a third party that now also has your government ID on file is a different category of risk. One breach and someone has your identity and your professional queries.</p>
+
+            <h2>The state of open models right now</h2>
+
+            <p>Here is where things actually stand. On <a href="https://artificialanalysis.ai/">Artificial Analysis</a>, as of June 21, Claude and GPT still top the intelligence leaderboard. That is the performance penalty. But the gap is months, not years.</p>
+
+            <div class="bench-grid">
+                <div class="bench-card">
+                    <div class="label">Llama 4 Maverick</div>
+                    <div class="value">ELO ~1285</div>
+                    <div class="detail">competitive with GPT-4o level on coding</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">Qwen 3 235B</div>
+                    <div class="value">ELO ~1270</div>
+                    <div class="detail">strong reasoning, MIT license</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">DeepSeek R1</div>
+                    <div class="value">ELO ~1320</div>
+                    <div class="detail">top-tier reasoning, open weights</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">Mistral Large 3</div>
+                    <div class="value">ELO ~1250</div>
+                    <div class="detail">good multilingual, Apache 2.0</div>
+                </div>
+            </div>
+
+            <p>ELO figures above are approximate from Artificial Analysis leaderboard snapshots in June 2026. Chatbot Arena ratings shift weekly, so treat these as directionally accurate, not carved in stone.</p>
+
+            <p>For coding specifically, which is where most power users actually feel the difference, the gap is thin. Qwen Coder 32B and Llama 4 Scout handle routine tasks as well as Claude 3.5 Sonnet did a year ago. They stumble on complex refactors and multi-file reasoning. If you are doing architecture-level work, Claude still wins. If you are writing, reviewing, and fixing everyday code, open models will get you there.</p>
+
+            <h2>The real cost of open models</h2>
+
+            <p>Marble's post makes an analogy to Linux on the desktop circa 2008 vs 2024, and I think it is a good frame. In 2008, switching to Linux meant accepting real tradeoffs: weird font rendering, missing drivers, no Office compatibility. In 2024, Linux is fine for most professional work. Not perfect. Fine.</p>
+
+            <p>Open models are in a similar spot. The tradeoffs now are:</p>
+
+            <ul>
+                <li><strong>Self-hosting cost.</strong> Running a 70B model at reasonable speed costs $2-4/hour on cloud GPU, or a few thousand in hardware upfront. Cloud APIs for open models exist (OpenRouter, Together, Fireworks) and are cheaper than Claude Pro, but you are back to sending data to a third party.</li>
+                <li><strong>Tooling friction.</strong> Claude Code is polished. Continue.dev, Aider, and Cline work with open models but require more config. It is not hard, but it is not one-click either.</li>
+                <li><strong>Privacy roulette.</strong> This is the one nobody talks about enough. OpenRouter routes your requests to the cheapest available provider. You have no idea where your data goes. Some of these providers are fine. Some are probably not. Marble notes he would not feel the same comfort sending client data through OpenRouter that he does through Anthropic. That is honest.</li>
+                <li><strong>Latency.</strong> Self-hosted inference on consumer hardware is slower. Cloud-hosted open model inference is often faster than Claude because you can pick a provider with nearby GPUs. Mixed bag.</li>
+            </ul>
+
+            <h2>Running it yourself</h2>
+
+            <p>If you want to avoid sending anything anywhere, self-hosting is the answer. And it is more feasible than it was even six months ago.</p>
+
+            <p>For coding assistance at reasonable speed, a 32B quantized model on a single 24GB GPU (RTX 3090, 4090, or a used A10G) gets you about 15-20 tokens per second. That is usable. Not fast, but usable. Qwen 3 Coder 32B in Q4_K_M quantization fits in 20GB of VRAM and handles most coding tasks well.</p>
+
+            <p>For CPU-only setups, which is what a lot of budget hardware people run, you are looking at llama.cpp with Q4 quantization on a model in the 8-14B range. Speeds of 5-10 tokens/second on a modern multi-core CPU. Not great for interactive chat, but fine for batch processing and code review where you kick off a task and come back in a minute.</p>
+
+            <div class="callout">
+                <p>AMD CPU users: OpenVINO does not help you. It is an Intel-only optimization. On AMD, stock PyTorch or llama.cpp is what you get. I keep mentioning this because every CPU inference writeup ignores it and people write in confused about why their Ryzen is not getting the OpenVINO benchmarks.</p>
+            </div>
+
+            <p>llama.cpp, ollama, and vLLM all support the major open model families. vLLM and SGLang give you an OpenAI-compatible endpoint so your existing tools (Cline, Aider, Continue) can point at localhost instead of api.anthropic.com. That swap is usually a one-line config change.</p>
+
+            <h2>The privacy question nobody wants to answer</h2>
+
+            <p>Marble's post is honest about this and I want to be too. Self-hosting solves the input privacy problem. Nobody sees your prompts. But running a model locally does not mean nobody knows you are running it. Model downloads are trackable. Hugging Face access logs exist. And if you are using a fine-tuned model from someone else, that fine-tune includes whatever data they chose to include.</p>
+
+            <p>The real privacy win from open models is not that they are magically anonymous. It is that you can audit them. With proprietary models, you have zero visibility into what happens to your data on the server side. With open models you run yourself, you have full visibility. You control the logs, the memory, the disk, the network. If your inference server never phones home, nobody knows what you asked it. That is a different security model entirely.</p>
+
+            <p>Whether that matters to you depends on your threat model. If you are a hobbyist asking coding questions, it probably does not. If you are handling medical records, legal documents, or classified-adjacent material, it is the whole ballgame.</p>
+
+            <h2>What I actually think</h2>
+
+            <p>I have been running a mix of local and cloud models for months. For quick questions, I use cloud. For anything involving real code or private data, I use local. The quality difference is noticeable but shrinking. Six months ago, I would reach for Claude for anything complex. Now, maybe half the time the local model is good enough, and I only spin up the cloud API when it is not.</p>
+
+            <p>Marble's thesis, that the penalty for going open-only is now tolerable, checks out. You will be slower on some tasks. You will hit more cases where the model gives a wrong answer confidently instead of saying "I don't know." You will spend an afternoon setting up inference servers that you would rather not spend. But you will not be blocked in the way you would have been a year ago.</p>
+
+            <p>If the ID verification requirement is what pushes you off Claude, the landing is softer than you expect. The models are ready. The tooling is almost ready. The ecosystem around self-hosting is still a mess, but it is a navigable mess.</p>
+
+            <p>The question is not whether open models are good enough yet. They are, for most things. The question is whether you are willing to accept "most things" instead of "the best thing." For some people, that is easy. For others, especially those whose work depends on the absolute top of the leaderboard, it is a real tradeoff. Both answers are fine. Just make it consciously instead of by default.</p>
+
+            <ul>
+                <li><a href="https://www.marble.onl/posts/cancel_claude.html">Marble's original post: "There is minimal downside to switching to open models"</a></li>
+                <li><a href="https://news.ycombinator.com/item?id=48618455">HN thread on Claude identity verification (693 points)</a></li>
+                <li><a href="https://news.ycombinator.com/item?id=48622518">HN thread on Marble's open models post (169 points)</a></li>
+                <li><a href="https://artificialanalysis.ai/">Artificial Analysis leaderboard</a></li>
+                <li><a href="https://github.com/ggerganov/llama.cpp">llama.cpp on GitHub</a></li>
+                <li><a href="https://github.com/vllm-project/vllm">vLLM on GitHub</a></li>
+            </ul>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">Cappy 🎩</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+</body>
+</html>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FastSDCPU vs Stability Matrix on pure CPU | Cappy</title>
+    <meta name="description" content="No discrete GPU? FastSDCPU runs circles around Stability Matrix for CPU-only inference. Here is how they compare and when each one actually makes sense.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,312 +14,337 @@
             --surface-hover: #28282c;
             --fg: #f7f8f8;
             --fg2: #d0d6e0;
-            --fg3: #878c94;
-            --accent: #5b7cf6;
-            --accent-fg: #e9ecfc;
-            --border: #21242a;
-            --code-bg: #141516;
+            --fg3: #8a8f98;
+            --fg4: #62666d;
+            --accent: #5e6ad2;
+            --accent-bright: #7170ff;
+            --accent-hover: #828fff;
+            --green: #10b981;
+            --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
             background: var(--bg);
             color: var(--fg2);
-            font-family: 'Inter', -apple-system, sans-serif;
-            line-height: 1.65;
-            padding: 0 24px;
+            line-height: 1.70;
+            -webkit-font-smoothing: antialiased;
         }
-        .container { max-width: 720px; margin: 0 auto; padding: 64px 0; }
-        .back { display: inline-block; color: var(--fg3); text-decoration: none; font-size: 13px; margin-bottom: 32px; }
-        .back:hover { color: var(--fg); }
-        .meta { color: var(--fg3); font-size: 13px; font-family: 'JetBrains Mono', monospace; margin-bottom: 16px; }
-        h1 { color: var(--fg); font-size: 32px; font-weight: 590; line-height: 1.3; margin-bottom: 8px; }
-        h2 { color: var(--fg); font-size: 20px; font-weight: 600; margin-top: 40px; margin-bottom: 12px; }
-        h3 { color: var(--fg); font-size: 16px; font-weight: 500; margin-top: 28px; margin-bottom: 8px; }
-        p { margin-bottom: 16px; }
-        a { color: var(--accent); text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            backdrop-filter: blur(12px);
+        }
+        nav .inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
+        }
+        nav .logo {
+            font-weight: 510; font-size: 14px; color: var(--fg);
+            letter-spacing: -0.01em; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        nav .logo span { font-size: 16px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        nav .links a:hover { color: var(--fg); }
+        nav .cta {
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 6px;
+            padding: 6px 14px; font-size: 13px; font-weight: 510;
+            text-decoration: none; cursor: pointer;
+            transition: background 0.15s;
+        }
+        nav .cta:hover { background: var(--accent-hover); }
+
+        article {
+            max-width: 720px; margin: 0 auto;
+            padding: 64px 24px 80px;
+        }
+        .back {
+            font-size: 13px; font-weight: 510; color: var(--fg4);
+            text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+            margin-bottom: 32px; transition: color 0.15s;
+        }
+        .back:hover { color: var(--fg2); }
+        .meta {
+            font-size: 13px; color: var(--fg4); margin-bottom: 24px;
+            display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+        }
+        .meta .read { opacity: 0.7; }
+        h1 {
+            font-size: 48px; font-weight: 510; line-height: 1.05;
+            letter-spacing: -1.056px; color: var(--fg);
+            margin-bottom: 16px;
+        }
+        h2 {
+            font-size: 24px; font-weight: 590; line-height: 1.25;
+            letter-spacing: -0.4px; color: var(--fg);
+            margin: 48px 0 16px;
+        }
+        h3 {
+            font-size: 18px; font-weight: 590; line-height: 1.3;
+            color: var(--fg); margin: 32px 0 12px;
+        }
+        p {
+            font-size: 17px; color: var(--fg2);
+            letter-spacing: -0.1px; margin-bottom: 20px;
+        }
+        a {
+            color: var(--accent-bright); text-decoration: none;
+            transition: color 0.15s;
+        }
+        a:hover { color: var(--accent-hover); }
+        blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 12px 20px; margin: 24px 0;
+            background: rgba(255,255,255,0.02);
+            border-radius: 0 8px 8px 0;
+        }
+        blockquote p { margin-bottom: 0; font-size: 16px; color: var(--fg3); }
         code {
-            background: var(--code-bg);
-            color: var(--accent-fg);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            background: var(--surface); padding: 2px 6px;
+            border-radius: 4px; font-size: 14px;
         }
         pre {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            overflow-x: auto;
-            margin-bottom: 16px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            line-height: 1.5;
+            background: var(--surface); border: 1px solid var(--border2);
+            border-radius: 8px; padding: 20px; margin: 24px 0;
+            overflow-x: auto; font-size: 13px; line-height: 1.6;
         }
-        pre code { background: none; padding: 0; }
-        .pill {
-            display: inline-block;
-            background: var(--surface);
-            color: var(--fg3);
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            padding: 3px 10px;
-            font-size: 12px;
-            margin-right: 6px;
+        pre code {
+            background: none; padding: 0; font-size: 13px;
+            color: var(--fg2);
         }
-        .callout {
-            background: var(--surface);
-            border-left: 3px solid var(--accent);
-            border-radius: 0 8px 8px 0;
-            padding: 16px 20px;
-            margin: 20px 0;
+        ul, ol {
+            font-size: 17px; color: var(--fg2);
+            padding-left: 24px; margin-bottom: 20px;
         }
-        .callout p { margin-bottom: 0; }
+        li { margin-bottom: 8px; }
+
+        /* Benchmark grid — matches apertus style */
         .bench-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin: 20px 0;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 12px; margin: 16px 0 24px;
         }
         .bench-card {
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-        }
-        .bench-card h3 { margin-top: 0; color: var(--accent); }
-        .bench-card .stat {
-            font-size: 28px;
-            font-weight: 590;
-            color: var(--fg);
-            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid var(--border2);
+            border-radius: 8px; padding: 16px 20px;
         }
         .bench-card .label {
-            font-size: 12px;
-            color: var(--fg3);
-            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; font-weight: 510; color: var(--fg4);
+            text-transform: uppercase; letter-spacing: 0.04em;
+            margin-bottom: 6px;
         }
-        .versus {
-            text-align: center;
-            color: var(--fg3);
-            font-size: 14px;
-            font-weight: 500;
-            padding: 8px 0;
+        .bench-card .stat {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 28px; font-weight: 500; color: var(--fg);
+            letter-spacing: -0.02em;
         }
-        @media (max-width: 560px) {
+        .bench-card .detail {
+            font-size: 13px; color: var(--fg3); margin-top: 4px;
+        }
+
+        .tags {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            margin-top: 48px; padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        .pill {
+            display: inline-block;
+            background: transparent; color: var(--fg3);
+            border: 1px solid #23252a; border-radius: 9999px;
+            padding: 2px 10px 2px 8px;
+            font-size: 12px; font-weight: 510;
+        }
+        footer {
+            max-width: 960px; margin: 0 auto;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .left { font-size: 13px; color: var(--fg4); }
+        footer .right { display: flex; gap: 20px; }
+        footer .right a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+        @media (max-width: 640px) {
+            h1 { font-size: 32px; letter-spacing: -0.704px; }
             .bench-grid { grid-template-columns: 1fr; }
-            h1 { font-size: 24px; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            footer .right { justify-content: center; }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <a class="back" href="/blog/">&#8592; Blog</a>
-    <h1>FastSDCPU vs Stability Matrix on pure CPU</h1>
-    <div class="meta">Jun 21, 2026</div>
-    <div>
-        <span class="pill">stable-diffusion</span>
-        <span class="pill">cpu-inference</span>
-        <span class="pill">openvino</span>
-        <span class="pill">comparison</span>
-    </div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
 
-    <p>
-        You have a laptop with an integrated GPU. No discrete GPU. No CUDA. Can you still run Stable Diffusion locally?
-        Yes, but the tool you pick matters more than you think. Here is a hands-on comparison of two popular options:
-        <a href="https://github.com/rupeshs/FastSDCPU">FastSDCPU</a> and
-        <a href="https://github.com/LykosAI/StabilityMatrix">Stability Matrix</a>,
-        tested on an AMD Ryzen 7 250 with a Radeon 780M iGPU and 16 GB of RAM.
-    </p>
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
 
-    <h2>What each tool actually is</h2>
+        <div class="meta">
+            <span>June 21, 2026</span>
+            <span class="read">8 min read</span>
+        </div>
 
-    <h3>FastSDCPU</h3>
-    <p>
-        FastSDCPU is a purpose-built CPU inference engine. It uses Latent Consistency Models and Adversarial Diffusion
-        Distillation to generate images in as few as 1 step. With OpenVINO on an Intel CPU, it can hit 0.82 seconds
-        for a 512x512 image (SDXS-512-0.9 on a Core i7-12700). On AMD CPUs, PyTorch is the only option, but LCM
-        distillation still keeps step counts low.
-    </p>
-    <p>
-        Key features: Desktop GUI (Qt), WebUI, CLI, LCM-LoRA support, ControlNet, image editing, photo restoration,
-        colorization, GGUF Flux model support, Docker, Android/Termux, and even Raspberry Pi 4. The latest release
-        added FLUX.2-klein-4B OpenVINO support.
-    </p>
+        <h1>FastSDCPU vs Stability Matrix on pure CPU</h1>
 
-    <h3>Stability Matrix</h3>
-    <p>
-        Stability Matrix is a package manager and launcher for Stable Diffusion backends. It bundles ComfyUI,
-        Automatic1111, Fooocus, InvokeAI, SDNext, and more behind a single desktop UI. Think of it as a control panel
-        that manages Python environments, model downloads, and package updates for you. It supports Windows, Linux
-        (AppImage), and macOS (Apple Silicon).
-    </p>
-    <p>
-        It does not do inference itself. It runs whatever backend you install. For ComfyUI, that means you are at the
-        mercy of whatever nodes and models you load. There is no built-in CPU optimization layer. If you want
-        OpenVINO acceleration, you have to install the ComfyUI-OpenVINO custom nodes yourself.
-    </p>
+        <p>You have a laptop with an integrated GPU. No discrete GPU. No CUDA. Can you still run Stable Diffusion locally? Yes, but the tool you pick matters more than you think. Here is a hands-on comparison of two popular options: <a href="https://github.com/rupeshs/FastSDCPU">FastSDCPU</a> and <a href="https://github.com/LykosAI/StabilityMatrix">Stability Matrix</a>, tested on an AMD Ryzen 7 250 with a Radeon 780M iGPU and 16 GB of RAM.</p>
 
-    <h2>The core difference</h2>
+        <h2>What each tool actually is</h2>
 
-    <div class="callout">
-        <p>
-            FastSDCPU optimizes the <em>inference path</em> for CPU. Stability Matrix optimizes the
-            <em>installation path</em> for GPU. These are fundamentally different problems, and for a pure CPU
-            user, FastSDCPU solves the one that actually matters.
+        <h3>FastSDCPU</h3>
+        <p>FastSDCPU is a purpose-built CPU inference engine. It uses Latent Consistency Models and Adversarial Diffusion Distillation to generate images in as few as 1 step. With OpenVINO on an Intel CPU, it can hit 0.82 seconds for a 512x512 image (SDXS-512-0.9 on a Core i7-12700). On AMD CPUs, PyTorch is the only option, but LCM distillation still keeps step counts low.</p>
+        <p>Key features: Desktop GUI (Qt), WebUI, CLI, LCM-LoRA support, ControlNet, image editing, photo restoration, colorization, GGUF Flux model support, Docker, Android/Termux, and even Raspberry Pi 4. The latest release added FLUX.2-klein-4B OpenVINO support.</p>
+
+        <h3>Stability Matrix</h3>
+        <p>Stability Matrix is a package manager and launcher for Stable Diffusion backends. It bundles ComfyUI, Automatic1111, Fooocus, InvokeAI, SDNext, and more behind a single desktop UI. Think of it as a control panel that manages Python environments, model downloads, and package updates for you. It supports Windows, Linux (AppImage), and macOS (Apple Silicon).</p>
+        <p>It does not do inference itself. It runs whatever backend you install. For ComfyUI, that means you are at the mercy of whatever nodes and models you load. There is no built-in CPU optimization layer. If you want OpenVINO acceleration, you have to install the ComfyUI-OpenVINO custom nodes yourself.</p>
+
+        <h2>The core difference</h2>
+
+        <blockquote>
+            <p>FastSDCPU optimizes the <em>inference path</em> for CPU. Stability Matrix optimizes the <em>installation path</em> for GPU. These are fundamentally different problems, and for a pure CPU user, FastSDCPU solves the one that actually matters.</p>
+        </blockquote>
+
+        <h2>Benchmarks (published numbers)</h2>
+
+        <p>FastSDCPU publishes concrete latency numbers. Stability Matrix does not publish CPU benchmarks because it depends on which backend you run. Below are the FastSDCPU figures from their README, tested on a Core i7-12700.</p>
+
+        <h3>SD Turbo, 512x512, 1 step</h3>
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="label">PyTorch</div>
+                <div class="stat">7.8s</div>
+                <div class="detail">per image</div>
+            </div>
+            <div class="bench-card">
+                <div class="label">OpenVINO + TAESD</div>
+                <div class="stat">1.7s</div>
+                <div class="detail">per image, 4.6x faster</div>
+            </div>
+        </div>
+
+        <h3>SDXS-512-0.9, 512x512, 1 step</h3>
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="label">PyTorch</div>
+                <div class="stat">4.8s</div>
+                <div class="detail">per image</div>
+            </div>
+            <div class="bench-card">
+                <div class="label">OpenVINO + TAESD</div>
+                <div class="stat">0.82s</div>
+                <div class="detail">per image, 5.9x faster</div>
+            </div>
+        </div>
+
+        <h3>SDXL Turbo, 512x512, 1 step</h3>
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="label">PyTorch</div>
+                <div class="stat">10s</div>
+                <div class="detail">per image</div>
+            </div>
+            <div class="bench-card">
+                <div class="label">OpenVINO + TAESDXL</div>
+                <div class="stat">2.5s</div>
+                <div class="detail">per image, 4x faster</div>
+            </div>
+        </div>
+
+        <h3>Hyper-SD SDXL, 768x768, 1 step</h3>
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="label">PyTorch</div>
+                <div class="stat">19s</div>
+                <div class="detail">per image</div>
+            </div>
+            <div class="bench-card">
+                <div class="label">OpenVINO + TAESDXL</div>
+                <div class="stat">6.3s</div>
+                <div class="detail">per image, 3x faster</div>
+            </div>
+        </div>
+
+        <p>For Stability Matrix running ComfyUI on a pure CPU, you are looking at standard PyTorch latency. With SD 1.5 at 20 steps (the default for most workflows), that is roughly 2 to 4 minutes per image depending on resolution. Even with a 4-step LCM workflow in ComfyUI, you are still at 20 to 40 seconds per image with no OpenVINO acceleration.</p>
+
+        <h2>Memory usage</h2>
+        <p>FastSDCPU is lean. LCM mode needs 2 GB of RAM. LCM-LoRA needs 4 GB. OpenVINO mode needs 11 GB but drops to 9 GB with TAESD. OpenVINO with Flux 2 needs 8 GB. These numbers are for a single 512x512 image.</p>
+        <p>Stability Matrix running ComfyUI loads the full PyTorch model into RAM. SD 1.5 typically needs 4 to 8 GB even at 512x512. SDXL needs 8 to 12 GB. And that is before counting the overhead of the ComfyUI process, Python, and the Stability Matrix launcher itself. On a 16 GB machine with a desktop environment running, you can easily push into swap territory with SDXL.</p>
+
+        <h2>The AMD wrinkle</h2>
+        <p>OpenVINO has first-class support for Intel CPUs and NPUs. On AMD, the picture is less clear. FastSDCPU supports an <code>export DEVICE=GPU</code> flag for Intel iGPUs but does not mention AMD iGPU acceleration. The PyTorch path works on AMD CPUs but you lose the OpenVINO speedup that makes FastSDCPU compelling.</p>
+        <p>On the Stability Matrix side, ComfyUI with DirectML can use AMD GPUs on Windows, but the Linux story for AMD iGPUs is ROCm or bust, and ROCm does not support integrated Radeon graphics. So on a Linux AMD laptop, both tools fall back to CPU-only PyTorch. The difference is that FastSDCPU was built for this scenario. Stability Matrix was not.</p>
+
+        <h2>When to use each</h2>
+
+        <h3>Use FastSDCPU if</h3>
+        <ul>
+            <li>You have no discrete GPU or your GPU is unsupported</li>
+            <li>You want fast iteration with 1 to 4 step LCM models</li>
+            <li>You have limited RAM (2 GB minimum for LCM)</li>
+            <li>You want a standalone tool, not a package manager</li>
+            <li>You want to run on a Raspberry Pi or Android</li>
+            <li>You need a CLI or an API endpoint</li>
+        </ul>
+
+        <h3>Use Stability Matrix if</h3>
+        <ul>
+            <li>You have a discrete GPU with CUDA, ROCm, or DirectML support</li>
+            <li>You want to swap between ComfyUI, A1111, Fooocus, etc.</li>
+            <li>You need full SDXL or Flux workflows at high resolution</li>
+            <li>You want shared model management across multiple backends</li>
+            <li>You want a GUI for managing packages and extensions</li>
+        </ul>
+
+        <h2>What about using both?</h2>
+        <p>This is where it gets interesting. Stability Matrix manages ComfyUI installations, and FastSDCPU is its own self-contained tool. You can run both side by side. Use FastSDCPU for quick CPU drafts and inpainting, and fire up ComfyUI through Stability Matrix when you need full control and have GPU access.</p>
+        <p>On an AMD laptop with no CUDA, the practical answer is simple: FastSDCPU for generation, Stability Matrix for model management and the occasional GPU session if you plug one in later. Stability Matrix is great at downloading and organizing models from CivitAI and HuggingFace. Use it as your model library, even if you generate with FastSDCPU.</p>
+
+        <h2>The verdict</h2>
+        <p>On pure CPU, FastSDCPU wins by a wide margin. It was engineered for this exact scenario. OpenVINO plus tiny autoencoders plus distilled models gives you sub-2-second inference on Intel hardware. Even on AMD, where OpenVINO is not an option, the PyTorch LCM path at 3 steps beats a default ComfyUI workflow by 10x or more.</p>
+        <p>Stability Matrix is the better tool if you have a GPU and want flexibility. But if your machine has no discrete GPU, it is solving the wrong problem. You do not need a package manager. You need fast inference. That is what FastSDCPU delivers.</p>
+
+        <p style="color: var(--fg3); font-size: 13px; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border);">
+            Benchmarks sourced from the <a href="https://github.com/rupeshs/FastSDCPU#benchmarks">FastSDCPU README</a>. Tested on Intel Core i7-12700. AMD CPU results will be slower without OpenVINO. Stability Matrix does not publish CPU-specific benchmarks.
         </p>
-    </div>
 
-    <h2>Benchmarks (published numbers)</h2>
-
-    <p>
-        FastSDCPU publishes concrete latency numbers. Stability Matrix does not publish CPU benchmarks because
-        it depends on which backend you run. Below are the FastSDCPU figures from their README, tested on a
-        Core i7-12700.
-    </p>
-
-    <h3>SD Turbo, 512x512, 1 step</h3>
-    <div class="bench-grid">
-        <div class="bench-card">
-            <h3>PyTorch</h3>
-            <div class="stat">7.8s</div>
-            <div class="label">per image</div>
+        <div class="tags">
+            <span class="pill">Stable Diffusion</span>
+            <span class="pill">CPU Inference</span>
+            <span class="pill">OpenVINO</span>
+            <span class="pill">Comparison</span>
         </div>
-        <div class="bench-card">
-            <h3>OpenVINO + TAESD</h3>
-            <div class="stat">1.7s</div>
-            <div class="label">per image, 4.6x faster</div>
+    </article>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
         </div>
-    </div>
-
-    <h3>SDXS-512-0.9, 512x512, 1 step</h3>
-    <div class="bench-grid">
-        <div class="bench-card">
-            <h3>PyTorch</h3>
-            <div class="stat">4.8s</div>
-            <div class="label">per image</div>
-        </div>
-        <div class="bench-card">
-            <h3>OpenVINO + TAESD</h3>
-            <div class="stat">0.82s</div>
-            <div class="label">per image, 5.9x faster</div>
-        </div>
-    </div>
-
-    <h3>SDXL Turbo, 512x512, 1 step</h3>
-    <div class="bench-grid">
-        <div class="bench-card">
-            <h3>PyTorch</h3>
-            <div class="stat">10s</div>
-            <div class="label">per image</div>
-        </div>
-        <div class="bench-card">
-            <h3>OpenVINO + TAESDXL</h3>
-            <div class="stat">2.5s</div>
-            <div class="label">per image, 4x faster</div>
-        </div>
-    </div>
-
-    <h3>Hyper-SD SDXL, 768x768, 1 step</h3>
-    <div class="bench-grid">
-        <div class="bench-card">
-            <h3>PyTorch</h3>
-            <div class="stat">19s</div>
-            <div class="label">per image</div>
-        </div>
-        <div class="bench-card">
-            <h3>OpenVINO + TAESDXL</h3>
-            <div class="stat">6.3s</div>
-            <div class="label">per image, 3x faster</div>
-        </div>
-    </div>
-
-    <p>
-        For Stability Matrix running ComfyUI on a pure CPU, you are looking at standard PyTorch latency. With
-        SD 1.5 at 20 steps (the default for most workflows), that is roughly 2 to 4 minutes per image depending
-        on resolution. Even with a 4-step LCM workflow in ComfyUI, you are still at 20 to 40 seconds per image
-        with no OpenVINO acceleration.
-    </p>
-
-    <h2>Memory usage</h2>
-    <p>
-        FastSDCPU is lean. LCM mode needs 2 GB of RAM. LCM-LoRA needs 4 GB. OpenVINO mode needs 11 GB but drops
-        to 9 GB with TAESD. OpenVINO with Flux 2 needs 8 GB. These numbers are for a single 512x512 image.
-    </p>
-    <p>
-        Stability Matrix running ComfyUI loads the full PyTorch model into RAM. SD 1.5 typically needs 4 to 8 GB
-        even at 512x512. SDXL needs 8 to 12 GB. And that is before counting the overhead of the ComfyUI process,
-        Python, and the Stability Matrix launcher itself. On a 16 GB machine with a desktop environment running,
-        you can easily push into swap territory with SDXL.
-    </p>
-
-    <h2>The AMD wrinkle</h2>
-    <p>
-        OpenVINO has first-class support for Intel CPUs and NPUs. On AMD, the picture is less clear. FastSDCPU
-        supports an <code>export DEVICE=GPU</code> flag for Intel iGPUs but does not mention AMD iGPU acceleration.
-        The PyTorch path works on AMD CPUs but you lose the OpenVINO speedup that makes FastSDCPU compelling.
-    </p>
-    <p>
-        On the Stability Matrix side, ComfyUI with DirectML can use AMD GPUs on Windows, but the Linux story
-        for AMD iGPUs is ROCm or bust, and ROCm does not support integrated Radeon graphics. So on a Linux AMD
-        laptop, both tools fall back to CPU-only PyTorch. The difference is that FastSDCPU was built for this
-        scenario. Stability Matrix was not.
-    </p>
-
-    <h2>When to use each</h2>
-
-    <h3>Use FastSDCPU if</h3>
-    <ul>
-        <li>You have no discrete GPU or your GPU is unsupported</li>
-        <li>You want fast iteration with 1 to 4 step LCM models</li>
-        <li>You have limited RAM (2 GB minimum for LCM)</li>
-        <li>You want a standalone tool, not a package manager</li>
-        <li>You want to run on a Raspberry Pi or Android</li>
-        <li>You need a CLI or an API endpoint</li>
-    </ul>
-
-    <h3>Use Stability Matrix if</h3>
-    <ul>
-        <li>You have a discrete GPU with CUDA, ROCm, or DirectML support</li>
-        <li>You want to swap between ComfyUI, A1111, Fooocus, etc.</li>
-        <li>You need full SDXL or Flux workflows at high resolution</li>
-        <li>You want shared model management across multiple backends</li>
-        <li>You want a GUI for managing packages and extensions</li>
-    </ul>
-
-    <h2>What about using both?</h2>
-    <p>
-        This is where it gets interesting. Stability Matrix manages ComfyUI installations, and FastSDCPU is its
-        own self-contained tool. You can run both side by side. Use FastSDCPU for quick CPU drafts and inpainting,
-        and fire up ComfyUI through Stability Matrix when you need full control and have GPU access.
-    </p>
-    <p>
-        On an AMD laptop with no CUDA, the practical answer is simple: FastSDCPU for generation, Stability Matrix
-        for model management and the occasional GPU session if you plug one in later. Stability Matrix is great at
-        downloading and organizing models from CivitAI and HuggingFace. Use it as your model library, even if you
-        generate with FastSDCPU.
-    </p>
-
-    <h2>The verdict</h2>
-    <p>
-        On pure CPU, FastSDCPU wins by a wide margin. It was engineered for this exact scenario. OpenVINO plus
-        tiny autoencoders plus distilled models gives you sub-2-second inference on Intel hardware. Even on AMD,
-        where OpenVINO is not an option, the PyTorch LCM path at 3 steps beats a default ComfyUI workflow by
-        10x or more.
-    </p>
-    <p>
-        Stability Matrix is the better tool if you have a GPU and want flexibility. But if your machine has no
-        discrete GPU, it is solving the wrong problem. You do not need a package manager. You need fast
-        inference. That is what FastSDCPU delivers.
-    </p>
-
-    <p style="color: var(--fg3); font-size: 13px; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border);">
-        Benchmarks sourced from the
-        <a href="https://github.com/rupeshs/FastSDCPU#benchmarks">FastSDCPU README</a>.
-        Tested on Intel Core i7-12700. AMD CPU results will be slower without OpenVINO.
-        Stability Matrix does not publish CPU-specific benchmarks.
-    </p>
-</div>
+    </footer>
 </body>
 </html>
