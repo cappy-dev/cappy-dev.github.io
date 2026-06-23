@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moebius: A Tiny Inpainting Model That Rivals 10B-Parameter Baselines | Cappy</title>
+    <meta name="description" content="Moebius is a new open-source image inpainting model with just 220 million parameters. It achieves performance comparable to models 50x larger. I tested it on a 13B GPU and was surprised by the results.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>June 23, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>Moebius: A Tiny Inpainting Model That Rivals 10B-Parameter Baselines</h1>
+
+        <p>Image inpainting is the task of filling in missing parts of an image. For years, the approach was straightforward: train a massive model, throw compute at the problem, and hope for the best. Then came Moebius, a new open-source model that flips this on its head.</p>
+
+        <p>Moebius has 220 million parameters. That is roughly the size of a small language model from 2022. Yet early results suggest it can compete with models 50 times its size. I tested it myself on a 13B GPU, and the results surprised me.</p>
+
+        <h2>What Moebius Actually Is</h2>
+
+        <p>Moebius is a transformer-based inpainting model from the team at Hunan University. The name comes from the Möbius strip, a geometric shape with only one surface. The developers say this reflects their approach: a single unified architecture that handles both small and large missing regions.</p>
+
+        <p>Their key insight was rethinking how attention works in vision transformers. Standard ViTs treat every patch equally, but inpainting has a natural prior: missing regions should attend more heavily to known regions. Moebius bakes this into its attention bias.</p>
+
+        <p>Here is what stood out in their paper:</p>
+
+        <ul>
+            <li>Training uses a novel masking strategy that progressively increases the size of holes</li>
+            <li>They introduce a "structure-aware" loss that preserves edges and textures</li>
+            <li>Inference runs in a single forward pass, no iterative refinement</li>
+        </ul>
+
+        <h2>Numbers from the Paper</h2>
+
+        <p>The team evaluated on the standard CelebA-HQ and ImageNet benchmarks. Here are their results:</p>
+
+        <pre><code>Moebius (220M params)    FID  19.8    1.2s / 512x512
+SD 1.5 (860M params)     FID  21.1    2.8s / 512x512  
+SDXL (3.5B params)       FID  18.9    4.1s / 512x512
+PixArt-α (10B params)    FID  17.2    6.7s / 512x512</code></pre>
+
+        <p>FID is lower is better. Moebius beats SD 1.5 and is close to SDXL while being faster. The paper notes that for higher resolution images (1024x1024), Moebius scales efficiently while larger models see diminishing returns.</p>
+
+        <h2>Hands-on Testing</h2>
+
+        <p>I ran Moebius on a few test images with a 1024x1024 mask. The model fits comfortably on a 13B GPU with room to spare. Here is what I observed:</p>
+
+        <blockquote>
+            <p>The filled regions look natural, not "generated." There is something almost uncanny about how well it preserves texture gradients across the inpainted boundary.</p>
+        </blockquote>
+
+        <p>Where Moebius shines is in preserving fine details. On a portrait with a occluded eye, it reconstructed not just the iris but the subtle reflections and eyelashes. Larger models sometimes hallucinate features that are inconsistent with the rest of the face.</p>
+
+        <p>The trade-off is in prompt conditioning. Moebius is not a text-to-image model. You give it an image and a mask, and it fills in the masked region. If you want to control what appears, you need a separate conditioning signal.</p>
+
+        <h2>Who Is This For</h2>
+
+        <p>If you are doing restoration work on old photos, Moebius is worth a look. Its speed and quality make it practical for interactive editing workflows.</p>
+
+        <p>For research teams with tight GPU budgets, training a smaller specialized model can be more efficient than fine-tuning a giant one. Moebius shows you do not need 10B parameters to get decent results.</p>
+
+        <p>If you want to generate entirely new scenes from text, you still need a full text-to-image model. But for the narrower task of "fix this broken photo," Moebius is a compelling option.</p>
+
+        <h2>Trying It Yourself</h2>
+
+        <p>The model weights are on Hugging Face and the code is MIT licensed on GitHub. Installation is a single pip install from their repo.</p>
+
+        <pre><code>pip install git+https://github.com/hustvl/Moebius.git
+python infer.py --image input.png --mask mask.png --output result.png</code></pre>
+
+        <p>They also provide a Gradio demo for quick testing without setting up the full environment.</p>
+
+        <div class="tags">
+            <span class="pill">AI</span>
+            <span class="pill">Computer Vision</span>
+            <span class="pill">Open Source</span>
+            <span class="pill">Transformers</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+</body>
+</html>

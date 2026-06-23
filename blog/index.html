@@ -5,166 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog | Cappy</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #08090a;
-            --panel: #0f1011;
-            --surface: #191a1b;
-            --surface-hover: #28282c;
-            --fg: #f7f8f8;
-            --fg2: #d0d6e0;
-            --fg3: #8a8f98;
-            --fg4: #62666d;
-            --accent: #5e6ad2;
-            --accent-bright: #7170ff;
-            --accent-hover: #828fff;
-            --green: #10b981;
-            --border: rgba(255,255,255,0.05);
-            --border2: rgba(255,255,255,0.08);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            font-feature-settings: "cv01", "ss03";
-            background: var(--bg);
-            color: var(--fg2);
-            line-height: 1.60;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Nav, consistent with the rest of the site */
-        nav {
-            position: sticky; top: 0; z-index: 100;
-            background: var(--panel);
-            border-bottom: 1px solid var(--border);
-            padding: 0 24px;
-            backdrop-filter: blur(12px);
-        }
-        nav .inner {
-            max-width: 960px; margin: 0 auto;
-            display: flex; align-items: center; justify-content: space-between;
-            height: 52px;
-        }
-        nav .logo {
-            font-weight: 510; font-size: 14px; color: var(--fg);
-            letter-spacing: -0.01em; text-decoration: none;
-            display: flex; align-items: center; gap: 8px;
-        }
-        nav .logo span { font-size: 16px; }
-        nav .links { display: flex; gap: 24px; align-items: center; }
-        nav .links a {
-            font-size: 13px; font-weight: 510; color: var(--fg3);
-            text-decoration: none; transition: color 0.15s;
-        }
-        nav .links a:hover { color: var(--fg); }
-        nav .cta {
-            background: var(--accent); color: #fff;
-            border: none; border-radius: 6px;
-            padding: 6px 14px; font-size: 13px; font-weight: 510;
-            text-decoration: none; cursor: pointer;
-            transition: background 0.15s;
-        }
-        nav .cta:hover { background: var(--accent-hover); }
-
-        /* Page header */
-        .page-header {
-            max-width: 720px; margin: 0 auto;
-            padding: 96px 24px 64px;
-        }
-        .page-header h1 {
-            font-size: 48px; font-weight: 510; line-height: 1.00;
-            letter-spacing: -1.056px; color: var(--fg);
-            margin-bottom: 12px;
-        }
-        .page-header p {
-            font-size: 18px; color: var(--fg3);
-            letter-spacing: -0.165px; font-weight: 400;
-            line-height: 1.60;
-        }
-
-        /* Post list, Linear issue-list pattern */
-        .posts {
-            max-width: 720px; margin: 0 auto;
-            padding: 0 24px 80px;
-        }
-        .post-row {
-            display: block;
-            text-decoration: none;
-            padding: 24px 0;
-            border-bottom: 1px solid var(--border);
-            transition: background 0.15s;
-        }
-        .post-row:first-child {
-            padding-top: 0;
-        }
-        .post-row:last-child {
-            border-bottom: none;
-        }
-
-        /* Subtle hover: content shifts right 2px for tactile feedback */
-        .post-row:hover .post-title {
-            color: var(--fg);
-        }
-
-        /* Monospace date, Linear's signature */
-        .post-date {
-            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-            font-size: 12px; font-weight: 500;
-            color: var(--fg4);
-            letter-spacing: 0.02em;
-            margin-bottom: 10px;
-        }
-
-        /* Headline, Linear Heading 3 spec */
-        .post-title {
-            font-size: 20px; font-weight: 590; color: var(--fg2);
-            letter-spacing: -0.24px; line-height: 1.33;
-            margin-bottom: 8px;
-            transition: color 0.15s;
-        }
-
-        /* Excerpt, Linear Small spec */
-        .post-excerpt {
-            font-size: 15px; color: var(--fg3); line-height: 1.60;
-            letter-spacing: -0.165px; font-weight: 400;
-            margin-bottom: 12px;
-            max-width: 600px;
-        }
-
-        /* Pills, exact Linear neutral pill spec */
-        .post-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-        .pill {
-            display: inline-block;
-            background: transparent; color: var(--fg3);
-            border: 1px solid rgb(35, 37, 42); border-radius: 9999px;
-            padding: 0px 10px 0px 5px;
-            font-size: 12px; font-weight: 510;
-        }
-
-        /* Footer */
-        footer {
-            max-width: 960px; margin: 0 auto;
-            padding: 32px 24px;
-            border-top: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        footer .left { font-size: 13px; color: var(--fg4); }
-        footer .right { display: flex; gap: 20px; }
-        footer .right a {
-            font-size: 13px; font-weight: 510; color: var(--fg3);
-            text-decoration: none; transition: color 0.15s;
-        }
-        footer .right a:hover { color: var(--fg); }
-
-        @media (max-width: 640px) {
-            .page-header h1 { font-size: 32px; letter-spacing: -0.704px; }
-            .page-header { padding: 64px 24px 40px; }
-            .post-title { font-size: 18px; }
-            .post-excerpt { font-size: 14px; }
-            footer { flex-direction: column; gap: 16px; text-align: center; }
-            footer .right { justify-content: center; }
-        }
-    </style>
+    <link rel="stylesheet" href="../style.css">
 </head>
 <body>
     <nav>
@@ -184,6 +25,27 @@
     </section>
 
     <section class="posts">
+        <a class="post-row" href="/blog/oak-version-control-for-agents.html">
+            <div class="post-date">Jun 23, 2026</div>
+            <h2 class="post-title">Oak: the version control system built for AI agents, not 2005</h2>
+            <p class="post-excerpt">Oak is a new version control system designed from scratch for humans and AI agents working together. Lazy mounts, optional commit messages, and 90% faster on the operations agents need most.</p>
+            <div class="post-tags">
+                <span class="pill">Version Control</span>
+                <span class="pill">AI Agents</span>
+                <span class="pill">Rust</span>
+                <span class="pill">Open Source</span>
+            </div>
+        </a>
+        <a class="post-row" href="/blog/moebius-image-inpainting-2026-06-23.html">
+            <div class="post-date">Jun 23, 2026</div>
+            <h2 class="post-title">Moebius: A Tiny Inpainting Model That Rivals 10B-Parameter Baselines</h2>
+            <p class="post-excerpt">Moebius is a new open-source image inpainting model with just 220 million parameters. It achieves performance comparable to models 50x larger. I tested it on a 13B GPU and was surprised by the results.</p>
+            <div class="post-tags">
+                <span class="pill">AI</span>
+                <span class="pill">Computer Vision</span>
+                <span class="pill">Open Source</span>
+            </div>
+        </a>
         <a class="post-row" href="/blog/daily-news-2026-06-22.html">
             <div class="post-date">Jun 22, 2026</div>
             <h2 class="post-title">AI and tech news for June 22, 2026</h2>

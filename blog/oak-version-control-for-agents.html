@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oak: the version control system built for AI agents, not 2005 | Cappy</title>
+    <meta name="description" content="Oak is a new version control system designed from scratch for humans and AI agents working together. It skips full clones, ditches mandatory commit messages, and runs 90% faster on the operations agents actually need.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>June 23, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>Oak: the version control system built for AI agents, not 2005</h1>
+
+        <p>Git turned 21 this year. It won. Every developer uses it. Every agent tries to. And the friction is starting to show.</p>
+
+        <p>A project called Oak just hit the front page of Hacker News with a pitch that sounds almost heretical: what if version control was not designed around a single human typing carefully crafted commit messages by hand, but around agents that make hundreds of small changes per minute and need to move fast without breaking each other?</p>
+
+        <p>I spent an evening reading their docs and benchmark harness. Here is what I found.</p>
+
+        <h2>What Oak actually is</h2>
+
+        <p>Oak is a version control system written in Rust. It shares DNA with Git: commits, branches, repos. Your mental model transfers over. But the internals are different enough that calling it "Git but faster" misses the point.</p>
+
+        <p>The core idea is the <em>agentic substrate</em>. In Git, every operation assumes a human is sitting there, waiting, reading output, deciding what to do next. In Oak, the design assumption is that a program is driving, and it needs answers fast, without ceremony.</p>
+
+        <p>Three things stood out.</p>
+
+        <h2>No more full clones</h2>
+
+        <p>Git makes you clone the entire history before you can open a single file. On a big repo, that is minutes of dead time. For an agent burning tokens while it waits, that is real money wasted on watching a progress bar.</p>
+
+        <p>Oak has <code>oak mount</code>. It projects a repo into a working tree without a full clone. Files hydrate on first access. You get a usable directory immediately, and the content streams in as you read it.</p>
+
+        <pre><code>$ oak mount acme/app
+fetched manifest · 2.4MB · 0 blobs
+mount ready at ./app (lazy) · files hydrate on read</code></pre>
+
+        <p>For agents that only need to touch a few files in a large monorepo, this is a substantial improvement. Instead of downloading 4GB of history to change one config file, you download the file you asked for.</p>
+
+        <h2>One task, one branch, no bleed</h2>
+
+        <p>Git worktrees exist, but they are fragile. One shared <code>.git</code> directory, detached-HEAD footguns, state bleeding between trees when the index gets confused. If you have ever watched two agent sessions corrupt each other's working tree, you know the pain.</p>
+
+        <p>Oak gives every task its own mount and branch. Tear one down, the rest are untouched. The isolation is structural, not convention-based.</p>
+
+        <pre><code>$ oak switch -c feat/oauth
+$ oak desc "Replace REST auth with OAuth + PKCE"
+# ... make changes, run tests ...
+$ oak merge squashed onto main</code></pre>
+
+        <p>You describe the branch once at the end. Not per-commit. More on that next.</p>
+
+        <h2>Commit messages are optional</h2>
+
+        <p>This one felt weird at first. Git has drilled into me that every commit needs a message. But think about what agents actually do: they checkpoint progress dozens of times per task with messages like "wip", "fix", "address feedback". Messages no human will read. Tokens burned for ritual compliance.</p>
+
+        <p>Oak checkpoints carry no message. You iterate freely on a feature branch with any number of intermediate commits. Then you land a single squash on main with the branch description as the commit message.</p>
+
+        <p>I was skeptical, but the logic is sound. Commit messages are for humans reading history. If the only reader is the agent that wrote them, the message is a tax, not documentation.</p>
+
+        <h2>The benchmarks</h2>
+
+        <p>Oak published a benchmark harness (oak.space/oak/benchmarks) with numbers you can reproduce yourself. I like that they included scenarios where Oak is <em>slower</em> than Git, because that builds trust.</p>
+
+        <p>Here are the highlights from their standard profile, median p50 latency:</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">50k files, initial snapshot</div>
+                <div class="bench-row">
+                    <span class="bench-tool">git</span>
+                    <span class="bench-time">29,723 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">oak</span>
+                    <span class="bench-time">1,412 ms</span>
+                </div>
+                <div class="bench-delta">95% faster</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Multi-GB binaries, task snapshot</div>
+                <div class="bench-row">
+                    <span class="bench-tool">git</span>
+                    <span class="bench-time">5,218 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">oak</span>
+                    <span class="bench-time">321 ms</span>
+                </div>
+                <div class="bench-delta">94% faster</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Wide dirty tree, initial snapshot</div>
+                <div class="bench-row">
+                    <span class="bench-tool">git</span>
+                    <span class="bench-time">849 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">oak</span>
+                    <span class="bench-time">50.9 ms</span>
+                </div>
+                <div class="bench-delta">94% faster</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Agent setup (clone + checkout)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">git</span>
+                    <span class="bench-time">540 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">oak</span>
+                    <span class="bench-time">58.6 ms</span>
+                </div>
+                <div class="bench-delta">89% faster</div>
+            </div>
+        </div>
+
+        <p>Operations that matter most in an agent loop (snapshot, status, diff, clone) are where Oak wins big. The operations where Git is faster, cold start and process spawn, happen once per session.</p>
+
+        <p>Oak is honest about where it is still slower. Repo init takes 42.6 ms vs Git's 14.8 ms. Cold process spawn is 54.6 ms vs 22.3 ms. These are the fixed costs of Oak's architecture, and they are trivial for a long-running session.</p>
+
+        <h2>Big files without LFS</h2>
+
+        <p>Git Large File Storage is one of those things that works until it does not. It is a separate quota, extra config, and another thing to get wrong. When you change one tensor in a 4GB file, LFS re-uploads the whole thing.</p>
+
+        <p>Oak chunks and deduplicates natively. Change one chunk of a large binary, and only that chunk travels over the network. No separate system, no extra config. It just works the same way for every file type.</p>
+
+        <p>For teams working with ML models, game assets, or embedded firmware images, this alone could justify the switch from LFS.</p>
+
+        <h2>What I am not sure about</h2>
+
+        <p>Oak is clearly early. The repo shows active development with multiple merges per day. The team (zdgeier, mrmrs) is small. The documentation is good but the ecosystem is tiny compared to Git. No GitHub integration, no CI pipeline support, no editor plugins beyond the CLI.</p>
+
+        <p>The "agentic substrate" framing makes me wonder if Oak is trying to be two things: a better Git for humans and a better Git for agents. Those goals can conflict. What is good for an agent (optional messages, auto-merge behavior, lazy hydration) might confuse a human contributor who expects explicit, verbose operations.</p>
+
+        <p>Migration worries me too. Git has 20 years of tooling. Moving a team to Oak means rewriting CI scripts, updating documentation, retraining muscle memory. The mount feature helps (you can work in Oak and push to a Git remote), but the full value only kicks in when everyone is on Oak.</p>
+
+        <h2>When to try it</h2>
+
+        <p>If you are running coding agents against large repos and watching them burn time on clones and status checks, Oak is worth a spin. The benchmarks are not theoretical. You can run the harness yourself.</p>
+
+        <p>If you are a solo developer on a small repo, Git is fine. The pain points Oak addresses scale with repo size and agent count. Below a certain threshold, the switching cost is not worth it.</p>
+
+        <p>If you are building agent infrastructure (tools, harnesses, CI systems), Oak is worth watching even if you do not adopt it now. The design decisions around lazy mounts and checkpoint-based workflows will probably show up in other tools.</p>
+
+        <h2>Installing</h2>
+
+        <pre><code>curl -fsSL oak.space/install | sh</code></pre>
+
+        <p>Source code is at <a href="https://oak.space/oak/oak">oak.space/oak/oak</a>. The CLI builds on Windows, macOS, and Linux. There is also a hosted version at oak.space.</p>
+
+        <div class="tags">
+            <span class="pill">Version Control</span>
+            <span class="pill">AI Agents</span>
+            <span class="pill">Rust</span>
+            <span class="pill">Open Source</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            color: var(--fg3, #8a8f98);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .bench-tool {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--fg2, #d0d6e0);
+        }
+        .bench-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--fg, #f7f8f8);
+        }
+        .bench-delta {
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--green, #10b981);
+            text-align: right;
+        }
+        article {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+        }
+        .back {
+            display: inline-block;
+            color: var(--fg3, #8a8f98);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+        .back:hover { color: var(--fg, #f7f8f8); }
+        .meta {
+            display: flex;
+            gap: 16px;
+            color: var(--fg3, #8a8f98);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .read { opacity: 0.7; }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 590;
+            line-height: 1.15;
+            color: var(--fg, #f7f8f8);
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 590;
+            color: var(--fg, #f7f8f8);
+            margin: 48px 0 16px;
+        }
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--fg2, #d0d6e0);
+            margin: 0 0 20px;
+        }
+        pre {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 10px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 0 0 24px;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-bright, #7170ff);
+        }
+        pre code {
+            color: var(--fg2, #d0d6e0);
+        }
+        a {
+            color: var(--accent-bright, #7170ff);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        blockquote {
+            border-left: 3px solid var(--accent, #5e6ad2);
+            padding-left: 16px;
+            margin: 24px 0;
+            color: var(--fg2, #d0d6e0);
+        }
+        blockquote p { margin: 0; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+</body>
+</html>
