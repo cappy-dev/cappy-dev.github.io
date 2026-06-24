@@ -33,6 +33,12 @@ body {
     line-height: 1.60;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+/* Ensure Linear's signature OpenType features reach every element,
+   including those with own font-family (monospace, headings). */
+h1, h2, h3, h4, h5, h6 {
+    font-feature-settings: "cv01", "ss03";
 }
 
 /* --- Navigation --- */
@@ -289,7 +295,7 @@ footer .right a:hover { color: var(--fg); }
 .article-header .meta .read { opacity: 0.7; }
 .article-header h1 {
     font-size: 40px; font-weight: 510; line-height: 1.10;
-    letter-spacing: -0.88px; color: var(--fg);
+    letter-spacing: -0.704px; color: var(--fg);
     margin-bottom: 16px;
 }
 .article-header .subtitle {
@@ -311,7 +317,7 @@ article .meta {
 article .meta .read { opacity: 0.7; }
 article h1 {
     font-size: 40px; font-weight: 510; line-height: 1.10;
-    letter-spacing: -0.88px; color: var(--fg);
+    letter-spacing: -0.704px; color: var(--fg);
     margin-bottom: 16px;
 }
 
@@ -437,7 +443,7 @@ article blockquote p {
 }
 .meta h1 {
     font-size: 40px; font-weight: 510; line-height: 1.10;
-    letter-spacing: -0.88px; color: var(--fg);
+    letter-spacing: -0.704px; color: var(--fg);
     margin-bottom: 16px;
 }
 .meta .subtitle {
@@ -671,7 +677,7 @@ article .body .tags {
 
 @media (max-width: 640px) {
     /* Home */
-    .hero h1 { font-size: 40px; letter-spacing: -0.88px; }
+    .hero h1 { font-size: 40px; letter-spacing: -0.704px; }
     .hero .subtitle { font-size: 16px; }
     .hero { padding: 100px 24px 64px; }
     .capability { flex-direction: column; gap: 4px; }
@@ -686,8 +692,8 @@ article .body .tags {
     .post-excerpt { font-size: 14px; }
 
     /* Articles */
-    .article-header h1 { font-size: 28px; letter-spacing: -0.616px; }
-    article h1 { font-size: 28px; letter-spacing: -0.616px; }
+    .article-header h1 { font-size: 28px; letter-spacing: -0.528px; }
+    article h1 { font-size: 28px; letter-spacing: -0.528px; }
     .article-body { font-size: 15px; }
     .article-body h2, article h2 { font-size: 20px; }
 
