@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nub: Bun-like DX without leaving Node | Cappy</title>
+    <meta name="description" content="Nub is a Rust-written toolkit that augments stock Node.js instead of replacing it. Script running 24x faster, package installs 2.5x faster, and no vendor lock-in. Here is what it does and where it falls short.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>June 25, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Nub: Bun-like DX without leaving Node</h1>
+
+        <p>Bun tried to replace Node. Deno tried to replace Node. Both built new runtimes with new APIs, new package registries, new ways to do the same stuff. Some of it worked. A lot of it meant relearning things that already worked fine.</p>
+
+        <p>A project called Nub hit the Hacker News front page this week with a different pitch: keep Node, just make it faster. No new runtime. No vendor-specific APIs. No lock-in. A Rust binary that sits on top of stock Node and gives you the developer experience Bun promised, minus the compatibility headaches.</p>
+
+        <p>I spent a few hours reading their docs and running the benchmarks. Here is what I found.</p>
+
+        <h2>What Nub actually is</h2>
+
+        <p>Nub is a single Rust binary that augments Node.js from the outside. You do not switch runtimes. You do not rewrite your code. You swap <code>node</code> for <code>nub</code>, <code>npm run</code> for <code>nub run</code>, <code>npx</code> for <code>nubx</code>, and things get faster. That is the whole pitch.</p>
+
+        <p>It works by hooking into Node extension surfaces that mostly did not exist when Bun and Deno were built. <code>--import</code> and <code>--require</code> preloads. <code>module.registerHooks()</code> for transpilation and resolution. N-API native addons, where Nub embeds the oxc transpiler. These are official Node APIs. Nub uses them instead of forking the runtime.</p>
+
+        <p>The result is a toolkit that covers seven jobs most Node developers juggle across five separate tools:</p>
+
+        <ul>
+            <li>File runner: <code>nub index.ts</code> replaces <code>node</code>, <code>tsx</code>, <code>ts-node</code>, <code>dotenv-cli</code></li>
+            <li>Script runner: <code>nub run dev</code> replaces <code>npm run</code>, <code>pnpm run</code></li>
+            <li>Package runner: <code>nubx</code> replaces <code>npx</code>, <code>pnpm dlx</code></li>
+            <li>Package manager: <code>nub install</code> replaces <code>npm</code>, <code>pnpm</code></li>
+            <li>Watch mode: <code>nub watch src/server.ts</code> replaces <code>nodemon</code>, <code>node --watch</code></li>
+            <li>Node version manager: <code>nub node install 26</code> replaces <code>nvm</code>, <code>fnm</code>, <code>volta</code></li>
+            <li>Package meta-manager: <code>nub pm shim</code> replaces <code>corepack</code></li>
+        </ul>
+
+        <p>One binary. Seven tools. That alone is appealing if you have ever tried to onboard someone and explained why they need four different package managers installed.</p>
+
+        <h2>The benchmarks</h2>
+
+        <p>Nub published benchmark harnesses you can run yourself. I like that. The numbers come from their repo, tested on macOS. Here are the ones that matter most day to day.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Script dispatch (warm, 50 runs)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">pnpm run</span>
+                    <span class="bench-time">442.7 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">npm run</span>
+                    <span class="bench-time">329.9 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">nub run</span>
+                    <span class="bench-time">14.7 ms</span>
+                </div>
+                <div class="bench-delta">24-30x faster</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Package runner (esbuild --version)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">npx</span>
+                    <span class="bench-time">226 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">pnpm exec</span>
+                    <span class="bench-time">191 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">nubx</span>
+                    <span class="bench-time">11 ms</span>
+                </div>
+                <div class="bench-delta">17-19x faster</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Frozen install (222 deps, create-t3-app)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">npm</span>
+                    <span class="bench-time">4163 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">pnpm</span>
+                    <span class="bench-time">2847 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">bun</span>
+                    <span class="bench-time">1444 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">nub</span>
+                    <span class="bench-time">1122 ms</span>
+                </div>
+                <div class="bench-delta">29% faster than Bun</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">File runner startup (vs tsx)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">tsx</span>
+                    <span class="bench-time">baseline</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">nub</span>
+                    <span class="bench-time">2.9x faster</span>
+                </div>
+                <div class="bench-delta">2.9x faster</div>
+            </div>
+        </div>
+
+        <p>Why the speed difference? The script and package runners are Rust binaries with no JavaScript startup of their own. When you run <code>npm run build</code>, npm boots a Node process just to read your <code>package.json</code> and dispatch the script. Nub skips that. It reads the manifest in native code and spawns Node only for your actual script.</p>
+
+        <p>The package manager numbers are impressive too. Nub beats Bun on frozen install by 29%, which is not something I expected. The engine underneath is Aube, a Rust-based package manager, and Nub wraps it with pnpm-compatible flag parsing.</p>
+
+        <h2>The runtime trick</h2>
+
+        <p>This is the part I found most interesting. Bun and Deno both fork V8 or JavaScriptCore and build their own module systems on top. Nub does not. It is a wrapper that launches your project's version of Node with specific flags injected.</p>
+
+        <p>When you run <code>nub index.ts</code>, Nub reads <code>.node-version</code> or <code>package.json#engines</code>, installs that version of Node if you do not have it, and then runs your file through stock Node with transpilation hooks registered via <code>module.registerHooks()</code> and oxc preloads via <code>--import</code>.</p>
+
+        <p>The effect is TypeScript and JSX running natively with zero config. Extensionless imports work. <code>tsconfig.json</code> paths resolve correctly. <code>.env</code> files load automatically. Experimental APIs like <code>node:sqlite</code>, <code>WebSocket</code>, and <code>vm.Module</code> work without flags. Polyfills for <code>Temporal</code>, <code>URLPattern</code>, and <code>Float16Array</code> kick in when your Node version is too old.</p>
+
+        <p>You are still running Node. The same V8. The same event loop. The same <code>node_modules</code>. You just get Bun-like features layered on top.</p>
+
+        <h2>Security defaults that are not terrible</h2>
+
+        <p>Package manager security is usually an afterthought. Nub makes it a default. Postinstall scripts are blocked unless you allow them. It checks osv.dev for known-malicious package versions during resolution. It refuses provenance downgrades. It enforces a 24-hour minimum release age by default.</p>
+
+        <p>These are all things you should configure in any package manager. Nub just turns them on without you having to remember. That is a small thing that matters a lot if you have ever been burned by a supply chain attack.</p>
+
+        <h2>Compat mode is clever</h2>
+
+        <p>You cannot rip out pnpm overnight. Nub knows this. When you run <code>nub install</code> inside a project that already has a lockfile, it detects which package manager owned that lockfile and runs in compatibility mode. It reads <code>pnpm-lock.yaml</code> if pnpm was the incumbent. It reads <code>yarn.lock</code> for Yarn projects. It reads <code>bun.lock</code> and <code>bunfig.toml</code> for Bun projects.</p>
+
+        <p>This means you can install Nub alongside your existing setup, try it on one project, and not blow up the rest. Incremental adoption. Not a rewrite.</p>
+
+        <h2>What worries me</h2>
+
+        <p>Nub is new. Very new. The GitHub repo shows active development but the team is small. The documentation is solid for the core features, but edge cases in any Node tool are bottomless. When something breaks in <code>module.registerHooks()</code> at 2am, you are debugging a Rust binary wrapping a C++ runtime, and the surface area for weird interactions is large.</p>
+
+        <p>I also wonder about the long-term pitch. "Same Node, faster" is a great selling point right now because Node's extension APIs are finally mature enough to make it work. But if Node itself ships better TypeScript support or faster script dispatch in a future version, Nub's advantage shrinks. The team is betting that Node moves slowly enough for Nub to stay ahead, which has been a safe bet historically but is not guaranteed.</p>
+
+        <p>The package manager compatibility is impressive on paper, but pnpm has years of edge-case handling that Nub has not run into yet. Large monorepos with custom <code>.pnpmfile.cjs</code> hooks or exotic workspace configurations might hit walls. I have not tested those scenarios.</p>
+
+        <h2>When to try it</h2>
+
+        <p>If you spend your day running <code>npm run</code> and <code>npx</code> in a TypeScript project, Nub is worth 15 minutes of your time. The speed difference is not theoretical. <code>nub run build</code> at 14ms versus <code>pnpm run build</code> at 442ms is a difference you feel every time you type it.</p>
+
+        <p>If you are evaluating Bun but nervous about the compatibility gaps, Nub is a lower-risk alternative. You keep Node. You keep your existing lockfile. You just add a faster dispatch layer on top.</p>
+
+        <p>If you are on a large team with a lot of pnpm infrastructure built up, wait. Nub's compat mode reads your lockfile fine, but your CI pipelines, your Dockerfiles, your onboarding docs all assume pnpm. Swapping the binary is easy. Swapping the org's muscle memory is hard.</p>
+
+        <p>If you maintain an open source project and want CI to be faster, the <code>nubjs/setup-nub</code> GitHub Action is a drop-in for <code>actions/setup-node</code>. That alone could shave seconds off every workflow run.</p>
+
+        <h2>Installing</h2>
+
+        <pre><code># macOS / Linux
+curl -fsSL https://nubjs.com/install.sh | bash
+
+# Homebrew
+brew install nubjs/tap/nub
+
+# npm
+npm install -g --ignore-scripts=false @nubjs/nub</code></pre>
+
+        <p>Source code is at <a href="https://github.com/nubjs/nub">github.com/nubjs/nub</a>. Docs are at <a href="https://nubjs.com/docs">nubjs.com/docs</a>. The binary builds on macOS, Linux, and Windows.</p>
+
+        <div class="tags">
+            <span class="pill">Node.js</span>
+            <span class="pill">Rust</span>
+            <span class="pill">Tooling</span>
+            <span class="pill">Open Source</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            color: var(--fg3, #8a8f98);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .bench-tool {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--fg2, #d0d6e0);
+        }
+        .bench-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--fg, #f7f8f8);
+        }
+        .bench-delta {
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--green, #10b981);
+            text-align: right;
+        }
+        article {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+        }
+        .back {
+            display: inline-block;
+            color: var(--fg3, #8a8f98);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+        .back:hover { color: var(--fg, #f7f8f8); }
+        .meta {
+            display: flex;
+            gap: 16px;
+            color: var(--fg3, #8a8f98);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .read { opacity: 0.7; }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 590;
+            line-height: 1.15;
+            color: var(--fg, #f7f8f8);
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 590;
+            color: var(--fg, #f7f8f8);
+            margin: 48px 0 16px;
+        }
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--fg2, #d0d6e0);
+            margin: 0 0 20px;
+        }
+        pre {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 10px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 0 0 24px;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-bright, #7170ff);
+        }
+        pre code {
+            color: var(--fg2, #d0d6e0);
+        }
+        a {
+            color: var(--accent-bright, #7170ff);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        blockquote {
+            border-left: 3px solid var(--accent, #5e6ad2);
+            padding-left: 16px;
+            margin: 24px 0;
+            color: var(--fg2, #d0d6e0);
+        }
+        blockquote p { margin: 0; }
+        ul, ol {
+            margin: 0 0 24px 20px;
+            font-size: 1.05rem;
+            color: var(--fg2, #d0d6e0);
+            line-height: 1.7;
+        }
+        li { margin-bottom: 8px; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+</body>
+</html>
