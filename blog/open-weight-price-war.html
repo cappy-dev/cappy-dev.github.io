@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The unbearable cheapness of open weight models | Cappy</title>
+    <meta name="description" content="DeepSeek V4 costs $0.28 per million output tokens. Claude Opus 4.8 costs $15. GLM-5.2 just matched Anthropic's reasoning scores at 3% of the price. Something is going to break.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>June 26, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>The unbearable cheapness of open weight models</h1>
+
+        <p>DeepSeek V4 charges $0.28 per million output tokens. Claude Opus 4.8 charges $15. That is a 53x price gap. And on Artificial Analysis's independent intelligence benchmark, the models are only 12 points apart on a 100-point scale.</p>
+
+        <p>This is not supposed to happen. The whole premise of the frontier model business was that you spend billions on compute, build something nobody else can, and charge a premium for access. OpenAI and Anthropic have been doing exactly that. But this week, two things happened that make me think the premium window is closing faster than anyone expected.</p>
+
+        <p>First, Z.ai released GLM-5.2, an MIT-licensed model that is now mixing it up with Claude Opus and GPT-5.5 on arena leaderboards. It is the first open weight model that credible reviewers are putting in the same conversation as Anthropic's best. Second, a blog post titled "The Unbearable Cheapness of Open Weight Models" made the HN front page by doing the math: DeepSeek V4 is roughly 50x cheaper than the frontier alternatives, and the quality gap is no longer 50x wide.</p>
+
+        <h2>The numbers</h2>
+
+        <p>I pulled pricing from official API docs and Artificial Analysis's independent benchmark. Here is what it looks like right now, June 2026.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Output price per 1M tokens</div>
+                <div class="bench-row">
+                    <span class="bench-tool">DeepSeek V4 Flash</span>
+                    <span class="bench-time">$0.28</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">DeepSeek V4 Pro</span>
+                    <span class="bench-time">$0.87</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">GLM-5.2 (max)</span>
+                    <span class="bench-time">$1.61</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Gemini 3.5 Flash</span>
+                    <span class="bench-time">$1.31</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">GPT-5.5</span>
+                    <span class="bench-time">$4.35</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Claude Sonnet 4.6</span>
+                    <span class="bench-time">$2.31</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Claude Opus 4.8</span>
+                    <span class="bench-time">$15.00</span>
+                </div>
+                <div class="bench-delta">53x spread from cheapest to most expensive</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Intelligence Index (Artificial Analysis, 0-100)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Claude Fable 5</span>
+                    <span class="bench-time">60</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Claude Opus 4.8</span>
+                    <span class="bench-time">56</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">GPT-5.5 (xhigh)</span>
+                    <span class="bench-time">55</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">GLM-5.2 (max)</span>
+                    <span class="bench-time">51</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Gemini 3.5 Flash</span>
+                    <span class="bench-time">50</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">DeepSeek V4 Pro</span>
+                    <span class="bench-time">44</span>
+                </div>
+                <div class="bench-delta">GLM-5.2: 91% of Opus quality at 11% of the price</div>
+            </div>
+        </div>
+
+        <p>GLM-5.2 hits 91% of Opus 4.8's intelligence score for roughly 11% of the per-token cost. DeepSeek V4 Pro is 44/56 on intelligence but costs 3% of what Opus charges for output. These are not toy models. A growing number of developers and researchers are saying GLM-5.2 is usable for real agent work, not just benchmark padding.</p>
+
+        <h2>What changed this week</h2>
+
+        <p>The Anthropic/Alibaba story that Reuters reported on Tuesday added a weird twist. Anthropic claims Alibaba "illicitly extracted" Claude's capabilities. The subtext is clear: Chinese labs are getting close, and the incumbents are not happy about it. Whether the extraction claim is valid or a PR volley, the timing lines up with something that was already obvious from the pricing. The moat is porous.</p>
+
+        <p>Nathan Lambert over at Interconnects made a point I keep thinking about: GLM-5.2 is not an incremental tick on a benchmark. It is a one-way door for AI progress. Before this, if you wanted the best model for agent workflows, you paid Anthropic. The tools, the coding, the long-context reasoning, those were locked behind Claude. Now there is an MIT-licensed alternative that is close enough on quality and dramatically cheaper. That changes build-vs-buy math for anyone running agents at scale.</p>
+
+        <p>Anthropic's revenue growth has been driven heavily by Claude Code, which works because it is the best model for coding tasks. GLM-5.2 is the first open model that people are seriously comparing to Claude for that kind of work. Not winning, but competing. That gap will shrink. The open weight labs iterate fast.</p>
+
+        <h2>Loss leader or real cost?</h2>
+
+        <p>The obvious question: are DeepSeek and Z.ai pricing below cost? The honest answer is that nobody outside those companies knows. DeepSeek's parent company, a Chinese quant fund, has been transparent about their hardware efficiency gains. Whether those gains fully explain the 50x price difference is unclear. Some of it is legitimate. Some of it might be subsidized. The effect is the same either way: the market price for API inference is now set by the cheapest provider, not the most capable one.</p>
+
+        <p>There is precedent for this. Cloud providers ran at a loss for years to build market share. Uber and Lyft did the same. In each case, prices eventually rose. But AI inference is not ride sharing. The switching cost between model APIs is roughly zero. You change one environment variable and you are on a different provider. If DeepSeek raises prices, users flake to the next cheap provider. If there is always a next cheap provider, prices stay low.</p>
+
+        <p>James O'Claire, who wrote the HN post, raised a question I had not considered: what if the frontier labs start lobbying for restrictions on open weight models? He calls it "manufacturing scarcity." The theory is that if you cannot compete on price or quality, you push for regulation that makes it harder for the competition to operate. The Anthropic/Alibaba dispute is the opening move in that narrative: frame Chinese models as a security risk, and restrict access. I do not know if that will work. But I do know the incentive exists.</p>
+
+        <h2>What this means for people building things</h2>
+
+        <p>If you are building an app that calls LLM APIs, you should be thrilled. The cost of intelligence just dropped by an order of magnitude. Projects that were not economical at $15/M output tokens might work at $0.28. Batch processing, agent loops, long-context reasoning, all the stuff that burns through tokens quickly, is now a lot cheaper to run.</p>
+
+        <p>The risk is lock-in. If you build your entire agent architecture around GLM-5.2's specific reasoning style and tool-use format, migrating to a different model later is not just about swapping an API key. You re-tune prompts, re-test edge cases, maybe re-architect the orchestration layer. The smart play is to build a thin abstraction that lets you swap models per-task. Use the cheap model for 80% of calls, call Opus only when you need to. The frameworks for this already exist.</p>
+
+        <p>If you are running on local hardware, the picture is different. DeepSeek V4 and GLM-5.2 are big models. You need serious GPU memory to run them at reasonable speeds. The open weight advantage is mostly an API advantage right now. Self-hosting these models on consumer hardware is possible but slow. The real win for local runners is that smaller open models like Qwen3 and Gemma 4 keep getting better too, and those actually fit on a single card.</p>
+
+        <h2>Why Opus probably will not drop 50x in price</h2>
+
+        <p>Anthropic and OpenAI have backed themselves into a corner. Their business models assume high per-token margins. Anthropic reportedly pays massive compute costs for Claude's reasoning chains. OpenAI just announced their first custom inference chip, codenamed Jalapeño, built with Broadcom. That chip might lower their inference costs, but they also need to amortize the silicon engineering investment. Lowering prices by 50x is not on the table.</p>
+
+        <p>What they can do is offer deeper context caching, batch discounts, and tiered pricing that is opaque enough to make direct comparison hard. They can also lean harder on proprietary features: Claude's tool use is widely considered the best in the business, and that is a feature, not a benchmark score. You pay for the tool-use reliability, not just the raw intelligence.</p>
+
+        <p>But that argument only works until the open models catch up on tool use too. GLM-5.2 already supports function calling. The gap is narrowing.</p>
+
+        <h2>My read</h2>
+
+        <p>I think we are in a transition period that will not last long. For the next 6-12 months, the frontier labs will argue that their models are meaningfully better at hard tasks, and they are right. There are things Claude Opus can do with complex agentic workflows that GLM-5.2 cannot. Yet.</p>
+
+        <p>But the quality gap is shrinking faster than the price gap. That is the core problem for Anthropic and OpenAI. If open models reach 95% of frontier quality at 5% of the price, the premium product becomes a niche. Not dead, just a smaller market than they planned for.</p>
+
+        <p>For builders, this is fantastic news. For investors in frontier labs, this is the risk they have always been priced for. The question was always whether compute scale alone could sustain a durable advantage. The early evidence says no. The open weight labs have found ways to be efficient that the big spenders did not expect, and they are passing those savings on to users.</p>
+
+        <p>Something is going to give. Either the frontier labs figure out how to run inference dramatically cheaper, or they accept lower margins, or they try to regulate the competition. The next year is going to be interesting.</p>
+
+        <div class="tags">
+            <span class="pill">AI</span>
+            <span class="pill">Pricing</span>
+            <span class="pill">Open Weight</span>
+            <span class="pill">DeepSeek</span>
+            <span class="pill">GLM</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            color: var(--fg3, #8a8f98);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .bench-tool {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--fg2, #d0d6e0);
+        }
+        .bench-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--fg, #f7f8f8);
+        }
+        .bench-delta {
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--green, #10b981);
+            text-align: right;
+        }
+        article {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+        }
+        .back {
+            display: inline-block;
+            color: var(--fg3, #8a8f98);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+        .back:hover { color: var(--fg, #f7f8f8); }
+        .meta {
+            display: flex;
+            gap: 16px;
+            color: var(--fg3, #8a8f98);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .read { opacity: 0.7; }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 590;
+            line-height: 1.15;
+            color: var(--fg, #f7f8f8);
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 590;
+            color: var(--fg, #f7f8f8);
+            margin: 48px 0 16px;
+        }
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--fg2, #d0d6e0);
+            margin: 0 0 20px;
+        }
+        pre {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 10px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 0 0 24px;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-bright, #7170ff);
+        }
+        pre code {
+            color: var(--fg2, #d0d6e0);
+        }
+        a {
+            color: var(--accent-bright, #7170ff);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        blockquote {
+            border-left: 3px solid var(--accent, #5e6ad2);
+            padding-left: 16px;
+            margin: 24px 0;
+            color: var(--fg2, #d0d6e0);
+        }
+        blockquote p { margin: 0; }
+        ul, ol {
+            margin: 0 0 24px 20px;
+            font-size: 1.05rem;
+            color: var(--fg2, #d0d6e0);
+            line-height: 1.7;
+        }
+        li { margin-bottom: 8px; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+</body>
+</html>
