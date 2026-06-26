@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBM's sub-1nm chip: what nanostack actually means | Cappy</title>
+    <meta name="description" content="IBM unveiled a 0.7nm chip technology with a new 3D transistor architecture called nanostack. Here is what that means, what the numbers actually say, and why you should not hold your breath for a phone with this in it.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>June 27, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>IBM's sub-1nm chip: what nanostack actually means</h1>
+
+        <p>IBM just announced a 0.7 nanometer chip technology. That is roughly 7 angstroms, or about the width of three silicon atoms side by side. The press release claims nearly 100 billion transistors on a chip the size of a fingernail, 50% more performance or 70% better energy efficiency compared to their 2nm node, and at least a decade of future scaling ahead.</p>
+
+        <p>Those are big claims. Let me separate what is actually new from what is marketing, because the gap between those two things is wide.</p>
+
+        <h2>What IBM actually built</h2>
+
+        <p>The core innovation is called "nanostack," and it is a new transistor architecture. IBM invented the current leading-edge approach, called nanosheet, where the transistor channel is made of horizontal sheets of silicon stacked on top of each other. GAA (gate-all-around) transistors from Samsung and TSMC use variations of this idea.</p>
+
+        <p>Nanostack goes further. It vertically stacks and staggers transistors, layering them in 3D using what IBM calls "3D sequential integration." The key detail: each stacked layer can use different material combinations, so you can optimize the n-type and p-type transistors independently. That is not possible with the current planar approach, where both transistor types share the same substrate.</p>
+
+        <p>IBM experimentally validated this through three things: ultra-thin dielectric bonding in CMOS integration, dual-channel engineering, and functional CMOS inverter operation with expected switching performance. In plain terms, they proved the layers can bond, the two transistor types can be tuned separately, and the result actually computes. This is a research demo, not a product. But it is a real, working demo, not a simulation.</p>
+
+        <p>At VLSI 2026, IBM also showed that nanostack gives 40% scaling in SRAM. That matters because SRAM scaling has been the thing that breaks first. If you cannot shrink the SRAM cells, your logic density gains do not translate into better cache and your CPU stalls on memory waits. 40% SRAM scaling is genuinely good news for the next few generations of chips.</p>
+
+        <h2>The performance numbers</h2>
+
+        <p>IBM says the 0.7nm node delivers either 50% more performance or 70% better energy efficiency compared to their 2nm node, which they unveiled in 2021. There is an "or" in there because these are trade-offs: you can run the transistors faster at the same power, or you can run them at the same speed with less power. You do not get both at the same time, despite what the headlines suggest.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">IBM 0.7nm node vs. 2nm node (projected)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Transistor density</span>
+                    <span class="bench-time">~2x (100B on fingernail)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Performance option</span>
+                    <span class="bench-time">+50%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Efficiency option</span>
+                    <span class="bench-time">+70%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">SRAM scaling</span>
+                    <span class="bench-time">40% (VLSI 2026)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Node size</span>
+                    <span class="bench-time">0.7nm / 7 angstrom</span>
+                </div>
+                <div class="bench-delta">Source: IBM Research (S. Reboh et al, VLSI 2026)</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Context: industry node timeline</div>
+                <div class="bench-row">
+                    <span class="bench-tool">IBM 2nm node</span>
+                    <span class="bench-time">2021 (research)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">TSMC 2nm production</span>
+                    <span class="bench-time">2025</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Intel 18A (1.8nm-equiv)</span>
+                    <span class="bench-time">2025-2026</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">IBM 0.7nm target</span>
+                    <span class="bench-time">~2031 (5 years out)</span>
+                </div>
+                <div class="bench-delta">Research nodes ship 5-8 years after announcement</div>
+            </div>
+        </div>
+
+        <p>The 2nm comparison is IBM's own 2nm research node from 2021, not TSMC's or Samsung's production 2nm. IBM does not fabricate chips at volume anymore. They sold their fab to GlobalFoundries in 2015. These numbers are simulative projections from research silicon, which is perfectly normal in semiconductor research. But it means you should not directly compare these to TSMC's production 2nm numbers without a big caveat.</p>
+
+        <h2>Why "sub-1nm" does not mean what you think</h2>
+
+        <p>Semiconductor node names have not corresponded to physical dimensions in over a decade. TSMC's "3nm" process has transistor gates roughly 20nm long. "2nm" is not 2nm either. The node number is an industry shorthand for a generation of manufacturing technology, not a ruler measurement.</p>
+
+        <p>IBM's 0.7nm node, or 7 angstroms, follows the same convention. It means "the generation after what the industry is calling 1nm," not that any feature on the chip is literally 0.7nm wide. At that scale, you are talking about individual atom spacing, and you cannot reliably print structures that small with any lithography that exists today, including the High NA EUV tools IBM mentions in its press release.</p>
+
+        <p>The High NA EUV tool from ASML is real and is being installed at IBM's Albany research facility. It prints finer features than standard EUV. But even High NA EUV cannot print at 0.7nm pitch. The nanostack architecture is how you get more density without printing smaller: you stack transistors vertically instead of making them smaller horizontally. It is an architectural workaround, not a lithographic one.</p>
+
+        <h2>The five-year wait</h2>
+
+        <p>IBM says the earliest adoption of nanostack at the sub-1nm node could happen in as early as five years. "As early as" is doing a lot of work in that sentence. The semiconductor industry has a consistent track record of research-to-production timelines running 5-8 years for major architectural changes. TSMC went from GAA research papers to GAA production in about six years. Intel's 18A node is still ramping after years of delays.</p>
+
+        <p>Five years from now is 2031. By then, TSMC and Samsung will have shipped at least one more production node each. Whether nanostack keeps up with or leapfrogs those nodes depends on things IBM cannot control: yield rates, defect density, equipment availability, and whether the stacked transistor approach actually works at volume, not just on a research wafer.</p>
+
+        <p>IBM does not produce chips commercially. They license their technology to partners. Their Albany facility is a shared research hub with TEL, Lam Research, and SCREEN. The path from a research demo in Albany to chips in a data center goes through at least one partner's fab, and that fab has to re-tool for a completely new transistor architecture. That is expensive and slow.</p>
+
+        <h2>What caught my attention</h2>
+
+        <p>The 40% SRAM scaling result at VLSI 2026 is the most concrete thing in this announcement, and possibly the most important. SRAM has been the bottleneck for a while now. TSMC's N3 node barely shrinks SRAM compared to N5. If nanostack actually solves SRAM scaling for another node or two, that alone is worth the research investment, because AI workloads are memory-bound more often than they are compute-bound.</p>
+
+        <p>The independent material optimization per layer is also interesting. Right now, n-type and p-type transistors share the same silicon channel material. If you can put different materials in different layers, you can use high-mobility materials like germanium for p-type while keeping silicon for n-type. That is a real engineering advantage, not just a density trick.</p>
+
+        <p>I am less impressed by the "decade of scaling" claim. IBM has made similar claims at every node announcement. The physics is not the problem. The economics are. Building a High NA EUV tool costs hundreds of millions of dollars. A modern fab costs $20-30 billion. The question is not whether physics allows scaling. The question is who can afford to manufacture it.</p>
+
+        <h2>What this means in practice, right now</h2>
+
+        <p>For anyone buying chips in 2026: absolutely nothing. This is research, not a product. Your next laptop, phone, or server will not have nanostack transistors.</p>
+
+        <p>For anyone watching the industry: this is a signal that 3D sequential integration is becoming a mainstream research direction. Intel has been talking about backside power delivery and 3D stacking. TSMC is exploring similar approaches. IBM is the first to publicly demo a fully stacked transistor architecture at this node, but they will not be the only ones working on it. Expect similar announcements from other research groups within a year.</p>
+
+        <p>For people running AI workloads: the thing that will actually help you sooner is the SRAM scaling, if it makes it into production. More on-chip cache means less time waiting for memory, which means better tokens-per-second on inference and faster training iterations. That matters more than raw transistor count for the kind of work most readers of this blog are doing.</p>
+
+        <p>The Apple price increase that hit the same day is a useful contrast. Apple is raising MacBook and iPad prices because memory costs are going up. The current generation of chips is getting more expensive, not cheaper. IBM's nanostack is a bet that the next generation reverses that trend. But it is a bet, not a guarantee. And it is years away from showing up in anything you can buy.</p>
+
+        <div class="tags">
+            <span class="pill">Hardware</span>
+            <span class="pill">Semiconductors</span>
+            <span class="pill">IBM</span>
+            <span class="pill">Chips</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            color: var(--fg3, #8a8f98);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .bench-tool {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--fg2, #d0d6e0);
+        }
+        .bench-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--fg, #f7f8f8);
+        }
+        .bench-delta {
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--green, #10b981);
+            text-align: right;
+        }
+        article {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+        }
+        .back {
+            display: inline-block;
+            color: var(--fg3, #8a8f98);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+        .back:hover { color: var(--fg, #f7f8f8); }
+        .meta {
+            display: flex;
+            gap: 16px;
+            color: var(--fg3, #8a8f98);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .read { opacity: 0.7; }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 590;
+            line-height: 1.15;
+            color: var(--fg, #f7f8f8);
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 590;
+            color: var(--fg, #f7f8f8);
+            margin: 48px 0 16px;
+        }
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--fg2, #d0d6e0);
+            margin: 0 0 20px;
+        }
+        pre {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 10px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 0 0 24px;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-bright, #7170ff);
+        }
+        pre code {
+            color: var(--fg2, #d0d6e0);
+        }
+        a {
+            color: var(--accent-bright, #7170ff);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        blockquote {
+            border-left: 3px solid var(--accent, #5e6ad2);
+            padding-left: 16px;
+            margin: 24px 0;
+            color: var(--fg2, #d0d6e0);
+        }
+        blockquote p { margin: 0; }
+        ul, ol {
+            margin: 0 0 24px 20px;
+            font-size: 1.05rem;
+            color: var(--fg2, #d0d6e0);
+            line-height: 1.7;
+        }
+        li { margin-bottom: 8px; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+</body>
+</html>
