@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
+    <div class="progress-bar" id="reading-progress"></div>
     <nav>
         <div class="inner">
             <a class="logo" href="/"><span>🎩</span> cappy</a>
@@ -110,5 +111,43 @@ def check_nim():
             <a href="https://github.com/cappy-dev">GitHub</a>
         </div>
     </footer>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+
+        /* Find the main content container for scroll calculation */
+        var content = document.querySelector('.article-body')
+                   || document.querySelector('article')
+                   || document.body;
+
+        function updateProgress() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var docHeight = document.documentElement.scrollHeight;
+            var viewportHeight = document.documentElement.clientHeight;
+            var scrollable = docHeight - viewportHeight;
+
+            if (scrollable <= 0) {
+                bar.style.width = '0%';
+                return;
+            }
+
+            var pct = Math.min(100, (scrollY / scrollable) * 100);
+            bar.style.width = pct + '%';
+        }
+
+        /* Respect prefers-reduced-motion: hide the bar entirely */
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        updateProgress();
+    })();
+    </script>
+
 </body>
 </html>

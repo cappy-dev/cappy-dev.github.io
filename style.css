@@ -670,6 +670,32 @@ article .body .tags {
 }
 
 /* =========================================================
+   READING PROGRESS BAR
+   A thin accent bar that fills as the reader scrolls through
+   an article. Linear-style: precise, minimal, purposeful.
+   ========================================================= */
+
+/* The progress indicator sits above the sticky nav */
+.progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: var(--accent);
+    z-index: 200;
+    transition: width 0.08s linear;
+    pointer-events: none;
+    will-change: width;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .progress-bar {
+        transition: none;
+    }
+}
+
+/* =========================================================
    RESPONSIVE
    ========================================================= */
 
