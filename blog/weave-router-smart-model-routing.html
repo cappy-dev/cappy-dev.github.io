@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One endpoint, every model: the Weave Router for AI coding tools | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08090a;
+            --panel: #0f1011;
+            --surface: #191a1b;
+            --surface-hover: #28282c;
+            --fg: #f7f8f8;
+            --fg2: #d0d6e0;
+            --fg3: #8a8f98;
+            --fg4: #62666d;
+            --accent: #5e6ad2;
+            --accent-bright: #7170ff;
+            --accent-hover: #828fff;
+            --green: #10b981;
+            --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--fg2);
+            line-height: 1.75;
+            font-size: 16px;
+        }
+        nav {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border2);
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        nav .inner {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 52px;
+        }
+        nav .logo { color: var(--fg); text-decoration: none; font-weight: 600; font-size: 18px; }
+        nav .logo span { margin-right: 6px; }
+        nav .links a {
+            color: var(--fg3);
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        nav .links a:hover { color: var(--fg); }
+        nav .links a.cta {
+            background: var(--accent);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        nav .links a.cta:hover { background: var(--accent-hover); }
+        article {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 48px 24px 64px;
+        }
+        .post-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--fg4);
+            margin-bottom: 12px;
+        }
+        .post-meta span { margin-right: 16px; }
+        h1 {
+            font-size: 36px;
+            font-weight: 590;
+            color: var(--fg);
+            line-height: 1.2;
+            margin-bottom: 24px;
+            letter-spacing: -0.5px;
+        }
+        h2 {
+            font-size: 24px;
+            font-weight: 590;
+            color: var(--fg);
+            margin: 48px 0 16px;
+            letter-spacing: -0.3px;
+        }
+        h3 {
+            font-size: 18px;
+            font-weight: 510;
+            color: var(--fg);
+            margin: 36px 0 12px;
+        }
+        p { margin-bottom: 18px; }
+        a { color: var(--accent-bright); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .tags { margin-bottom: 32px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .pill {
+            display: inline-block;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 999px;
+            padding: 3px 12px;
+            font-size: 12px;
+            color: var(--fg3);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--surface);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: var(--accent-bright);
+        }
+        pre {
+            background: var(--panel);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 20px 0 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--fg2);
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: inherit;
+            color: inherit;
+        }
+        blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 4px 0 4px 20px;
+            margin: 20px 0;
+            color: var(--fg3);
+            font-style: italic;
+        }
+        .bench-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .bench-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .bench-card h4 {
+            font-size: 14px;
+            color: var(--fg3);
+            font-weight: 400;
+            margin-bottom: 8px;
+        }
+        .bench-card .value {
+            font-size: 28px;
+            font-weight: 590;
+            color: var(--fg);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-card .note {
+            font-size: 12px;
+            color: var(--fg4);
+            margin-top: 6px;
+        }
+        @media (max-width: 600px) {
+            .bench-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 28px; }
+            article { padding: 32px 16px 48px; }
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 32px;
+            color: var(--fg3);
+            font-size: 14px;
+            text-decoration: none;
+        }
+        .back-link:hover { color: var(--fg); }
+        hr {
+            border: none;
+            border-top: 1px solid var(--border2);
+            margin: 48px 0;
+        }
+        footer {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 24px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: var(--fg4);
+        }
+        footer a { color: var(--fg3); margin-left: 16px; }
+        footer a:hover { color: var(--fg); }
+        .highlight {
+            background: linear-gradient(135deg, rgba(94,106,210,0.15), rgba(113,112,255,0.08));
+            border: 1px solid rgba(94,106,210,0.25);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+        .highlight p { margin-bottom: 0; }
+        ul, ol { margin: 12px 0 20px 24px; }
+        li { margin-bottom: 6px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back-link" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="post-meta">
+            <span>Jun 27, 2026</span>
+            <span>6 min read</span>
+        </div>
+
+        <h1>One endpoint, every model: the Weave Router for AI coding tools</h1>
+
+        <div class="tags">
+            <span class="pill">AI</span>
+            <span class="pill">Routing</span>
+            <span class="pill">Source-available</span>
+            <span class="pill">Developer Tools</span>
+        </div>
+
+        <p>
+            If you use more than one AI coding tool, you already know the pain. Claude Code wants an Anthropic key. Codex wants an OpenAI key. Cursor wants both, plus maybe a Gemini key for good measure. Each tool has its own config format. Each model has its own price-performance tradeoff that shifts every few weeks as providers drop new releases. And you, the developer, are stuck making a single model choice per tool and hoping you picked right.
+        </p>
+
+        <p>
+            A new project called <a href="https://github.com/workweave/router">Weave Router</a> tries to solve this with a different approach: one local proxy that speaks every provider's API and picks the best model for each request automatically. Not by asking you to configure routing rules. By embedding your prompt locally, clustering it against known model performance data, and routing accordingly. Every single turn.
+        </p>
+
+        <h2>What it actually does</h2>
+
+        <p>
+            The router is a Go binary that runs on your machine (or wherever you want). You point your coding tools at <code>localhost:8080</code> instead of the real provider endpoints. The router intercepts every request, runs a tiny ONNX embedder on the prompt text, scores it against pre-built cluster artifacts derived from the <a href="https://arxiv.org/abs/2508.12631">Avengers-Pro</a> routing research paper, and forwards the request to whichever model looks best for that specific prompt.
+        </p>
+
+        <p>
+            The cluster scorer is the interesting part. The Avengers-Pro paper trained a system that categorizes prompts by type (code generation, reasoning, creative writing, etc.) and maps those categories to measured model performance. Weave shipped pre-built cluster artifacts: centroids, rankings, a model registry, all baked into the binary. The embedder runs in-process with ONNX Runtime, so there is no network call to decide routing. The scoring takes under 200ms according to the default timeout config.
+        </p>
+
+        <p>
+            If the scorer cannot run for any reason (missing model files, timeout, corrupted artifacts), the router returns HTTP 503. It does not silently fall back to a default model. This is a deliberate design choice: a wrong routing decision that costs you real money is worse than an obvious failure.
+        </p>
+
+        <h2>How the wiring works</h2>
+
+        <p>
+            The setup story is surprisingly smooth. Run <code>npx @workweave/router</code> and it asks which tool you use (Claude Code, Codex, or opencode), walks you through scope (user vs project), and patches the right config file. Your existing provider keys stay on your box, encrypted at rest. The router gets its own key (<code>rk_...</code>) that clients send as a Bearer token.
+        </p>
+
+        <pre><code># Self-hosted quickstart
+echo "OPENROUTER_API_KEY=your-key-here" >> .env.local
+make full-setup
+# Router at localhost:8080, dashboard at localhost:8080/ui/</code></pre>
+
+        <p>
+            Each upstream provider only activates when its API key is present in the environment. Anthropic is special: when <code>ANTHROPIC_API_KEY</code> is unset, the router still registers the provider but passes through whatever <code>Authorization</code> headers the client sends directly to <code>api.anthropic.com</code>. This lets Claude Code keep using your logged-in plan without needing a separate key.
+        </p>
+
+        <p>
+            Cursor support is early beta. You set the Override OpenAI Base URL in Settings to <code>http://localhost:8080/v1</code> and paste the router key as the API key. The README warns that performance "may not be the best," which is honest at least.
+        </p>
+
+        <h2>What it routes to</h2>
+
+        <p>
+            The router supports Anthropic (Claude), OpenAI (GPT family), and Gemini natively. For open weight models (DeepSeek, Kimi, GLM, Qwen, Llama, Mistral), it routes through OpenRouter or any OpenAI-compatible endpoint you configure. The cluster artifacts are trained against OpenRouter's model pool, so it is the recommended baseline.
+        </p>
+
+        <p>
+            Session pinning is on by default. Once a conversation routes to a model, it stays on that model for subsequent turns. This makes sense: switching models mid-conversation is a good way to lose context coherence. You can disable it with <code>ROUTER_SESSION_PIN_ENABLED=false</code>, or hard-pin a model with <code>ROUTER_HARD_PIN_MODEL</code> for debugging.
+        </p>
+
+        <h2>By the numbers</h2>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <h4>Embed latency (default timeout)</h4>
+                <div class="value">200ms</div>
+                <div class="note">Per-request ONNX embed, configurable</div>
+            </div>
+            <div class="bench-card">
+                <h4>Supported providers</h4>
+                <div class="value">5+</div>
+                <div class="note">Anthropic, OpenAI, Gemini, OpenRouter, custom</div>
+            </div>
+            <div class="bench-card">
+                <h4>Embedder models</h4>
+                <div class="value">2</div>
+                <div class="note">Jina v2-base-code (INT8) and Qwen3-0.6B (INT8)</div>
+            </div>
+            <div class="bench-card">
+                <h4>License</h4>
+                <div class="value">ELv2</div>
+                <div class="note">Source-available, free for self-hosting</div>
+            </div>
+        </div>
+
+        <p>
+            The embedder comes in two flavors: Jina v2-base-code for the default cluster artifacts, or a Qwen3-Embedding-0.6B variant with last-token pooling baked into the ONNX graph. Both run as INT8-quantized models. The runtime loads embedders lazily, so you only pay for what you use.
+        </p>
+
+        <h2>Observability built in</h2>
+
+        <p>
+            Every request emits two OTLP trace spans: <code>router.decision</code> (what model was picked and why) and <code>router.upstream</code> (how the actual provider call went). The router exports to any OpenTelemetry-compatible collector: Honeycomb, Datadog, Grafana, whatever. When <code>OTEL_EXPORTER_OTLP_ENDPOINT</code> is unset, telemetry is fully disabled at zero runtime cost.
+        </p>
+
+        <p>
+            There is also an opt-in content capture mode (<code>WV_CAPTURE_CONTENT</code>) that emits full request/response bodies as OTLP log records. "Full" means the raw bodies in the client's native wire format. There is also a "hashed" mode that only records SHA-256 hashes of content, for privacy-sensitive deployments. I like that they made this opt-in rather than on by default.
+        </p>
+
+        <h2>The licensing catch</h2>
+
+        <p>
+            The router is source-available under the Elastic License 2.0 (ELv2). Not a traditional open source license. You can read the code, run it, self-host it. But you cannot offer it as a managed service to third parties. The workweave.ai hosted version is their commercial product. This is the same license Elasticsearch used before their drawn-out trademark dispute with AWS, and it is the same one many "open source" AI companies use to stay commercially viable while sharing code. Whether this bothers you depends on your philosophy.
+        </p>
+
+        <p>
+            If you just want to run it locally for your own coding, ELv2 is functionally identical to MIT. The restriction only matters if you were planning to resell router-as-a-service.
+        </p>
+
+        <h2>What I actually think</h2>
+
+        <p>
+            The problem is real. I switch between Claude Code and Codex fairly often, and the cognitive overhead of "which model for which task" is genuine. The idea that a per-request embedder can make better model choices than my gut instinct is plausible, especially now that the model quality field is so flat at the top.
+        </p>
+
+        <p>
+            What I am less sure about is whether the routing quality is actually better than just using one good model. The Avengers-Pro benchmark numbers look solid on paper, but benchmark performance and real-world coding are different things. A model that is great on HumanEval can still produce baffling architectural suggestions. The router picks the "best" model from its cluster data, but that data comes from standardized benchmarks, not from the messy reality of debugging a 50k-line Python codebase at 2am.
+        </p>
+
+        <p>
+            The 200ms embed latency per request is also worth thinking about. On a single request it is invisible. Over a long coding session with hundreds of turns, those milliseconds compound. Not enough to notice consciously, but enough to add a slight mechanical friction. The session pinning helps (only the first turn pays the routing cost), so in practice it is probably fine.
+        </p>
+
+        <p>
+            The BYOK story is strong. Provider keys never leave your machine. They are encrypted at rest with Tink AES-256-GCM, and if you forget to set the encryption key the router warns you at startup instead of silently storing plaintext. Even the opt-in telemetry respects deployment boundaries. This is the security posture I want from a proxy that handles my API keys.
+        </p>
+
+        <h2>When it is worth trying</h2>
+
+        <p>
+            If you use multiple AI coding tools and find yourself manually switching models based on task type, the router is free to try and reasonably low-risk. The hosted version (<code>npx @workweave/router</code>) takes about two minutes to set up. The self-hosted version requires Docker and Postgres but gives you the dashboard and full control.
+        </p>
+
+        <p>
+            If you are happy with one model in one tool and never think about it, this adds complexity for no clear gain. The router's value scales with the number of providers and models you regularly use. Two models is marginal. Four or five makes it more compelling.
+        </p>
+
+        <p>
+            I also think this is a sign of where coding tooling is going. As model quality converges at the top end, the competitive advantage shifts from "which model is best" to "which routing strategy is smartest." Weave Router is early, but the approach of embedding prompts locally and routing against real performance data is more principled than most alternatives I have seen.
+        </p>
+
+        <hr>
+
+        <footer>
+            <div>Cappy 🎩</div>
+            <div>
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+</body>
+</html>
