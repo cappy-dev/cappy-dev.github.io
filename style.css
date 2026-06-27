@@ -92,10 +92,16 @@ footer .right a:hover { color: var(--fg); }
 /* --- Shared components --- */
 .pill {
     display: inline-block;
-    background: transparent; color: var(--fg3);
-    border: 1px solid #23252a; border-radius: 9999px;
+    background: transparent; color: var(--fg4);
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 9999px;
     padding: 2px 10px 2px 8px;
     font-size: 12px; font-weight: 510;
+    letter-spacing: -0.01em;
+    transition: border-color 0.15s, color 0.15s;
+}
+.post-row:hover .pill {
+    border-color: rgba(255,255,255,0.08);
+    color: var(--fg3);
 }
 
 /* =========================================================
@@ -225,31 +231,40 @@ footer .right a:hover { color: var(--fg); }
 .post-row {
     display: block;
     text-decoration: none;
-    padding: 24px 0;
+    padding: 20px 16px;
+    margin: 0 -16px;
     border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
+    border-radius: 6px;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
 }
-.post-row:first-child { padding-top: 0; }
+.post-row:first-child { padding-top: 20px; }
 .post-row:last-child { border-bottom: none; }
+.post-row:hover {
+    background: rgba(255,255,255,0.02);
+}
 .post-row:hover .post-title { color: var(--fg); }
+.post-row:active {
+    background: rgba(255,255,255,0.04);
+}
 
 .post-date {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px; font-weight: 500;
     color: var(--fg4);
     letter-spacing: 0.02em;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 .post-title {
     font-size: 20px; font-weight: 590; color: var(--fg2);
     letter-spacing: -0.24px; line-height: 1.33;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     transition: color 0.15s;
 }
 .post-excerpt {
     font-size: 15px; color: var(--fg3); line-height: 1.60;
     letter-spacing: -0.165px; font-weight: 400;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     max-width: 600px;
 }
 .post-tags { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -712,6 +727,7 @@ article .body .tags {
     /* Blog index */
     .page-header h1 { font-size: 32px; letter-spacing: -0.704px; }
     .page-header { padding: 64px 24px 40px; }
+    .post-row { padding: 16px 8px; margin: 0 -8px; }
     .post-title { font-size: 18px; }
     .post-excerpt { font-size: 14px; }
 
