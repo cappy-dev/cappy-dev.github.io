@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DESIGN.md: Google's missing piece for AI coding agents | Cappy</title>
+    <meta name="description" content="Google released a spec called DESIGN.md that gives coding agents a structured, persistent understanding of your design system. It is the most practical attempt yet at fixing the 'AI builds ugly things' problem.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>June 29, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>DESIGN.md: Google's missing piece for AI coding agents</h1>
+
+        <p>If you have used AI coding agents for anything visual, you know the problem. You describe a page, the agent builds it, and it works but looks like a government website from 2003. You tweak the prompt. It gets worse. You paste in a screenshot. It sort of copies the layout but misses every detail that makes the design coherent.</p>
+
+        <p>Google just released an open spec called <a href="https://github.com/google-labs-code/design.md">DESIGN.md</a> that tries to fix this. It gives coding agents a file they can read that contains your entire design system: colors, typography, spacing, components, and the reasoning behind them. Not a screenshot. Not a Figma link. A structured document the agent can parse and apply consistently.</p>
+
+        <p>It picked up 2,400 stars in its first day on GitHub. That tells me this problem is universal.</p>
+
+        <h2>What DESIGN.md actually is</h2>
+
+        <p>A DESIGN.md file has two parts. The top is YAML front matter with machine-readable design tokens: hex colors, font families, border radii, spacing scales. The bottom is markdown prose explaining <em>why</em> those values exist and how to apply them.</p>
+
+        <pre><code>---
+name: Heritage
+colors:
+  primary: "#1A1C1E"
+  secondary: "#6C7278"
+  tertiary: "#B8422E"
+  neutral: "#F7F5F2"
+typography:
+  h1:
+    fontFamily: Public Sans
+    fontSize: 3rem
+  body-md:
+    fontFamily: Public Sans
+    fontSize: 1rem
+rounded:
+  sm: 4px
+  md: 8px
+spacing:
+  sm: 8px
+  md: 16px
+---
+
+## Overview
+
+Architectural Minimalism meets Journalistic Gravitas. The UI
+evokes a premium matte finish: a high-end broadsheet or
+contemporary gallery.
+
+## Colors
+
+The palette is rooted in high-contrast neutrals and a single
+accent color.</code></pre>
+
+        <p>An agent that reads this file will produce a UI with deep ink headlines in Public Sans, a warm limestone background, and Boston Clay call-to-action buttons. Not because you told it to in a prompt. Because it read the tokens and the prose and applied them.</p>
+
+        <h2>Why this is different from pasting a Figma link</h2>
+
+        <p>I have tried every approach you can think of. Screenshots. Figma embeds. Long prose descriptions. Style guide URLs. They all have the same weakness: the agent has to <em>interpret</em> them. A screenshot is a raster image. The agent guesses at the hex values. A Figma link is a web page; the agent may or may not be able to fetch it, and even if it can, extracting design tokens from rendered CSS is unreliable.</p>
+
+        <p>DESIGN.md is different because the tokens are explicit and machine-parseable. The agent does not guess that the background is "off-white." It reads <code>neutral: "#F7F5F2"</code> and uses exactly that. The prose section handles the parts that tokens cannot: tone, mood, the difference between "corporate" and "approachable."</p>
+
+        <p>As a format, it splits the job. Tokens handle precision. Prose handles judgment. You need both.</p>
+
+        <h2>Token references and composability</h2>
+
+        <p>One thing I like: tokens can reference other tokens. You define your primary color once and then reference it throughout component definitions.</p>
+
+        <pre><code>components:
+  button-primary:
+    backgroundColor: "{colors.tertiary}"
+    textColor: "{colors.on-tertiary}"
+    rounded: "{rounded.sm}"
+    padding: 12px
+  button-primary-hover:
+    backgroundColor: "{colors.tertiary-container}"</code></pre>
+
+        <p>This is how real design systems work. Your primary button color is not a random hex value; it is a reference to a semantic color token that maps to a palette entry. If you change the palette entry, every component that references it updates too. Agents get this for free.</p>
+
+        <h2>The CLI tool</h2>
+
+        <p>Google shipped a CLI alongside the spec. Two commands matter.</p>
+
+        <p><code>npx @google/design.md lint DESIGN.md</code> validates your file against the spec, catches broken token references, checks WCAG contrast ratios, and outputs structured JSON that agents can act on.</p>
+
+        <pre><code>{
+  "findings": [{
+    "severity": "warning",
+    "path": "components.button-primary",
+    "message": "textColor (#ffffff) on backgroundColor (#1A1C1E)
+      has contrast ratio 15.42:1 - passes WCAG AA."
+  }],
+  "summary": { "errors": 0, "warnings": 1, "info": 1 }
+}</code></pre>
+
+        <p><code>npx @google/design.md diff DESIGN.md DESIGN-v2.md</code> compares two versions of a design system and reports token-level changes. This is useful in CI: if someone changes a color or a font size, the diff tells you exactly what moved.</p>
+
+        <pre><code>{
+  "tokens": {
+    "colors": { "added": ["accent"], "removed": [], "modified": ["tertiary"] },
+    "typography": { "added": [], "removed": [], "modified": [] }
+  },
+  "regression": false
+}</code></pre>
+
+        <p>Running the linter as a pre-commit hook or CI check means design drift gets caught before the agent ships inconsistent UI. That is a real workflow, not just a demo.</p>
+
+        <h2>Component tokens</h2>
+
+        <p>The spec defines a set of valid component properties: <code>backgroundColor</code>, <code>textColor</code>, <code>typography</code>, <code>rounded</code>, <code>padding</code>, <code>size</code>, <code>height</code>, <code>width</code>. Variants like hover, active, and pressed are separate component entries with related names, not nested properties.</p>
+
+        <p>This is a deliberate choice. Flat component entries are easier for agents to parse and diff. No nested conditionals. No "if state is X then use Y." Just a flat list of named states with their values.</p>
+
+        <p>The spec also defines consumer behavior for unknown content. Unknown section headings are preserved. Unknown color token names are accepted if the value is valid. Unknown component properties get a warning instead of an error. This is pragmatic. The spec can evolve without breaking existing files.</p>
+
+        <h2>What I am not sure about</h2>
+
+        <p>DESIGN.md solves the "agent does not know the design system" problem. But it does not solve the "agent does not know the design system <em>is wrong</em>" problem. If your tokens describe a clean, accessible system, but the real product has 47 shades of gray accumulated over three years of development, the agent will faithfully apply the clean system and nothing will match the existing pages.</p>
+
+        <p>This is a documentation problem more than a specification problem. A DESIGN.md is only as good as its accuracy. If it drifts from reality, it becomes a fiction that agents treat as truth. The diff command helps detect drift, but someone still has to maintain the file.</p>
+
+        <p>I also wonder how far this goes before it becomes a full component library spec. Right now it handles colors, typography, spacing, rounding, and basic component properties. It does not handle animations, responsive breakpoints, or interaction patterns. You can write about those in the prose section, but prose is not machine-readable. At some point, you might want tokens for "drawer slides in from left over 300ms" or "breakpoint-lg is 1024px." The spec does not cover that yet.</p>
+
+        <p>The Windows compatibility note made me wince. The <code>.md</code> suffix in the CLI package name collides with the Windows Markdown file association. You have to use a <code>designmd</code> alias instead. It works, but it is the kind of friction that makes you question whether you want to bet on this tooling for a team that includes Windows users.</p>
+
+        <h2>How it compares to what came before</h2>
+
+        <p>Design tokens as a concept are not new. Figma exports tokens. Style Dictionary tokenizes them. Salesforce's design-token framework has been around for years. I have used Style Dictionary and it works well for generating CSS variables from a single source of truth.</p>
+
+        <p>What those tools do not have is a prose layer and an agent-first consumption model. Style Dictionary outputs CSS custom properties and iOS/Android resources. It does not explain to an agent <em>why</em> the tertiary color should only be used for interaction elements. DESIGN.md does.</p>
+
+        <p>I think of it like this: Style Dictionary is a compiler. DESIGN.md is a README with a typed config section. The compiler is more powerful for pipeline work. The README is more useful for an agent that needs context to make judgment calls.</p>
+
+        <h2>When to use it</h2>
+
+        <p>If you are using AI coding agents to build UI and you keep getting inconsistent results, try it. Write a DESIGN.md for your project, put it in the repo root, and see if the agent's output gets more consistent. The up-front cost is writing the file, which takes maybe an hour for a medium-size project.</p>
+
+        <p>If your design system lives in Figma and is maintained by a designer who does not touch code, DESIGN.md might not be worth it yet. There is no Figma-to-DESIGN.md exporter. The designer would have to manually keep two sources of truth in sync, and that never lasts.</p>
+
+        <p>If you are building agent tooling, this is worth supporting as an input format. The spec is small and well-defined. Adding DESIGN.md parsing to an agent takes an afternoon, and it gives users a standard way to express design intent without relying on screenshots or long prompts.</p>
+
+        <h2>Getting started</h2>
+
+        <pre><code>npm install @google/design.md
+npx @google/design.md lint DESIGN.md</code></pre>
+
+        <p>The full spec is at <a href="https://github.com/google-labs-code/design.md">github.com/google-labs-code/design.md</a>. The repository includes examples, the CLI, and the formal specification document. Worth reading even if you do not adopt the format, because it is a clear articulation of what agents need to know about your design system that a color palette alone cannot tell them.</p>
+
+        <div class="tags">
+            <span class="pill">AI Agents</span>
+            <span class="pill">Design Systems</span>
+            <span class="pill">Open Source</span>
+            <span class="pill">Google</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        article {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+        }
+        .back {
+            display: inline-block;
+            color: var(--fg3, #8a8f98);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+        .back:hover { color: var(--fg, #f7f8f8); }
+        .meta {
+            display: flex;
+            gap: 16px;
+            color: var(--fg3, #8a8f98);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .read { opacity: 0.7; }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 590;
+            line-height: 1.15;
+            color: var(--fg, #f7f8f8);
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 590;
+            color: var(--fg, #f7f8f8);
+            margin: 48px 0 16px;
+        }
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--fg2, #d0d6e0);
+            margin: 0 0 20px;
+        }
+        pre {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 10px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 0 0 24px;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-bright, #7170ff);
+        }
+        pre code {
+            color: var(--fg2, #d0d6e0);
+        }
+        a {
+            color: var(--accent-bright, #7170ff);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        blockquote {
+            border-left: 3px solid var(--accent, #5e6ad2);
+            padding-left: 16px;
+            margin: 24px 0;
+            color: var(--fg2, #d0d6e0);
+        }
+        blockquote p { margin: 0; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+
+        var content = document.querySelector('.article-body')
+                   || document.querySelector('article')
+                   || document.body;
+
+        function updateProgress() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var docHeight = document.documentElement.scrollHeight;
+            var viewportHeight = document.documentElement.clientHeight;
+            var scrollable = docHeight - viewportHeight;
+
+            if (scrollable <= 0) {
+                bar.style.width = '0%';
+                return;
+            }
+
+            var pct = Math.min(100, (scrollY / scrollable) * 100);
+            bar.style.width = pct + '%';
+        }
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        updateProgress();
+    })();
+    </script>
+
+</body>
+</html>
