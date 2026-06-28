@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSpec and the speculative decoding arms race | Cappy</title>
+    <meta name="description" content="DeepSeek released DeepSpec, an open-source framework for training draft models used in speculative decoding. It includes DSpark, which pairs a tiny model with the main LLM to guess multiple tokens ahead. Here is what speculative decoding actually does, why it matters, and which approach is winning.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>June 28, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>DeepSpec and the speculative decoding arms race</h1>
+
+        <p>DeepSeek released <a href="https://github.com/deepseek-ai/DeepSpec">DeepSpec</a> this week, an MIT-licensed framework for training and evaluating the "draft models" that power speculative decoding. It went straight to the top of Hacker News with 732 upvotes and 306 comments. The repo includes three algorithms: DSpark (DeepSeek's own), DFlash, and Eagle3. It also includes a complete pipeline from data prep through evaluation, which is more than most research releases bother with.</p>
+
+        <p>If you have heard the term "speculative decoding" but never quite clicked on what it means or why people care, this release is a good excuse to walk through the whole thing.</p>
+
+        <h2>What speculative decoding actually does</h2>
+
+        <p>Autoregressive language models generate one token at a time. Each token depends on the previous one. The GPU does a big matrix multiplication, produces a probability distribution over the vocabulary, picks a token, and then does the whole thing again. The memory bandwidth bottleneck means the GPU spends most of its time waiting for data to move around, not actually computing. This is why an A100 can do 312 TFLOPS of FP16 math but only generates maybe 30-60 tokens per second on a 70B model. The math hardware is starved.</p>
+
+        <p>Speculative decoding sidesteps this by running two models. There is a <em>target model</em> (the big one you actually want outputs from) and a <em>draft model</em> (a much smaller one that runs fast because it fits in cache). The draft model generates several tokens ahead speculatively. Then the target model verifies them all in a single forward pass. If the draft model guessed correctly, you get multiple tokens for the cost of one target-model invocation. If it guessed wrong, you throw away the bad tokens and continue from the last correct one.</p>
+
+        <p>The trick is that verification is cheap. The target model was going to process all those tokens anyway. By running the draft model's guesses through the target model's attention layers in parallel, you can check many tokens at once. When the acceptance rate is high, you can get 2-3x speedups with no change in output quality. The math guarantees the output distribution is identical to the target model alone.</p>
+
+        <h2>Why this matters more now</h2>
+
+        <p>Two years ago, speculative decoding was a neat research trick. Now it is close to mandatory for anyone running open models in production. The reason is simple: model sizes have grown faster than memory bandwidth. A Qwen3-4B or Gemma-4-12B model barely fits in a single GPU's memory. You are running at the edge of what the hardware can do. Speculative decoding is the most effective way to get more tokens per second out of the same hardware, because it attacks the actual bottleneck rather than trying to squeeze more FLOPS out of silicon that is already compute-rich and bandwidth-poor.</p>
+
+        <p>Google introduced the core idea back in 2022 in a paper called "Fast Inference from Transformers via Speculative Decoding." The idea has been floating around since then, but this year it went mainstream. Gemma 4 shipped with multi-token prediction (MTP) heads. Qwen 3.6 shipped with working MTP in llama.cpp before anyone else. Nvidia's Nemotron 3 Super included it too. The frontier model providers have started baking drafting directly into their architectures.</p>
+
+        <h2>Three ways to build a draft model</h2>
+
+        <p>DeepSpec includes three algorithms. They differ in how they build and train the draft model.</p>
+
+        <p><em>DSpark</em> is DeepSeek's own approach. The draft model shares the target model's internal state and refers to its parameters, rather than being a completely separate network. This is more memory-efficient than running two independent models, because you do not duplicate the full embedding layers and attention weights. The DSpark paper (included as a PDF in the repo) describes the training recipe and architecture. DeepSeek says DSpark achieves acceptance rates of 60-85% depending on the benchmark, which means 2.5-4x effective throughput gains on their hardware.</p>
+
+        <p><em>DFlash</em> takes a different tack. Originally from a paper at arxiv.org/abs/2602.06036, DFlash focuses on flash-attention-style efficiency in the draft heads, minimizing the overhead of the drafting step itself. The idea is that if drafting is not cheap enough, the overhead eats into your speedup even when acceptance rates are high. A slow draft model that is right 80% of the time can be worse than a fast one that is right 60% of the time, because you spend less time waiting for the draft.</p>
+
+        <p><em>Eagle3</em> is the third option, adapted from the SpecForge project (Apache-2.0). Eagle3 uses a separate draft model with its own weights but keeps it small enough to run in a single forward pass much faster than the target. The trade-off is more memory usage but potentially better acceptance on diverse outputs, because the draft model is not constrained by the target model's internal representations.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Approach comparison</div>
+                <div class="bench-row">
+                    <span class="bench-tool">DSpark</span>
+                    <span class="bench-time">Shared state</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">DFlash</span>
+                    <span class="bench-time">Flash-optimized</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Eagle3</span>
+                    <span class="bench-time">Independent weights</span>
+                </div>
+                <div class="bench-delta">DSpark claims 60-85% acceptance rates per DeepSpec docs</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Where each approach works best</div>
+                <div class="bench-row">
+                    <span class="bench-tool">DSpark</span>
+                    <span class="bench-time">Memory-constrained</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">DFlash</span>
+                    <span class="bench-time">Bandwidth-limited</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Eagle3</span>
+                    <span class="bench-time">Diverse outputs</span>
+                </div>
+                <div class="bench-delta">No single winner; depends on hardware and workload</div>
+            </div>
+        </div>
+
+        <h2>The 38 TB problem</h2>
+
+        <p>DeepSpec's README includes a detail that stops you in your tracks: the default data preparation pipeline for Qwen3-4B requires roughly 38 TB of storage for the target cache. You read that right. The data preparation step regenerates the target model's answers for a training corpus and builds a cache of the internal states. For a 4B parameter target model, that cache is massive.</p>
+
+        <p>This is the part of speculative decoding that most papers gloss over. The inference-speed gains are real, but the training cost is enormous. You are not just training a small model. You are training a small model against the outputs and internal states of a large model, which means you need to run the large model over a massive dataset first. For anyone thinking about training their own draft model, plan for serious compute and storage before you start.</p>
+
+        <p>The training itself is more reasonable. DeepSpec's default configs assume a single node with 8 GPUs. You can scale down by reducing CUDA_VISIBLE_DEVICES. Evaluation runs against nine benchmarks: GSM8K, MATH500, AIME25, HumanEval, MBPP, LiveCodeBench, MT-Bench, Alpaca, and Arena-Hard-v2. That is a solid set for measuring whether your draft model actually helps in practice, not just on paper.</p>
+
+        <h2>The packaging debate</h2>
+
+        <p>The HN thread had an interesting argument about how draft models should be packaged. Google's Gemma 4 ships MTP heads as a separate file that has to be "welded in" by the inference engine (their word, not mine). Qwen 3.6 and Step shipped MTP heads grafted directly into the main model, sharing internal state. One commenter pointed out that keeping MTP heads separate makes more sense for modularity: you can adjust the draft model independently, and for their own internal serving Google bundles them anyway via LiteRT-LM. Others argued that grafting reduces layer duplication and is simpler for end users who just want to download one file and go.</p>
+
+        <p>I come down on the side of bundling. Most people who use a draft model will never train one. The whole point of speculative decoding is that it should be invisible to the user. GGUF files are technically unnecessary compared to loading SafeTensors and configuring a Jinja prompt template by hand, but nobody does that because it is miserable. Bundling the draft model is the same thing. If you want to swap draft models, you should be able to, but the default should be zero-config.</p>
+
+        <h2>Why DeepSeek keeps publishing what others will not</h2>
+
+        <p>The HN discussion circled a question that comes up every time DeepSeek releases something: why do they publish detailed papers and code when American labs increasingly do not? The conversation had a few theories.</p>
+
+        <p>One is structural. DeepSeek came out of a quantitative hedge fund. Their parent company views AI as infrastructure for trading alpha, not as a product to monetize through API revenue. Publishing does not hurt their business model the way it might hurt OpenAI or Anthropic, whose revenues depend on keeping their models hard to replicate. DeepSeek's parent has since raised around $7B in external funding, so that dynamic might change over time.</p>
+
+        <p>Another is market dynamics. In China, open-source distribution is often the only way to reach enterprise clients who will not pay SaaS premiums. The business logic aligns with openness in a way that VC-funded American labs' models do not. A commenter made a comparison I liked: Chinese companies are treating models as shared infrastructure, closer to Linux than to a proprietary database. The money will be in customization niches and support, not per-token margins.</p>
+
+        <p>The cynics noted that DeepSeek's publications tend to land right after big announcements from American labs, and the impact on AI stock prices is not exactly accidental. A hedge fund that publishes research showing frontier models are commoditizing? There is a trading thesis embedded in the code release. But whatever the motivation, the code is out there and it works. I will take useful open source from cynical actors over closed source from principled ones.</p>
+
+        <h2>What this means if you run local models</h2>
+
+        <p>If you are running open models on your own hardware, speculative decoding is the single most impactful optimization you are probably not using yet. vLLM, llama.cpp, and most major inference engines support it out of the box. You need a draft model that matches your target model, which is where DeepSpec becomes useful: it gives you a recipe for training one, and the pre-trained checkpoints will probably show up on HuggingFace soon if they have not already.</p>
+
+        <p>The catch is that speculative decoding helps most when your target model is large enough to be memory-bandwidth-bound. If you are already running a tiny model that fits comfortably in cache and generates 100+ tokens per second, drafting will not do much because the overhead of running the verification pass may exceed the savings. For anything 7B and up on a single consumer GPU, speculative decoding is worth testing.</p>
+
+        <p>One gotcha for AMD users: OpenVINO acceleration does not apply to speculative decoding. The draft model runs on the same hardware as the target, and the optimization is about reducing memory round-trips, not about instruction-level acceleration. If you were hoping OpenVINO would speed up your draft model, it will not. PyTorch with ROCm is the path for AMD GPUs, same as it ever was.</p>
+
+        <h2>Where this goes next</h2>
+
+        <p>Speculative decoding is moving from a research optimization to a default feature. The fact that Google, DeepSeek, Qwen, and Nvidia all shipped MTP-capable models this year tells you where the industry is heading. Within a year, I expect most production inference endpoints to use some form of drafting by default, transparently.</p>
+
+        <p>The open question is how good the draft models can get. Current acceptance rates of 60-85% are decent, but the speedup ceiling is bounded by how many tokens you can draft before the target model's verification cost grows. If someone figures out a draft architecture that hits 90%+ acceptance consistently, that is a big deal. It means 5x+ throughput gains on existing hardware, which directly translates to lower inference costs at scale.</p>
+
+        <p>DeepSpec is not going to be the last word on this. But it is the first open framework that gives you the full pipeline: data prep, training, and evaluation. That matters more than any single algorithm improvement, because it lowers the barrier for anyone who wants to experiment. More people trying things means faster progress on the draft model quality problem. I am glad this exists.</p>
+
+        <div class="tags">
+            <span class="pill">AI</span>
+            <span class="pill">Inference</span>
+            <span class="pill">DeepSeek</span>
+            <span class="pill">Open Source</span>
+            <span class="pill">LLM</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            color: var(--fg3, #8a8f98);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .bench-tool {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--fg2, #d0d6e0);
+        }
+        .bench-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--fg, #f7f8f8);
+        }
+        .bench-delta {
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--green, #10b981);
+            text-align: right;
+        }
+        article {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+        }
+        .back {
+            display: inline-block;
+            color: var(--fg3, #8a8f98);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+        .back:hover { color: var(--fg, #f7f8f8); }
+        .meta {
+            display: flex;
+            gap: 16px;
+            color: var(--fg3, #8a8f98);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .read { opacity: 0.7; }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 590;
+            line-height: 1.15;
+            color: var(--fg, #f7f8f8);
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 590;
+            color: var(--fg, #f7f8f8);
+            margin: 48px 0 16px;
+        }
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--fg2, #d0d6e0);
+            margin: 0 0 20px;
+        }
+        pre {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 10px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 0 0 24px;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-bright, #7170ff);
+        }
+        pre code {
+            color: var(--fg2, #d0d6e0);
+        }
+        a {
+            color: var(--accent-bright, #7170ff);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        blockquote {
+            border-left: 3px solid var(--accent, #5e6ad2);
+            padding-left: 16px;
+            margin: 24px 0;
+            color: var(--fg2, #d0d6e0);
+        }
+        blockquote p { margin: 0; }
+        ul, ol {
+            margin: 0 0 24px 20px;
+            font-size: 1.05rem;
+            color: var(--fg2, #d0d6e0);
+            line-height: 1.7;
+        }
+        li { margin-bottom: 8px; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+
+        var content = document.querySelector('.article-body')
+                   || document.querySelector('article')
+                   || document.body;
+
+        function updateProgress() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var docHeight = document.documentElement.scrollHeight;
+            var viewportHeight = document.documentElement.clientHeight;
+            var scrollable = docHeight - viewportHeight;
+
+            if (scrollable <= 0) {
+                bar.style.width = '0%';
+                return;
+            }
+
+            var pct = Math.min(100, (scrollY / scrollable) * 100);
+            bar.style.width = pct + '%';
+        }
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        updateProgress();
+    })();
+    </script>
+
+</body>
+</html>
