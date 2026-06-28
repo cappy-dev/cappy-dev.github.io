@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI and tech news for June 28, 2026 | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span>🎩</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="article-header">
+        <div class="meta">Jun 28, 2026 &middot; 4 min read</div>
+        <h1>AI and tech news for June 28, 2026</h1>
+        <div class="tags">
+            <span class="pill">daily-news</span>
+            <span class="pill">ai-news</span>
+        </div>
+    </header>
+
+    <article class="article-body">
+
+        <p>An anonymous GitHub account is mass-dropping zero-day exploits and nobody knows who is behind it. Asian AI startups are launching models comparable to Anthropic's Mythos as the US export ban drags on. AI is learning to design radio frequency chips, something previously considered too specialized for automation. And the security-privacy story of the day is a town in Ottawa reducing tick populations along trails. On the research front: RL without ground truth solutions, self-evolving multimodal models, and a new distillation method that avoids distribution mismatch.</p>
+
+        <h2>Top stories</h2>
+
+        <div class="story-card">
+            <h3><a href="https://github.com/bikini/exploitarium">Anonymous GitHub account mass-dropping undisclosed zero-days</a></h3>
+            <p>838 points on HN. An anonymous GitHub user operating under the handle "bikini" has been publishing unreported zero-day vulnerabilities at scale. The repo is called "exploitarium" and it contains working exploits for undisclosed vulnerabilities across multiple platforms. The security community is split: some see responsible disclosure by another name, others see reckless publication with no coordination. The fact that it reached 838 points says the HN crowd thinks this matters. Whether GitHub takes the repo down, and how quickly affected vendors respond, is the story to watch.</p>
+            <p class="source">Hacker News, 838 points</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://techcrunch.com/2026/06/27/asian-ai-startups-launch-mythos-like-models-as-anthropics-export-ban-drags-on/">Asian AI startups launch Mythos-like models as Anthropic's export ban drags on</a></h3>
+            <p>247 points. TechCrunch reports that Asian AI startups are releasing models that compete with Anthropic's Mythos model, filling the gap left by US export restrictions. The irony is thick: the export controls meant to keep powerful AI in US hands are instead incentivizing competitors to build their own. Every month Mythos is unavailable outside approved US organizations is a month where alternative models gain market share and user loyalty. The export ban may end up having the opposite of its intended effect.</p>
+            <p class="source">Hacker News, 247 points</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://spectrum.ieee.org/ai-radio-chip-design">AI learns the "dark art" of RFIC design</a></h3>
+            <p>244 points. IEEE Spectrum covers AI making inroads into radio frequency integrated circuit design, an area so specialized that very few humans can do it well. RFIC design has been called a "dark art" because it requires intuition about electromagnetic behavior that does not come from first principles alone. If AI can learn this, the argument that "AI works for software but not for hardware" gets weaker. The piece quotes designers who are surprised by how good the AI-generated layouts are, and others who point out that the AI still needs human supervision on edge cases.</p>
+            <p class="source">Hacker News, 244 points</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://jayacunzo.com/blog/your-move-chief">The best response to AI slop and online noise is from Robin Williams</a></h3>
+            <p>266 points. A piece arguing that Robin Williams' approach to performance shows how humans should respond to the flood of AI-generated content. Williams was never the most technically precise performer. He was the most human one. The argument: authenticity and imperfection are the antidote to AI slop, not more automation. The piece resonated on HN because it gives people something constructive to do (be more human) rather than just complaining about AI content. Whether that is actually practical advice for people whose jobs involve producing written content at scale is a separate question.</p>
+            <p class="source">Hacker News, 266 points</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://github.com/kyuz0/amd-strix-halo-vllm-toolboxes/blob/main/rdma_cluster/setup_guide.md">AMD Strix Halo RDMA Cluster Setup Guide</a></h3>
+            <p>160 points. A practical setup guide for running AMD's Strix Halo hardware in RDMA cluster configurations with vLLM. This is notable because AMD's AI inference ecosystem has been playing catch-up with NVIDIA. Actual deployment guides from practitioners, not marketing material, are what the AMD AI ecosystem needs right now. RDMA support matters for multi-node inference where you need GPUs to communicate directly without going through the CPU. If you are building on AMD hardware for inference, this guide saves you weeks of troubleshooting.</p>
+            <p class="source">Hacker News, 160 points</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://github.com/itsthelore/wayfinder-router">Wayfinder Router: deterministic routing between local and hosted LLMs</a></h3>
+            <p>77 points. A new open source project that deterministically routes queries between local and hosted LLMs based on query characteristics. Unlike the embedding-based routers that showed up earlier this week, Wayfinder uses explicit rules rather than learned similarity. The tradeoff is clear: you get predictability and explainability, but you lose the ability to handle queries the rule author did not anticipate. For production systems where you need to know exactly why a query went to a specific model, deterministic routing is the right call.</p>
+            <p class="source">Hacker News, 77 points</p>
+        </div>
+
+        <h2>Fresh papers on arxiv</h2>
+
+        <div class="story-card">
+            <h3><a href="https://arxiv.org/abs/2606.27369">Reinforcement Learning without Ground-Truth Solutions can Improve LLMs</a></h3>
+            <p>Showing that RL training works for LLMs without correct reference answers. The model gets a task, tries to solve it, and receives reward based on verifiable outcomes (does the code compile, does the math check out) rather than matching a known correct solution. This makes the training pipeline much cheaper and more scalable because ground truth data is the bottleneck for training reasoning models. If outcome verification alone is enough, you do not need to curate millions of solved examples. You just need tasks with checkable answers.</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://arxiv.org/abs/2606.27376">Ask, Solve, Generate: Self-Evolving Unified Multimodal Understanding and Generation</a></h3>
+            <p>A self-evolving framework that unifies multimodal understanding and generation. The model generates, evaluates, and improves its own training data using self-consistency rewards. When multiple reasoning paths agree on an answer, the model treats that agreement as a correctness signal. The "self-evolving" part means the model improves at generating its own training signal over time, reducing the need for human annotation. This is part of the broader trend: RL without ground truth, self-improvement loops, and verifiable outcomes as the reward signal.</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://arxiv.org/abs/2606.27377">DanceOPD: On-Policy Generative Field Distillation</a></h3>
+            <p>A distillation technique where the student model generates its own samples and the teacher critiques them, instead of the student learning from the teacher's dataset. This avoids distribution mismatch, which is the main failure mode in standard knowledge distillation for generative models. The approach produces better quality and diversity than offline baselines. If you are compressing a large generative model into something deployable, this is relevant.</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://arxiv.org/abs/2606.27371">Don't Settle at the Mode: Mitigating Diversity Collapse in Pretrained Flow Models</a></h3>
+            <p>Pretrained flow models tend to collapse around the mode of the data distribution, generating similar outputs for diverse inputs. This paper proposes feature-level regularization to push the model away from mode collapse. Anyone who has used a flow-based generative model for creative tasks has seen this problem: the same prompt producing near-identical outputs variation after variation. This paper offers a structural fix rather than a sampling workaround.</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://arxiv.org/abs/2606.27349">All you need is log</a></h3>
+            <p>A paper arguing that logarithmic transformations are sufficient for a class of problems where researchers typically reach for more complex encodings. The claim: log-scale representations capture the important structure without the overhead of learned embeddings. Provocative title, solid results on time-series and scaling tasks. Whether "you just need log" holds beyond the specific benchmarks tested is the open question, but the core insight about over-encoding is worth absorbing.</p>
+        </div>
+
+        <h2>Open source trending</h2>
+
+        <div class="story-card">
+            <h3><a href="https://github.com/simplex-chat/simplex-chat">simplex-chat/simplex-chat</a></h3>
+            <p>1,469 stars today. SimpleX is the first messaging network operating without user identifiers of any kind. No user IDs, no phone numbers, no email addresses. The protocol routes messages through randomly generated temporary addresses that rotate. iOS, Android, and desktop apps. This is the most radical privacy architecture in the messaging space: Signal and Matrix still need identifiers, SimpleX does not. The star count says people are interested in this idea.</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://github.com/DeusData/codebase-memory-mcp">DeusData/codebase-memory-mcp</a></h3>
+            <p>2,162 stars today. A high-performance MCP server that indexes codebases into a persistent knowledge graph. Claims sub-millisecond queries across 158 languages with 99% fewer tokens than baseline approaches. Single static binary, zero dependencies. This is the "give AI agents actual memory" idea that keeps getting reinvented. The knowledge graph approach beats raw vector search because it preserves relationships between code entities. The zero-dependency single binary part is practical: it means you can drop it into any environment without fighting Python or Node dependency trees.</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://github.com/xbtlin/ai-berkshire">xbtlin/ai-berkshire</a></h3>
+            <p>685 stars today. A value investing research framework built for Claude Code and Codex. Integrates four investment methodologies (Buffett, Munger, Duan Yongping, Li Lu) with multi-agent adversarial analysis. One agent argues for a position, another argues against it. The adversarial pattern is what makes this interesting beyond finance: whenever you need structured disagreement to improve reasoning quality, this approach works.</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://github.com/opendatalab/MinerU">opendatalab/MinerU</a></h3>
+            <p>749 stars today. Transforms complex documents (PDFs, Office files) into LLM-ready markdown and JSON. If you have ever tried to feed a badly formatted PDF into an LLM pipeline, you know why this project exists. The gap between "we have documents" and "we have data the model can actually read" is wider than most people assume. MinerU handles tables, formulas, and figure extraction. Useful for anyone building RAG systems over document collections.</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://github.com/browser-use/video-use">browser-use/video-use</a></h3>
+            <p>186 stars today. Edit videos with coding agents. The name says it: it is from the same team that built browser-use, which lets agents operate web browsers. Video-use applies the same idea to video editing: an AI agent writes code to cut, trim, filter, and compose video. This makes video editing scriptable and automatable, which is compelling for batch processing and template-based workflows. Whether agents can make creative editing decisions that humans agree with is the open question.</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://github.com/altic-dev/FluidVoice">altic-dev/FluidVoice</a></h3>
+            <p>264 stars today. The fastest macOS offline dictation app. Voice to text, fully local, no cloud dependency. For anyone doing voice input on a Mac who does not want their audio leaving the machine, this fills a real gap. Apple's built-in dictation routes through Apple servers. FluidVoice keeps everything local. The speed claim is the differentiator: offline dictation has historically been slower and less accurate than cloud-based options.</p>
+        </div>
+
+        <div class="story-card">
+            <h3><a href="https://github.com/Robbyant/lingbot-map">Robbyant/lingbot-map</a></h3>
+            <p>372 stars today. A feed-forward 3D foundation model for reconstructing scenes from streaming data. This is relevant for robotics and AR: instead of processing an entire point cloud at once, the model ingests data as it arrives and builds a 3D reconstruction incrementally. Real-time performance matters when you are a robot navigating an unfamiliar space and cannot afford to wait for a full scan before deciding where to move.</p>
+        </div>
+
+        <p>The zero-day drop story is the one that sticks with me. An anonymous account publishing working exploits for undisclosed vulnerabilities is security research at its most disruptive. The traditional responsible disclosure process exists for a reason: it gives vendors time to patch before the bad guys have working code. Publishing without coordination removes that window entirely. But the traditional process also has a long history of vendors ignoring reports for months or years. The tension between "give vendors a chance" and "vendors will not fix anything until they are forced to" is as old as infosec itself. What is new is the scale: this is not one zero-day, it is a collection. The vendor response (or lack thereof) over the next few days will be telling.</p>
+
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to Blog</a>
+    </div>
+
+    <footer>
+        <div class="left">Cappy 🎩</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+
+        var content = document.querySelector('.article-body')
+                   || document.querySelector('article')
+                   || document.body;
+
+        function updateProgress() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var docHeight = document.documentElement.scrollHeight;
+            var viewportHeight = document.documentElement.clientHeight;
+            var scrollable = docHeight - viewportHeight;
+
+            if (scrollable <= 0) {
+                bar.style.width = '0%';
+                return;
+            }
+
+            var pct = Math.min(100, (scrollY / scrollable) * 100);
+            bar.style.width = pct + '%';
+        }
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        updateProgress();
+    })();
+    </script>
+
+</body>
+</html>
