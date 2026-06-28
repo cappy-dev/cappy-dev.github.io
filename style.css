@@ -223,49 +223,87 @@ footer .right a:hover { color: var(--fg); }
     line-height: 1.60;
 }
 
-/* Post list — Linear issue-list pattern */
+/* Year heading — top-level grouping */
+.post-year {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; font-weight: 500; color: var(--accent-bright);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 32px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border2);
+}
+
+/* Month heading — secondary grouping */
+.post-month {
+    font-size: 13px; font-weight: 510; color: var(--fg4);
+    letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 16px;
+    padding-bottom: 0;
+}
+
+/* Empty month indicator */
+.post-empty {
+    font-size: 14px; color: var(--fg4);
+    padding: 8px 0 24px;
+    font-style: normal;
+}
+
+/* Post list — Linear issue-list pattern, two-column layout */
 .posts {
     max-width: 720px; margin: 0 auto;
     padding: 0 24px 80px;
 }
 .post-row {
-    display: block;
+    display: flex;
     text-decoration: none;
-    padding: 20px 16px;
-    margin: 0 -16px;
+    padding: 16px 0;
     border-bottom: 1px solid var(--border);
-    border-radius: 6px;
-    transition: background 0.15s ease, box-shadow 0.15s ease;
-    position: relative;
+    transition: background 0.15s ease;
+    align-items: flex-start;
+    gap: 20px;
 }
-.post-row:first-child { padding-top: 20px; }
+.post-row:first-child { padding-top: 0; }
 .post-row:last-child { border-bottom: none; }
 .post-row:hover {
     background: rgba(255,255,255,0.02);
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border-radius: 6px;
 }
 .post-row:hover .post-title { color: var(--fg); }
 .post-row:active {
     background: rgba(255,255,255,0.04);
 }
 
+/* Date column — fixed width for alignment */
 .post-date {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px; font-weight: 500;
     color: var(--fg4);
     letter-spacing: 0.02em;
-    margin-bottom: 6px;
+    padding-top: 5px;
+    min-width: 56px;
+    flex-shrink: 0;
 }
+
+/* Content column — title, excerpt, tags */
+.post-content {
+    flex: 1;
+    min-width: 0;
+}
+
 .post-title {
-    font-size: 20px; font-weight: 590; color: var(--fg2);
-    letter-spacing: -0.24px; line-height: 1.33;
-    margin-bottom: 6px;
+    font-size: 16px; font-weight: 510; color: var(--fg2);
+    letter-spacing: -0.01em; line-height: 1.40;
+    margin-bottom: 4px;
     transition: color 0.15s;
 }
 .post-excerpt {
-    font-size: 15px; color: var(--fg3); line-height: 1.60;
-    letter-spacing: -0.165px; font-weight: 400;
-    margin-bottom: 10px;
-    max-width: 600px;
+    font-size: 14px; color: var(--fg3); line-height: 1.55;
+    letter-spacing: -0.01em; font-weight: 400;
+    margin-bottom: 8px;
+    max-width: 540px;
 }
 .post-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 
@@ -727,9 +765,12 @@ article .body .tags {
     /* Blog index */
     .page-header h1 { font-size: 32px; letter-spacing: -0.704px; }
     .page-header { padding: 64px 24px 40px; }
-    .post-row { padding: 16px 8px; margin: 0 -8px; }
-    .post-title { font-size: 18px; }
-    .post-excerpt { font-size: 14px; }
+    .post-row { flex-direction: column; gap: 4px; padding: 16px 8px; }
+    .post-row:hover { margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+    .post-date { padding-top: 0; min-width: 0; }
+    .post-title { font-size: 15px; }
+    .post-excerpt { font-size: 13px; }
+    .post-month { margin-top: 32px; }
 
     /* Articles */
     .article-header h1 { font-size: 28px; letter-spacing: -0.528px; }
