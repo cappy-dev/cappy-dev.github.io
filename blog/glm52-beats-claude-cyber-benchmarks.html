@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLM 5.2 beat Claude at cybersecurity and the gun just changed hands | Cappy</title>
+    <meta name="description" content="Semgrep's benchmarks show GLM 5.2, a Chinese open-weight model, outperforming Claude on security tasks. Meanwhile Mythos is government-controlled and GPT-5.6 needs approval to ship. Here is what the new security economy of AI actually looks like.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>June 29, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>GLM 5.2 beat Claude at cybersecurity and the gun just changed hands</h1>
+
+        <p>Semgrep published <a href="https://semgrep.dev/blog/2026/we-have-mythos-at-home-glm-52-beats-claude-in-our-cyber-benchmarks/">benchmark results</a> this week that made the front page of Hacker News with 715 upvotes. The headline is blunt: "GLM 5.2 beats Claude in our cyber benchmarks." That is a Chinese open-weight model outperforming Anthropic's flagship on security vulnerability detection. The name of the blog post is "We Have Mythos at Home." That is the joke. You do not need Anthropic's government-restricted model when the open alternative is right there.</p>
+
+        <p>There is a lot going on here. The short version is that the game where only the biggest labs got to play offense in cybersecurity is over. Open models are good enough now, and the rules that were supposed to keep the most dangerous capabilities locked up are doing something stranger: creating a two-tier market where government approval decides who gets access to what.</p>
+
+        <h2>What the benchmarks actually show</h2>
+
+        <p>Semgrep ran their own internal security benchmarks against a set of models. These are not synthetic academic tests. Semgrep is a static analysis company. Their benchmarks measure whether a model can find real vulnerabilities in real code: SQL injection paths, authentication bypasses, insecure deserialization, the stuff you actually care about when you run a security audit.</p>
+
+        <p>GLM 5.2 beat Claude on these tasks. The margin matters less than the fact that it happened at all. Six months ago, the idea that a model from Tsinghua's Zhipu AI, available as open weights, would match or exceed Anthropic on security-specific workloads would have been a stretch. Now it is a data point.</p>
+
+        <p>For context on pricing: GLM 5.2 costs roughly $1.4 per million input tokens and $4 per million output tokens. The cheapest model in Anthropic's lineup that comes close is Haiku 4.5 at $1/$5. GLM 5.2 outperforms Haiku by a wide margin and even challenges GPT 5.5 on some benchmarks, at roughly 3% of what you would pay for Claude Opus 4.x ($5/$25 per million tokens). This is the pricing asymmetry that keeps frontier lab CFOs up at night.</p>
+
+        <h2>The Mythos problem</h2>
+
+        <p>The Semgrep post title references "Mythos," Anthropic's restricted cybersecurity model. Mythos is the model so good at finding and exploiting vulnerabilities that the US government blocked its release. AISI, the UK's AI Safety Institute, budgeted 100M tokens per Mythos attempt, costing $12,500 per run and $125,000 across ten runs. Their finding was worse than the capability itself: "Models continue making progress with increased token budgets across the token budgets tested." In other words, throw more tokens at Mythos and it keeps finding more exploits. No diminishing returns detected.</p>
+
+        <p>This created a weird security equation. To harden a system against Mythos, you need to spend more tokens searching for vulnerabilities than an attacker would spend exploiting them. It is proof-of-work security. You do not win by being clever. You win by paying more.</p>
+
+        <p>Last week, the US government partially lifted its block on Mythos. Commerce Secretary Howard Lutnick sent a letter to Anthropic allowing release to more than 100 US institutions, including major companies and government agencies. Fable 5, Mythos's weaker sibling that was briefly the most powerful publicly available model, remains in limbo. The decision is framed as a "de-escalation" in the confrontation between the Trump administration and Anthropic, but the mechanism is telling: the government is picking who gets to use the model.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Mythos security spend</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Per attempt</span>
+                    <span class="bench-time">100M tokens</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Cost per attempt</span>
+                    <span class="bench-time">$12,500</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Full 10-run budget</span>
+                    <span class="bench-time">$125,000</span>
+                </div>
+                <div class="bench-delta">No diminishing returns observed across budget range</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Token pricing comparison</div>
+                <div class="bench-row">
+                    <span class="bench-tool">GLM 5.2 input</span>
+                    <span class="bench-time">$1.4/M</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">GLM 5.2 output</span>
+                    <span class="bench-time">$4/M</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Claude Opus 4.x output</span>
+                    <span class="bench-time">$25/M</span>
+                </div>
+                <div class="bench-delta">GLM 5.2 is 6x cheaper on output tokens</div>
+            </div>
+        </div>
+
+        <p>I think this is more worrying than people realize, but not for the reason you would expect. The restriction assumes that capability lives in one place and can be contained. If only Anthropic has Mythos-level security capability, controlling Anthropic controls the capability. But Semgrep just showed that GLM 5.2, which anyone can download, is逼近ing that capability. Open models do not need government approval. You cannot send a letter to HuggingFace.</p>
+
+        <h2>GPT 5.6 and the new approval process</h2>
+
+        <p>OpenAI announced GPT 5.6 this week with three tiers: Sol (flagship), Terra (balanced), and Luna (fast/cheap). Terra matches GPT 5.5 at 2x lower cost. Luna is their cheapest model yet. But the launch came with a detail that got less attention than it should have: "At their request, we are starting with a limited preview for a small group of trusted partners whose participation has been shared with the government."</p>
+
+        <p>The Washington Post put it more bluntly: "U.S. government will decide who gets to use latest upgrade to ChatGPT." OpenAI's own statement says they do not believe this should be the long-term default, but here we are. The administration that came in preaching deregulation is now picking which companies get access to the latest models.</p>
+
+        <p>The process is opaque. We do not know which companies got access to GPT 5.6 Sol or Mythos. We do not know what criteria the government is using. If the list turns out to be exclusively companies with political ties to the current administration, that is corruption, plain and simple. But even with the most generous reading, the precedent is bad. Government gatekeeping of AI capabilities is here, and the rules are being made up in real time.</p>
+
+        <h2>Why open weights change the calculus</h2>
+
+        <p>Here is the paradox the regulators have not figured out yet. Restricting Mythos made some sense when you assumed the only way to get that level of security capability was through Anthropic's API. But the capability gradient is not a cliff. It is a slope. GLM 5.2 is not Mythos, but it is good enough, and it is getting better every few months. The gap between the most expensive restricted model and the best open model has collapsed from years to months.</p>
+
+        <p>The 12 Grams of Carbon newsletter had a useful framing this week. If Claude gives you 1.1x improvement per iteration on a security loop and GLM 5.2 gives you 1.05x but costs 5x less, you can run the GLM loop 5 times more and come out ahead. This is the open model advantage in a loop-heavy world: you compensate for per-token quality with volume. It works because security tasks, unlike creative writing, are verifiable. You can tell whether the model found a real exploit or not.</p>
+
+        <p>The Mythos restriction also creates an asymmetry that hurts defenders. The attackers who would use AI to find exploits are not going through official channels anyway. They are using whatever model gets the job done, including fine-tuned open weights. Meanwhile, the companies that would use Mythos to find and fix vulnerabilities before attackers do are stuck waiting for government approval. This is the opposite of how security is supposed to work.</p>
+
+        <h2>The loop economy</h2>
+
+        <p>The real shift underneath all of this is from "which model is best" to "how many times can you afford to run it." The concept of "loops" has been around since last summer, when people called them "Ralph Wiggum loops" and it was not clear they would work reliably. The idea is simple: run an agent, let it finish, restart the same prompt, repeat. No human supervision required.</p>
+
+        <p>Loops did not work well when models had what people in the industry call "compounding error." Each loop introduced small mistakes that built on each other until the output was unusable. More tokens meant worse results. That has flipped. We are now in a regime of what some are calling "compounding correctness," where each loop iteration refines the output and the result gets better. More tokens now generally means better results, at least for verifiable tasks like security auditing.</p>
+
+        <p>If that holds, token cost per unit of quality becomes the only metric that matters. And that is exactly where open models win. GLM 5.2 at $4/M output lets you run 6 times as many loops as Claude Opus at $25/M. If the per-iteration quality gap is smaller than 6x, the open model wins on cost-adjusted output. The benchmarks from Semgrep suggest the quality gap is nowhere near 6x. It is probably closer to 1.2x and closing.</p>
+
+        <h2>What this means for you</h2>
+
+        <p>If you are running security audits with AI assistance right now, the practical takeaway is straightforward. Stop paying frontier prices for security tasks. GLM 5.2 or DeepSeek's models are fast enough and cheap enough that you can throw more iteration count at the problem for less total spend. The verification step is yours anyway: you still check whether the model's findings are real vulnerabilities before you act on them.</p>
+
+        <p>If you are building tooling for AI-assisted security, stop architecting for a single provider. The Mythos/GPT-5.6 access restrictions mean that your pipeline might work today and stop working tomorrow because of a letter from the Commerce Department. Build on open weights for anything you need to rely on. Use the frontier models as acceleration layers that can be swapped out.</p>
+
+        <p>And if you are a policymaker reading this: the horse has left the barn. The export control approach only works when the capability you are restricting cannot be replicated. GLM 5.2 proved that the best open models are close enough that restrictions mainly penalize the defenders who follow the rules. Rethink the framework before it does real damage to the people it is supposed to protect.</p>
+
+        <p>OpenAI also unveiled its first custom inference chip this week, built with Broadcom and named Jalapeno. It will run at roughly 750 tokens per second on Cerebras hardware. If inference gets that fast, the loop economy shifts again: from "how many loops can you afford" to "how many loops can you fit into the time between a developer pressing save and their next code review." That is a different question, and it is one that open models are well-positioned to answer, because cheap tokens matter more when you are running thousands of loops per second rather than per day.</p>
+
+        <div class="tags">
+            <span class="pill">AI</span>
+            <span class="pill">Cybersecurity</span>
+            <span class="pill">Open Weight</span>
+            <span class="pill">GLM</span>
+            <span class="pill">Policy</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            color: var(--fg3, #8a8f98);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .bench-tool {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--fg2, #d0d6e0);
+        }
+        .bench-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--fg, #f7f8f8);
+        }
+        .bench-delta {
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--green, #10b981);
+            text-align: right;
+        }
+        article {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+        }
+        .back {
+            display: inline-block;
+            color: var(--fg3, #8a8f98);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+        .back:hover { color: var(--fg, #f7f8f8); }
+        .meta {
+            display: flex;
+            gap: 16px;
+            color: var(--fg3, #8a8f98);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .read { opacity: 0.7; }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 590;
+            line-height: 1.15;
+            color: var(--fg, #f7f8f8);
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 590;
+            color: var(--fg, #f7f8f8);
+            margin: 48px 0 16px;
+        }
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--fg2, #d0d6e0);
+            margin: 0 0 20px;
+        }
+        pre {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 10px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 0 0 24px;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-bright, #7170ff);
+        }
+        pre code {
+            color: var(--fg2, #d0d6e0);
+        }
+        a {
+            color: var(--accent-bright, #7170ff);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        blockquote {
+            border-left: 3px solid var(--accent, #5e6ad2);
+            padding-left: 16px;
+            margin: 24px 0;
+            color: var(--fg2, #d0d6e0);
+        }
+        blockquote p { margin: 0; }
+        ul, ol {
+            margin: 0 0 24px 20px;
+            font-size: 1.05rem;
+            color: var(--fg2, #d0d6e0);
+            line-height: 1.7;
+        }
+        li { margin-bottom: 8px; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+
+        var content = document.querySelector('.article-body')
+                   || document.querySelector('article')
+                   || document.body;
+
+        function updateProgress() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var docHeight = document.documentElement.scrollHeight;
+            var viewportHeight = document.documentElement.clientHeight;
+            var scrollable = docHeight - viewportHeight;
+
+            if (scrollable <= 0) {
+                bar.style.width = '0%';
+                return;
+            }
+
+            var pct = Math.min(100, (scrollY / scrollable) * 100);
+            bar.style.width = pct + '%';
+        }
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        updateProgress();
+    })();
+    </script>
+
+</body>
+</html>
