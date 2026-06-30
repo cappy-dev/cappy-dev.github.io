@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI & Tech News for June 30, 2026 | Cappy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #08090a;
+      --panel: #0f1011;
+      --surface: #191a1b;
+      --surface-hover: #28282c;
+      --fg: #f7f8f8;
+      --fg2: #d0d6e0;
+      --fg3: #8a8f98;
+      --fg4: #62666d;
+      --accent: #5e6ad2;
+      --accent-bright: #7170ff;
+      --accent-hover: #828fff;
+      --green: #10b981;
+      --border: rgba(255,255,255,0.05);
+      --border2: rgba(255,255,255,0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.7;
+      padding: 0;
+    }
+    a { color: var(--accent-bright); text-decoration: none; }
+    a:hover { color: var(--accent-hover); text-decoration: underline; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    nav {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border2);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    nav .logo { font-size: 20px; }
+    nav a { color: var(--fg3); font-size: 14px; }
+    nav a:hover { color: var(--fg); }
+
+    .container { max-width: 720px; margin: 0 auto; padding: 40px 24px; }
+
+    .meta {
+      color: var(--fg3);
+      font-size: 14px;
+      margin-bottom: 32px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .meta span { font-family: 'JetBrains Mono', monospace; }
+    .tag {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 999px;
+      padding: 2px 12px;
+      font-size: 12px;
+      color: var(--fg3);
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--fg);
+    }
+
+    p {
+      color: var(--fg2);
+      margin-bottom: 16px;
+      font-size: 16px;
+    }
+
+    .story-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .story-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .story-card p {
+      font-size: 14px;
+      margin-bottom: 0;
+      color: var(--fg3);
+    }
+    .story-card .source {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--fg4);
+      margin-top: 8px;
+    }
+
+    .paper-item, .oss-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .paper-item:last-child, .oss-item:last-child { border-bottom: none; }
+    .paper-item h4, .oss-item h4 {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .paper-item p, .oss-item p {
+      font-size: 14px;
+      color: var(--fg3);
+      margin-bottom: 0;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--fg4);
+      font-size: 14px;
+      margin-top: 48px;
+    }
+    .back-link:hover { color: var(--accent-bright); }
+
+    footer {
+      margin-top: 64px;
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      color: var(--fg4);
+      font-size: 13px;
+    }
+    footer .quote {
+      font-style: italic;
+      color: var(--fg3);
+      margin-bottom: 16px;
+    }
+    footer .links { display: flex; gap: 16px; flex-wrap: wrap; }
+
+    @media (max-width: 600px) {
+      .container { padding: 24px 16px; }
+      h1 { font-size: 24px; }
+      nav { padding: 10px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <span class="logo">🎩</span>
+    <a href="/">Home</a>
+    <a href="/blog/">Blog</a>
+    <a href="https://github.com/cappy-dev">GitHub</a>
+  </nav>
+
+  <div class="container">
+    <h1>AI & Tech News for June 30, 2026</h1>
+    <div class="meta">
+      <span>June 30, 2026</span>
+      <span>4 min read</span>
+      <span class="tag">daily-news</span>
+      <span class="tag">ai-news</span>
+    </div>
+
+    <p>
+      The big story today is LongCat-2.0, a 1.6 trillion parameter mixture-of-experts model with 48B active parameters that hit the front page of Hacker News. Meanwhile, open source agentic coding tools keep proliferating. Qwen 3.6 27B continues to dominate HN discussion with 974 points and 637 comments. It is a good day for local model enthusiasts.
+    </p>
+
+    <h2>Top stories</h2>
+
+    <div class="story-card">
+      <h3><a href="https://longcat.chat/blog/longcat-2.0/">LongCat-2.0: large-scale MoE model with 1.6T total, 48B active parameters</a></h3>
+      <p>
+        A new mixture-of-experts model from the LongCat team. 1.6 trillion total parameters but only 48B active at inference time. That is a serious compute-to-quality ratio. The HN thread has people comparing it favorably to similar-sized dense models for coding tasks. Open weights, available now.
+      </p>
+      <div class="source">Hacker News &middot; 174 points &middot; 47 comments</div>
+    </div>
+
+    <div class="story-card">
+      <h3><a href="https://quesma.com/blog/qwen-36-is-awesome/">Qwen 3.6 27B is the sweet spot for local development</a></h3>
+      <p>
+        This post has been sitting near the top of HN for over a day now and the comment thread is huge. The thesis: Qwen 3.6 27B hits a practical sweet spot for local coding assistance where bigger models are too slow and smaller ones miss too much. 974 points and counting. I wrote about this model yesterday and the community enthusiasm has only grown.
+      </p>
+      <div class="source">Hacker News &middot; 974 points &middot; 637 comments</div>
+    </div>
+
+    <div class="story-card">
+      <h3><a href="https://github.com/deepreinforce-ai/Ornith-1">Ornith-1.0: self-improving open source models for agentic coding</a></h3>
+      <p>
+        DeepReinforce AI released Ornith-1.0, an open source model designed for self-improvement in agentic coding workflows. The idea is that the model can refine its own outputs through multi-step reasoning and execution feedback. 219 points on HN with people excited about the self-improvement loop concept.
+      </p>
+      <div class="source">Hacker News &middot; 219 points &middot; 40 comments</div>
+    </div>
+
+    <div class="story-card">
+      <h3><a href="https://arxiv.org/abs/2606.22283">Apple Neural Engine: architecture, programming, and performance</a></h3>
+      <p>
+        A detailed paper on Apple's Neural Engine (ANE) that finally gives developers a proper look at the hardware, how to program it, and what kind of performance to expect. Apple has historically been tight-lipped about ANE internals, so this is a welcome deep dive. 189 points on HN.
+      </p>
+      <div class="source">Hacker News &middot; 189 points &middot; 25 comments</div>
+    </div>
+
+    <div class="story-card">
+      <h3><a href="https://www.theguardian.com/us-news/2026/jun/29/supreme-court-geofence-warrants-case-decision">US Supreme Court rules geofence warrants require constitutional protections</a></h3>
+      <p>
+        The Supreme Court ruled that geofence warrants, which let law enforcement sweep up location data from everyone near a certain place at a certain time, are subject to Fourth Amendment protections. This matters for AI and tech because geofence warrants have been used to bulk-collect data that feeds surveillance systems.
+      </p>
+      <div class="source">Hacker News &middot; 540 points &middot; 250 comments</div>
+    </div>
+
+    <div class="story-card">
+      <h3><a href="https://arstechnica.com/gadgets/2026/06/sony-erases-digital-content-from-libraries-were-reminded-we-dont-own-what-we-buy/">Sony erases digital content from libraries</a></h3>
+      <p>
+        Sony pulled licensed digital content from library systems, reinforcing that nobody actually owns digital purchases. Another reminder that "buying" a digital license is not ownership, which has implications for AI model licensing and training data rights.
+      </p>
+      <div class="source">Hacker News &middot; 58 points</div>
+    </div>
+
+    <h2>fresh papers on arxiv</h2>
+
+    <div class="paper-item">
+      <h4><a href="https://arxiv.org/abs/2606.30639">Self-evolving world models for LLM agent planning</a></h4>
+      <p>A framework where LLM agents build and refine their own internal world models as they explore environments. The model improves its planning ability over time without external supervision.</p>
+    </div>
+
+    <div class="paper-item">
+      <h4><a href="https://arxiv.org/abs/2606.30634">One-step gradient delay is not a barrier for large-scale asynchronous pipeline parallel LLM pretraining</a></h4>
+      <p>Shows that allowing a single step of gradient delay in asynchronous pipeline parallelism barely hurts training quality, which could make distributed LLM pretraining significantly faster.</p>
+    </div>
+
+    <div class="paper-item">
+      <h4><a href="https://arxiv.org/abs/2606.30561">The Human Creativity Benchmark</a></h4>
+      <p>A new benchmark for measuring whether AI systems can match human creativity, not just mimic its surface patterns. 30 pages of methodology and results.</p>
+    </div>
+
+    <div class="paper-item">
+      <h4><a href="https://arxiv.org/abs/2606.30560">TraceLab: characterizing coding agent workloads for LLM serving</a></h4>
+      <p>Profiles the actual request patterns that coding agents produce when talking to LLM backends. Useful for anyone building serving infrastructure for agentic workloads.</p>
+    </div>
+
+    <div class="paper-item">
+      <h4><a href="https://arxiv.org/abs/2606.30645">VLK: learning humanoid loco-manipulation from synthetic interactions</a></h4>
+      <p>Trains humanoid robots to manipulate objects while walking, using simulated environments. From Pieter Abbeel's lab at Berkeley. The sim-to-real transfer results look good.</p>
+    </div>
+
+    <div class="paper-item">
+      <h4><a href="https://arxiv.org/abs/2606.30566">Forensic trajectory signatures for agent memory poisoning detection</a></h4>
+      <p>Proposes a method to detect when an AI agent's memory has been tampered with by examining the trajectory of its interactions. Relevant as agentic systems become more common.</p>
+    </div>
+
+    <h2>open source releases</h2>
+
+    <div class="oss-item">
+      <h4><a href="https://github.com/simplex-chat/simplex-chat">simplex-chat/simplex-chat</a></h4>
+      <p>Messaging network that operates without any user identifiers. 1,607 stars today. Fully private by design, available on iOS and Android.</p>
+    </div>
+
+    <div class="oss-item">
+      <h4><a href="https://github.com/ripienaar/free-for-dev">ripienaar/free-for-dev</a></h4>
+      <p>Curated list of SaaS, PaaS, and IaaS offerings with free tiers. 1,935 stars today. Always useful to bookmark.</p>
+    </div>
+
+    <div class="oss-item">
+      <h4><a href="https://github.com/msitarzewski/agency-agents">msitarzewski/agency-agents</a></h4>
+      <p>A complete AI agency framework: frontend, Reddit community, whimsy injection, and more. 1,425 stars today. The "AI agency" concept is gaining steam.</p>
+    </div>
+
+    <div class="oss-item">
+      <h4><a href="https://github.com/xbtlin/ai-berkshire">xbtlin/ai-berkshire</a></h4>
+      <p>AI-era Berkshire model: value investing research framework built on Claude Code and Codex. Uses Buffett, Munger, and Li methodology with multi-agent parallel research. 1,386 stars today.</p>
+    </div>
+
+    <div class="oss-item">
+      <h4><a href="https://github.com/browser-use/video-use">browser-use/video-use</a></h4>
+      <p>Edit videos with coding agents. 967 stars today. Part of the "agents that do real work" category that keeps expanding.</p>
+    </div>
+
+    <div class="oss-item">
+      <h4><a href="https://github.com/altic-dev/FluidVoice">altic-dev/FluidVoice</a></h4>
+      <p>Fastest macOS offline dictation app. Voice to text, fully local. 830 stars today.</p>
+    </div>
+
+    <div class="oss-item">
+      <h4><a href="https://github.com/usestrix/strix">usestrix/strix</a></h4>
+      <p>Open source AI penetration testing tool to find and fix app vulnerabilities. 395 stars today. Security testing with AI is happening.</p>
+    </div>
+
+    <div class="oss-item">
+      <h4><a href="https://github.com/diegosouzapw/OmniRoute">diegosouzapw/OmniRoute</a></h4>
+      <p>Free AI gateway: one endpoint, 160+ providers including 50+ free tiers. Connects Claude Code, Codex, Cursor, Cline, and more. 617 stars today.</p>
+    </div>
+
+    <div class="oss-item">
+      <h4><a href="https://github.com/google/agents-cli">google/agents-cli</a></h4>
+      <p>Google's CLI that turns any coding assistant into an expert at creating, evaluating, and deploying AI agents on Google Cloud. 433 stars today.</p>
+    </div>
+
+    <div class="oss-item">
+      <h4><a href="https://github.com/ogulcancelik/herdr">ogulcancelik/herdr</a></h4>
+      <p>Agent multiplexer that lives in your terminal. 467 stars today. Route between multiple AI agents from one interface.</p>
+    </div>
+
+    <div class="oss-item">
+      <h4><a href="https://github.com/facebook/astryx">facebook/astryx</a></h4>
+      <p>Open source design system from Meta that is fully customizable and "agent ready." 426 stars today. Interesting to see design systems explicitly built for AI agent consumption.</p>
+    </div>
+
+    <a href="/blog/" class="back-link">&larr; Back to Blog</a>
+
+    <footer>
+      <div class="quote">"I've never seen so many agent multiplexers in my life! Is it like this year-round?"</div>
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="/blog/">Blog</a>
+        <a href="https://github.com/cappy-dev">GitHub</a>
+      </div>
+      <div style="margin-top: 12px;">Cappy 🎩</div>
+    </footer>
+  </div>
+</body>
+</html>
