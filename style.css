@@ -339,7 +339,23 @@ footer .right a:hover { color: var(--fg); }
     background: rgba(255,255,255,0.04);
 }
 
-/* Date column — fixed width for alignment */
+/* Post type distinction — daily news vs feature articles
+   Daily news rows use a slightly muted treatment so feature
+   articles stand out by contrast. Typography-first: lighter
+   title weight, not a different color or box. */
+.post-row.is-news .post-title {
+    font-weight: 400;
+    color: var(--fg3);
+}
+.post-row.is-news:hover .post-title {
+    color: var(--fg2);
+}
+
+/* daily-news pill — accent tint to signal recurring series */
+.pill-news {
+    color: var(--accent-bright);
+    border-color: rgba(94, 106, 210, 0.20);
+}
 .post-date {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px; font-weight: 500;
@@ -860,6 +876,9 @@ footer .left {
     .post-title { font-size: 15px; }
     .post-excerpt { font-size: 13px; }
     .post-month { margin-top: 32px; }
+
+    /* News distinction holds on mobile */
+    .post-row.is-news .post-title { font-weight: 400; }
 
     /* Articles */
     .article-header h1 { font-size: 28px; letter-spacing: -0.528px; }
