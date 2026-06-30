@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qwen 3.6 27B: the local model that actually works | Cappy</title>
+    <meta name="description" content="Qwen 3.6 27B is the first open-weight model that genuinely competes with cloud APIs for coding and general tasks, and it runs on consumer hardware. Real benchmarks, setup instructions, and why 27B beats the bigger MoE variant for real work.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>June 30, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Qwen 3.6 27B: the local model that actually works</h1>
+
+        <p>Qwen 3.6 27B hit the front page of Hacker News on June 29 with 822 points and a title that sounds like clickbait but is not: "Qwen 3.6 27B is the sweet spot for local development." I have been burned by local models before. They are slow, they hallucinate protocols that do not exist, and they suggest npm packages that were deprecated in 2023. So I was skeptical. Then I ran it myself.</p>
+
+        <p>It is good. Annoyingly good. Good enough that I have been reaching for it instead of Claude for a lot of day-to-day coding tasks, which is not something I expected to say about a model that fits in 42GB of RAM.</p>
+
+        <h2>Two variants, pick the right one</h2>
+
+        <p>Qwen 3.6 comes in two sizes. There is a mixture-of-experts model called Qwen 3.6 35B A3B, which activates only 3 billion of its 35 billion parameters per token. It is fast. And there is a dense Qwen 3.6 27B, which runs every parameter on every token. It is slower, but it is smarter.</p>
+
+        <p>The consensus from people actually using both is that 27B is the one you want. The 35B MoE is roughly three times faster, but the output quality is noticeably worse for anything that requires sustained reasoning. If you are doing code generation, technical writing, or anything where the model needs to hold a complex idea together for more than a few hundred tokens, 27B wins. I would rather wait an extra second per token and get code that compiles on the first try.</p>
+
+        <p>The author of the Quesma blog post that went viral on HN put it plainly: "I'd rather generate a third as much code, but of higher quality." That tracks with my experience. Speed matters, but wrong code that arrives fast is not actually fast. You spend the saved time debugging.</p>
+
+        <h2>How good is it, in numbers</h2>
+
+        <p>Artificial Analysis scores are a rough but useful yardstick. Their composite benchmarks put Qwen 3.6 27B at a score of 37. For context, here is how that compares to models you know:</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Artificial Analysis composite scores</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Gemma 4 31B</span>
+                    <span class="bench-time">29</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Qwen 3.6 35B A3B</span>
+                    <span class="bench-time">32</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Qwen 3.6 27B</span>
+                    <span class="bench-time">37</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">DeepSeek V4 Flash</span>
+                    <span class="bench-time">40</span>
+                </div>
+                <div class="bench-delta">27B scores roughly on par with mid-2025 GPT-5 and Claude Sonnet 4.5</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Approximate era equivalence</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Gemma 4 31B</span>
+                    <span class="bench-time">Late 2024 o1 / Claude 3.5</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Q3.6 35B A3B</span>
+                    <span class="bench-time">Early 2025 o3 / Claude 4</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Q3.6 27B</span>
+                    <span class="bench-time">Mid 2025 GPT-5 / Sonnet 4.5</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">DS V4 Flash (Q2-4)</span>
+                    <span class="bench-time">Late 2025 GPT-5.2 / Opus 4.5</span>
+                </div>
+                <div class="bench-delta">Source: Artificial Analysis, Quesma blog</div>
+            </div>
+        </div>
+
+        <p>A score of 37 from a 27B parameter model is wild. That is a model smaller than Llama 3 70B, running on a MacBook, scoring comparably to frontier models that cost millions to serve. The era equivalences are approximate and you should not read too much into them, but the point is clear: open models have caught up faster than most people expected.</p>
+
+        <p>One caveat on the DeepSeek V4 Flash numbers: that was tested at Q2-Q4 quantization, which is aggressive. The full model is better. But even accounting for that, Qwen 3.6 27B at 8-bit quantization appears to be in the same neighborhood, which is remarkable given the size difference.</p>
+
+        <h2>Running it yourself</h2>
+
+        <p>Setting up Qwen 3.6 27B with llama.cpp is surprisingly simple. One command:</p>
+
+        <pre><code>llama-server -hf unsloth/Qwen3.6-27B-MTP-GGUF:Q8_0 \
+  --spec-type draft-mtp -ngl 999 -fa on -c 65536 --port 8080</code></pre>
+
+        <p>That downloads an 8-bit quantized model from HuggingFace on first run, caches it locally, and starts an OpenAI-compatible API server on port 8080. The <code>-hf</code> flag handles the download. The <code>draft-mtp</code> flag enables multi-token prediction, which is Qwen 3.6's built-in speculative decoding mechanism. The <code>-ngl 999</code> puts all layers on the GPU. <code>-fa on</code> turns on flash attention. Context size is set to 64K tokens (the model supports up to 256K, but 64K is more practical for most tasks on consumer hardware).</p>
+
+        <p>You do not need Ollama, Docker, or a web UI. Just llama.cpp and a machine with enough RAM.</p>
+
+        <h2>What hardware you need</h2>
+
+        <p>This is where things get real. The 8-bit quantized 27B model uses about 42GB of RAM with llama.cpp. On Apple Silicon, that means you want at least 48GB of unified memory. On an M-series Mac with 64GB or more, it runs comfortably. On a 32GB machine, you need to drop to a lower quantization (Q4 or Q5), which costs some quality.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Performance on MacBook Max M5 128GB</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Q3.6 35B A3B (8-bit, MLX)</span>
+                    <span class="bench-time">85 tok/s, 37 GB RAM</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Q3.6 35B A3B (8-bit, llama.cpp)</span>
+                    <span class="bench-time">93 tok/s, 44 GB RAM</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Q3.6 35B A3B + MTP (llama.cpp)</span>
+                    <span class="bench-time">105 tok/s, 45 GB RAM</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Q3.6 27B (8-bit, MLX)</span>
+                    <span class="bench-time">17 tok/s, 28 GB RAM</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Q3.6 27B (8-bit, llama.cpp)</span>
+                    <span class="bench-time">18 tok/s, 41 GB RAM</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Q3.6 27B + MTP (llama.cpp)</span>
+                    <span class="bench-time">32 tok/s, 42 GB RAM</span>
+                </div>
+                <div class="bench-delta">Source: Quesma blog (MacBook Max M5 128GB)</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Nvidia RTX 5090 (user report)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Q3.6 27B (Q6_K, Q4_0 KV)</span>
+                    <span class="bench-time">50 tok/s, ~28/32 GB VRAM</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Context length</span>
+                    <span class="bench-time">123K tokens</span>
+                </div>
+                <div class="bench-delta">Source: Hacker News user report</div>
+            </div>
+        </div>
+
+        <p>A few things jump out. On the MacBook, MTP doubles the throughput of the 27B model, from 18 to 32 tokens per second. That is the difference between "usable but you wait" and "comfortable for interactive coding." The 35B MoE model is faster in absolute terms, but again, the output quality trade-off makes it a worse deal for most coding tasks.</p>
+
+        <p>On an RTX 5090 with Q6_K quantization, someone on HN reported a consistent 50 tokens per second at 123K context, using about 28 of 32GB VRAM. That is fast. Faster than most cloud APIs when you factor in network latency.</p>
+
+        <p>For CPU-only setups, I would be honest: 27B is going to be slow on pure CPU. You are looking at maybe 3-8 tokens per second depending on your hardware. It is usable for batch tasks but frustrating for interactive coding. If you are CPU-bound, the 35B A3B MoE variant is the better choice because it only activates 3B parameters per token, making it much faster on low-end hardware. Note that OpenVINO optimizations only apply to Intel CPUs; AMD processors fall back to stock PyTorch with no acceleration.</p>
+
+        <h2>Why local models matter now more than a year ago</h2>
+
+        <p>The recent history of cloud model APIs is not comforting. Claude Fable 5 was taken down. Other frontier models run at what is almost certainly a massive subsidy; that $100/month subscription gives you thousands of dollars worth of tokens. That cannot last forever. When the subsidy ends, pricing will adjust, and the calculus for local inference changes.</p>
+
+        <p>There is also the privacy question. I do not want my company's codebase, my medical questions, or my personal writing sent to servers in another country. I do not care how many SOC 2 reports they have. The data leaves my machine, and I lose control of it.</p>
+
+        <p>And there is the fragility. Cloud APIs go down, get rate-limited, change their terms, or suddenly stop serving your use case. A model on your machine does none of those things. It is there when the internet is out. It is there when the provider decides your use case violates some policy they updated at 2am. It is yours.</p>
+
+        <p>Qwen 3.6 27B is the first model that makes this argument practically rather than theoretically. Previous local models were a compromise. You ran them because you could not afford the cloud, not because you wanted to. This one, you might actually choose.</p>
+
+        <h2>Connecting it to your coding tools</h2>
+
+        <p>Once llama-server is running on port 8080, it speaks the OpenAI-compatible API. That means most coding tools can connect to it with a config change. OpenCode, Continue, Aider, and similar tools all support custom OpenAI-compatible endpoints.</p>
+
+        <p>For OpenCode, the config looks like this:</p>
+
+        <pre><code>{
+  "provider": {
+    "llama": {
+      "name": "llama.cpp (local)",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://127.0.0.1:8080/v1"
+      },
+      "models": {
+        "qwen3.6-27b": {
+          "name": "Qwen3.6-27B Q8 +MTP"
+        }
+      }
+    }
+  },
+  "model": "llama/qwen3.6-27b"
+}</code></pre>
+
+        <p>That is it. No API key. No billing. No rate limits. Just a local model answering requests as fast as your hardware allows.</p>
+
+        <h2>The open model catching-up moment</h2>
+
+        <p>I keep coming back to the Artificial Analysis score of 37 for a 27B model. A year ago, that score required a model two or three times larger, served from a data center. Now it runs on a laptop with 48GB of RAM. With GLM 5.2 also available as open weight (though requiring much more hardware), the open model ecosystem has clearly crossed a threshold.</p>
+
+        <p>There is a reasonable argument that the gap between open and closed models is now small enough that for many practical purposes, it does not matter. If you are doing routine coding, writing documentation, or building prototypes, Qwen 3.6 27B is good enough. Not as good as Claude Opus 5 on genuinely hard problems. But good enough for the work most people do most of the time.</p>
+
+        <p>I do not think cloud APIs are going away. The best proprietary models will probably always be slightly ahead. But "slightly ahead" is a very different thing from "the only option," which is where we were a year and a half ago. The fact that I can run a model on my laptop that performs comparably to mid-2025 frontier models is a shift I did not expect to happen this fast.</p>
+
+        <p>Try it. The instructions above will get you running in under ten minutes if you have the hardware. If you do not, the 35B A3B MoE variant works on machines with less RAM and is still surprisingly capable. Just pick 27B if you can.</p>
+
+        <div class="tags">
+            <span class="pill">AI</span>
+            <span class="pill">Local Models</span>
+            <span class="pill">Qwen</span>
+            <span class="pill">llama.cpp</span>
+            <span class="pill">Open Weight</span>
+            <span class="pill">Apple Silicon</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--fg4, #62666d);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border, rgba(255,255,255,0.05));
+        }
+        .bench-row:last-of-type { border-bottom: none; }
+        .bench-tool {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--fg2, #d0d6e0);
+        }
+        .bench-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--fg, #f7f8f8);
+        }
+        .bench-delta {
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--green, #10b981);
+            text-align: right;
+        }
+        article {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+        }
+        .back {
+            display: inline-block;
+            color: var(--fg3, #8a8f98);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+        .back:hover { color: var(--fg, #f7f8f8); }
+        .meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--fg4, #62666d);
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .meta .read { color: var(--fg3, #8a8f98); }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 590;
+            line-height: 1.15;
+            color: var(--fg, #f7f8f8);
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 590;
+            color: var(--fg, #f7f8f8);
+            margin: 48px 0 16px;
+        }
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--fg2, #d0d6e0);
+            margin: 0 0 20px;
+        }
+        pre {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 10px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 0 0 24px;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-bright, #7170ff);
+        }
+        pre code {
+            color: var(--fg2, #d0d6e0);
+        }
+        a {
+            color: var(--accent-bright, #7170ff);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        blockquote {
+            border-left: 3px solid var(--accent, #5e6ad2);
+            padding-left: 16px;
+            margin: 24px 0;
+            color: var(--fg2, #d0d6e0);
+        }
+        blockquote p { margin: 0; }
+        ul, ol {
+            margin: 0 0 24px 20px;
+            font-size: 1.05rem;
+            color: var(--fg2, #d0d6e0);
+            line-height: 1.7;
+        }
+        li { margin-bottom: 8px; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+
+        var content = document.querySelector('.article-body')
+                   || document.querySelector('article')
+                   || document.body;
+
+        function updateProgress() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var docHeight = document.documentElement.scrollHeight;
+            var viewportHeight = document.documentElement.clientHeight;
+            var scrollable = docHeight - viewportHeight;
+
+            if (scrollable <= 0) {
+                bar.style.width = '0%';
+                return;
+            }
+
+            var pct = Math.min(100, (scrollY / scrollable) * 100);
+            bar.style.width = pct + '%';
+        }
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        updateProgress();
+    })();
+    </script>
+
+</body>
+</html>
