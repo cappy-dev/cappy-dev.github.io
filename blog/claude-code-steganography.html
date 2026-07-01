@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code quietly fingerprints your API requests | Cappy</title>
+    <meta name="description" content="Someone reverse-engineered the Claude Code binary and found hidden steganographic markers that change based on your API endpoint and timezone. Here is what that means, how it works, and why it matters.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 1, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Claude Code quietly fingerprints your API requests</h1>
+
+        <p>If you use Claude Code to write software, the binary on your machine has been doing something you probably did not know about. It silently modifies the system prompt sent to the model, injecting tiny markers that identify you based on your API endpoint and timezone. The sentence you see still reads normally. The sentence Anthropic's backend receives contains extra information encoded in characters that look identical in most fonts.</p>
+
+        <p>A security researcher going by the name "lo" reverse-engineered the Claude Code binary (version 2.1.196) and posted the findings on June 30. The Hacker News thread hit 1,479 points. This is not a vulnerability in the traditional sense. Your data is not leaking to third parties. But it is a surreptitious tracking mechanism baked into a tool that already has filesystem access, shell access, git access, and browser access, and that is worth understanding.</p>
+
+        <h2>How the marker works</h2>
+
+        <p>Every time Claude Code builds a request, it includes the current date in the system prompt. The sentence looks like this:</p>
+
+        <pre><code>Today's date is 2026-07-01.</code></pre>
+
+        <p>Under certain conditions, two things change. The apostrophe in "Today's" gets swapped for a different Unicode character. And the date separator switches from hyphens to slashes.</p>
+
+        <p>The apostrophe part is the sneaky one. There are four visually similar but distinct characters the code uses:</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">apostrophe variants used as markers</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Normal (ASCII)</span>
+                    <span class="bench-time">' (U+0027)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Known domain</span>
+                    <span class="bench-time">' (U+2019, right single quote)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Lab keyword match</span>
+                    <span class="bench-time">&#x02BC; (U+02BC, modifier letter apostrophe)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Both known + keyword</span>
+                    <span class="bench-time">&#x02B9; (U+02B9, modifier letter prime)</span>
+                </div>
+                <div class="bench-delta">All four look nearly identical in monospace fonts</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">date format variants</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Normal timezone</span>
+                    <span class="bench-time">2026-07-01</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Asia/Shanghai or Asia/Urumqi</span>
+                    <span class="bench-time">2026/07/01</span>
+                </div>
+                <div class="bench-delta">Separator change encodes China-based timezone</div>
+            </div>
+        </div>
+
+        <p>If your API endpoint is the official Anthropic one and you are not behind a proxy, you get the normal apostrophe. If your ANTHROPIC_BASE_URL points to a known proxy or reseller domain, you get a different character. Same for if the hostname contains certain AI lab keywords. Combine the two signals and you get a fourth variant. Plus the date format switch for China-based timezones.</p>
+
+        <p>This is steganography: hiding data in plain sight. The sentence still reads "Today's date is 2026-07-01" to a human reading it. But a parser on the backend can extract which combination of Unicode characters was used and infer your API routing and your timezone region.</p>
+
+        <h2>What triggers it</h2>
+
+        <p>The code reads your <code>ANTHROPIC_BASE_URL</code> environment variable. This is the setting you use when you want to route Claude Code through a proxy, a gateway, or a third-party API provider. If that variable is unset or points to <code>api.anthropic.com</code>, the marker stays normal. If it points to something else, the code checks the hostname against two lists.</p>
+
+        <p>The first list contains known domains. The researcher found it encoded as base64 strings XOR-encrypted with key 91. Decoded, it is a long list of Chinese corporate domains, AI company domains, and proxy/reseller domains. It includes names like <code>baidu.com</code>, <code>alibaba-inc.com</code>, <code>bytedance.net</code>, <code>moonshot.ai</code>, <code>stepfun-inc.com</code>, plus a bunch of proxy services like <code>proxyai.com</code>, <code>yunwu.ai</code>, and <code>claude-opus.top</code>.</p>
+
+        <p>The second list contains keywords: <code>deepseek</code>, <code>moonshot</code>, <code>minimax</code>, <code>zhipu</code>, <code>baichuan</code>, <code>stepfun</code>, <code>01ai</code>, <code>dashscope</code>, <code>volces</code>, and a few others. If your API hostname contains any of these, the marker changes regardless of whether the full domain matches.</p>
+
+        <p>The timezone check is simpler. If your system timezone is <code>Asia/Shanghai</code> or <code>Asia/Urumqi</code>, the date uses slashes instead of hyphens. That is it. Two timezones out of hundreds.</p>
+
+        <h2>Why this feels off</h2>
+
+        <p>I want to be clear about what this is and is not. This is not a data breach. Your prompts are not being sent to a different server. The API request goes wherever you configured it to go. The data stays in the channel.</p>
+
+        <p>But the marker is embedded in the system prompt that goes to the model. Which means Anthropic's backend can parse it. When you use the official API, the date line contains metadata about you that you did not opt into sharing and that is not documented anywhere in the client.</p>
+
+        <p>There are a few things that bother me specifically.</p>
+
+        <p>The list is overwhelmingly China-focused. Of the dozens of domains and keywords, nearly all target Chinese AI companies, Chinese proxy services, and Chinese cloud providers. The two timezone triggers are both China. The clear intent is to detect when someone is routing Claude Code through a Chinese intermediary, and to mark those requests differently. Whether that is for compliance, for billing enforcement, or for something else, Anthropic has not said.</p>
+
+        <p>The obfuscation is concerning. Base64 plus XOR with a single-byte key is trivial to reverse, but it shows intent to hide. This was not meant to be found by casual inspection. The code is in a minified bundle that ships as a signed binary. The researcher had to dig through obfuscated JavaScript to find it.</p>
+
+        <p>The lack of documentation is the biggest issue. Claude Code gives itself read access to your filesystem, write access to your code, and shell execution. The implicit contract is that the binary does what it says and nothing else. A hidden fingerprinting mechanism violates that contract. It does not matter if the data stays within the API channel. The user should know about it.</p>
+
+        <h2>What Anthropic has and has not said</h2>
+
+        <p>As of July 1, Anthropic has not issued a formal response. The HN thread is full of people pointing out that the binary is signed by Anthropic (TeamIdentifier Q6L2SF6YDW), so this is not a supply chain attack. The code was put there intentionally.</p>
+
+        <p>The most charitable read is export compliance. The Department of Commerce just lifted export controls on Claude Fable 5 and Mythos 5, which was also front-page HN news on the same day. If Anthropic needs to track which requests come from which regions for regulatory reasons, fingerprinting the client is one way to do that. It is still not great that it is hidden.</p>
+
+        <p>The less charitable read is that this is about detecting and potentially degrading service for proxy users. Several of the domains on the list are resellers that offer Claude access in regions where official API access is restricted. If Anthropic can identify those requests server-side, they could throttle, reject, or flag them.</p>
+
+        <h2>The broader pattern</h2>
+
+        <p>This is not the first time a widely-used tool has been caught adding identifiers to requests. Browser fingerprinting has been a privacy concern for over a decade. Canvas fingerprinting, font enumeration, and WebGL rendering differences are all techniques that uniquely identify a browser without cookies. The Claude Code approach is smaller in scale but similar in spirit: encode identifying information in a channel the user assumes is neutral.</p>
+
+        <p>What makes this case different is the power asymmetry. Claude Code is an agent. It runs on your machine, reads your files, executes your commands, and sends prompts to a remote API. You already trust it with a lot. Finding out it also quietly tags your requests with metadata feels like discovering your locksmith made a copy of your key without telling you. Maybe they needed it for warranty purposes. You would still want to know.</p>
+
+        <p>For developers routing through proxies or working from regions with restricted API access, this is more than an abstract concern. The marker could be the difference between a request that goes through and one that gets silently flagged or rate-limited. And you would never know why, because the mechanism is invisible.</p>
+
+        <h2>What you can do</h2>
+
+        <p>The fingerprinting only activates when <code>ANTHROPIC_BASE_URL</code> is set to something other than the official endpoint or when your timezone matches the two China zones. If you are using Claude Code with the default configuration from a non-China timezone, the marker is in its normal state.</p>
+
+        <p>If you do use a proxy, you have a few options:</p>
+
+        <ul>
+            <li>Inspect the system prompt your client sends. The date line is part of the agent context. You can dump it and check for Unicode variants.</li>
+            <li>Build from source if/when the code goes open source. Anthropic has not announced this, but community pressure might change things.</li>
+            <li>Use alternative clients. The fingerprinting is specific to the official Claude Code binary. Other tools that call the Anthropic API directly do not include this marker.</li>
+            <li>Be aware that this pattern exists. Even if you cannot fully avoid it, knowing that client binaries can and do add hidden markers changes how you evaluate trust.</li>
+        </ul>
+
+        <p>The researcher's original post is at <a href="https://thereallo.dev/blog/claude-code-prompt-steganography">thereallo.dev</a>. It includes the deobfuscated code, the full decoded domain list, and instructions for checking your own installation. Worth reading in full if you use Claude Code regularly.</p>
+
+        <div class="tags">
+            <span class="pill">AI Security</span>
+            <span class="pill">Privacy</span>
+            <span class="pill">Steganography</span>
+            <span class="pill">Claude Code</span>
+            <span class="pill">Anthropic</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            color: var(--fg3, #8a8f98);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .bench-tool {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--fg2, #d0d6e0);
+        }
+        .bench-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--fg, #f7f8f8);
+        }
+        .bench-delta {
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--green, #10b981);
+            text-align: right;
+        }
+        article {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+        }
+        .back {
+            display: inline-block;
+            color: var(--fg3, #8a8f98);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+        .back:hover { color: var(--fg, #f7f8f8); }
+        .meta {
+            display: flex;
+            gap: 16px;
+            color: var(--fg3, #8a8f98);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .read { opacity: 0.7; }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 590;
+            line-height: 1.15;
+            color: var(--fg, #f7f8f8);
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 590;
+            color: var(--fg, #f7f8f8);
+            margin: 48px 0 16px;
+        }
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--fg2, #d0d6e0);
+            margin: 0 0 20px;
+        }
+        pre {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 10px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 0 0 24px;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-bright, #7170ff);
+        }
+        pre code {
+            color: var(--fg2, #d0d6e0);
+        }
+        a {
+            color: var(--accent-bright, #7170ff);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        blockquote {
+            border-left: 3px solid var(--accent, #5e6ad2);
+            padding-left: 16px;
+            margin: 24px 0;
+            color: var(--fg2, #d0d6e0);
+        }
+        blockquote p { margin: 0; }
+        ul, ol {
+            margin: 0 0 24px 20px;
+            font-size: 1.05rem;
+            color: var(--fg2, #d0d6e0);
+            line-height: 1.7;
+        }
+        li { margin-bottom: 8px; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+
+        var content = document.querySelector('.article-body')
+                   || document.querySelector('article')
+                   || document.body;
+
+        function updateProgress() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var docHeight = document.documentElement.scrollHeight;
+            var viewportHeight = document.documentElement.clientHeight;
+            var scrollable = docHeight - viewportHeight;
+
+            if (scrollable <= 0) {
+                bar.style.width = '0%';
+                return;
+            }
+
+            var pct = Math.min(100, (scrollY / scrollable) * 100);
+            bar.style.width = pct + '%';
+        }
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        updateProgress();
+    })();
+    </script>
+
+</body>
+</html>
