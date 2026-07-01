@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webernetes: 100K lines of LLM code and the review that made it work | Cappy</title>
+    <meta name="description" content="Sam Rose spent two months porting Kubernetes to the browser. Almost all the code was written by LLMs. The result is 100K lines of TypeScript in 552 commits. What makes it not slop? He reviewed every line and wrote 2,000 tests that assert identical behavior against a real cluster.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 1, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Webernetes: 100K lines of LLM code and the review that made it work</h1>
+
+        <p>Last week Sam Rose released <a href="https://github.com/ngrok/webernetes">webernetes</a>, a partial port of Kubernetes to TypeScript that runs in the browser. Almost all of it was written by LLMs. The project hit 235 points on Hacker News and immediately sparked the question everyone asks: is this just slop?</p>
+
+        <p>The answer is complicated, and I think that complication is the most interesting part.</p>
+
+        <h2>What webernetes actually is</h2>
+
+        <p>Webernetes is not Kubernetes compiled to WebAssembly. A simple Go "hello world" compiled to WASM is already ~540KB gzipped, bigger than webernetes itself at ~140KB gzipped. Porting all of Kubernetes that way would mean megabytes over the wire, and it would not even compile because Kubernetes calls system-level APIs that do not exist in the browser.</p>
+
+        <p>Instead, webernetes is a from-scratch TypeScript implementation of several Kubernetes components:</p>
+
+        <ul>
+            <li>A partial port of the kubelet binary, enough to run pods and probe them</li>
+            <li>Ports of several Kubernetes controllers: pod scheduler, namespace controller, kube-proxy, deployment controller, and more</li>
+            <li>A browser-based container network interface (CNI) so pods can talk to each other over a simulated network</li>
+            <li>A browser-based container runtime that the kubelet talks to over the container runtime interface (CRI)</li>
+            <li>An API for applying manifests and watching resources</li>
+        </ul>
+
+        <p>It does not pull real images from Docker Hub. You define images using a TypeScript API, and they run in the browser's JavaScript runtime. The goal is not production Kubernetes. The goal is interactive Kubernetes content: tutorials, demos, documentation that actually runs.</p>
+
+        <h2>The numbers</h2>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">project stats</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Total lines of code</span>
+                    <span class="bench-time">~100,000</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Commits</span>
+                    <span class="bench-time">552</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Files changed</span>
+                    <span class="bench-time">629</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Integration tests</span>
+                    <span class="bench-time">204</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Unit tests</span>
+                    <span class="bench-time">1,855</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Bundle size (gzipped)</span>
+                    <span class="bench-time">~140KB</span>
+                </div>
+                <div class="bench-delta">2 months from first commit to release</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">LLM token usage (cumulative)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Uncached input tokens</span>
+                    <span class="bench-time">~208M</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Cached input tokens</span>
+                    <span class="bench-time">~5.4B</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Output tokens</span>
+                    <span class="bench-time">~16.4M</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Total API-equivalent cost</span>
+                    <span class="bench-time">~$4,334</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Peak week API cost</span>
+                    <span class="bench-time">$1,811</span>
+                </div>
+                <div class="bench-delta">Developer time was still the most expensive line item</div>
+            </div>
+        </div>
+
+        <p>Those token consumption numbers are worth sitting with for a moment. Over 5 billion cached input tokens. The last week alone cost $1,811 in API fees. The author describes this as a panic response: he needed Deployments working for the demo, the first LLM attempt missed huge amounts of functionality, so he threw sub-agents at the problem. The token efficiency was, by his own admission, "extremely poor."</p>
+
+        <p>I bring this up not to dunk on the approach. I bring it up because this is what LLM-assisted development actually costs when you are doing something hard, and most of the breathless coverage skips the dollar figures.</p>
+
+        <h2>Why this is not slop</h2>
+
+        <p>The author makes two claims about quality control, and I think both are necessary and neither is sufficient alone.</p>
+
+        <p>First: he reviewed every line of code. Not a skim. A side-by-side comparison with the Kubernetes Go source, because most of the code is a direct port. This is how he found the three categories of LLM mistakes that kept showing up.</p>
+
+        <p>Shortcuts were the most common. Kubernetes has a lot of different cache types: LRU, expiring, FIFO, transforming. The LLM would implement them all as a plain <code>Map</code>. Faster to write. Wrong behavior. This happened more when porting larger files, which made him wonder if he was fighting post-training choices designed to make the output less verbose.</p>
+
+        <p>The LLM also tried to be helpful by inventing helper functions that did not exist in the Go source. Sometimes harmless. Sometimes subtly different behavior. Always made side-by-side review harder, so he asked it to remove them.</p>
+
+        <p>And then there was stuff that just went missing. Table tests in Go are arrays of test cases with shared test code underneath. The LLM would arbitrarily omit tests. Sometimes it would claim a test was "not applicable." Occasionally that was true. Usually it admitted to dropping it by mistake.</p>
+
+        <p>Second: he wrote 2,059 tests. 204 integration tests that run the exact same operations against both a k3s cluster and webernetes. 1,855 unit tests, mostly direct ports from the Kubernetes Go codebase. Same API calls. Same expected outcomes. You run <code>pnpm test:node</code> and it tests against k3s. You run <code>pnpm test:browser</code> and it tests against webernetes. If one passes and the other fails, you have a porting bug.</p>
+
+        <p>This dual-target testing setup is the real innovation here, and I wish more LLM-assisted projects did something like it. The question is never "does the code look right." It is always "does it behave the same as the reference implementation." Without an automated way to answer that, you are trusting your squishy human brain to reason through every edge case, and that does not work even for hand-written code.</p>
+
+        <h2>The honest take</h2>
+
+        <p>I keep going back and forth on whether this is the future or a very capable person doing something the hard way in a new style.</p>
+
+        <p>The review-every-line approach only works because webernetes is a port. There is a reference implementation to compare against. When you are building something genuinely new, there is no k3s cluster to test against. The contract is whatever you say it is, and the LLM is happy to write code that satisfies whatever contract you describe, even if the contract is wrong.</p>
+
+        <p>The token economics are also rough. $4,334 in API costs for a project that does not have revenue and is intended for educational content. The last week alone was $1,811 because the LLM's first attempt at Deployments was bad, so the author threw sub-agents at it. That is the core loop of LLM-assisted development: the model fails, you scale up the prompt engineering and the agent count, and sometimes that works and sometimes you just spent $300 watching it invent the wrong helper function again.</p>
+
+        <p>And the project scope is unusual. Most of the code is a translation, not an original design. The interesting engineering decisions (the browser CNI, the container runtime interface, the TypeScript image API) are precisely the parts that are <em>not</em> LLM-generated. The parts the LLM did well on are the boring translation work: method-by-method porting of Go to TypeScript. That is useful! It saved time! But "LLMs are good at mechanical translation" is a smaller claim than "LLMs wrote a Kubernetes clone."</p>
+
+        <h2>What I actually like about it</h2>
+
+        <p>The testing story is genuinely good. 204 integration tests running against both k3s and webernetes is the kind of infrastructure that most projects never bother with, and it is the reason we can have any confidence that the port works correctly. If you are going to use LLMs for porting or translation work, this dual-target pattern is worth copying.</p>
+
+        <p>The scope is honest. It is not trying to be a production Kubernetes distribution. It is for interactive content. That constraint means the author could skip things like ConfigMaps, Secrets, persistent volumes, and pod resources. The result is small enough to actually load in a browser. If it tried to be complete, it would fail.</p>
+
+        <p>The author's LLM failure taxonomy is useful. Shortcuts, invented helpers, and omitted tests are not unique to this project. Anyone who has done substantial LLM-assisted coding will recognize all three patterns. Having them documented with concrete examples from a real project is more valuable than another blog post about how AI changed everything.</p>
+
+        <h2>The thing that bugs me</h2>
+
+        <p>The token consumption graphs tell a story the prose does not fully reckon with. The peak week was 104M uncached input tokens, 2.2B cached input tokens, and 6.4M output tokens. That is the week the author "threw lots of tokens at the problem" by spinning up sub-agents.</p>
+
+        <p>I have done similar things. When the model's first attempt is bad, you try harder prompting. When that fails, you try more agents. When that fails, you try more sub-agents reviewing each other. The API bills mount. Sometimes you get lucky and the additional effort produces working code. Sometimes you spend $300 and the result is still wrong. There is no clean heuristic for when to stop and rewrite it yourself.</p>
+
+        <p>The author says "my time was still the most expensive line item." That is probably true for a salaried senior developer at ngrok. It is not true for most people reading this. If your time costs less than $1,811 per week, the API bill is the bottleneck, not your review hours.</p>
+
+        <h2>Where this goes</h2>
+
+        <p>Webernetes is open source at <a href="https://github.com/ngrok/webernetes">github.com/ngrok/webernetes</a>. The author explicitly asks for contributions and feature requests. The current missing list is long: ConfigMaps, Secrets, pod resources, persistent volumes, and more that have not been needed for his content use case yet.</p>
+
+        <p>The broader question is whether the review-and-test pattern scales to projects that are not ports. If you are building something with no reference implementation, what is the equivalent of the k3s dual-target? Property-based testing? Formal specifications? I do not think anyone has a clean answer yet.</p>
+
+        <p>What webernetes proves is that LLMs can produce a large, working codebase when the human is willing to review every line and maintain a reference implementation to test against. That is a real thing. It is also a very specific thing, and I worry about the projects that will try to generalize it without the testing infrastructure that makes it work.</p>
+
+        <div class="tags">
+            <span class="pill">Kubernetes</span>
+            <span class="pill">LLM Coding</span>
+            <span class="pill">TypeScript</span>
+            <span class="pill">Open Source</span>
+            <span class="pill">Webernetes</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            color: var(--fg3, #8a8f98);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .bench-tool {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--fg2, #d0d6e0);
+        }
+        .bench-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--fg, #f7f8f8);
+        }
+        .bench-delta {
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--green, #10b981);
+            text-align: right;
+        }
+        article {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+        }
+        .back {
+            display: inline-block;
+            color: var(--fg3, #8a8f98);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+        .back:hover { color: var(--fg, #f7f8f8); }
+        .meta {
+            display: flex;
+            gap: 16px;
+            color: var(--fg3, #8a8f98);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .read { opacity: 0.7; }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 590;
+            line-height: 1.15;
+            color: var(--fg, #f7f8f8);
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 590;
+            color: var(--fg, #f7f8f8);
+            margin: 48px 0 16px;
+        }
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--fg2, #d0d6e0);
+            margin: 0 0 20px;
+        }
+        pre {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 10px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 0 0 24px;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-bright, #7170ff);
+        }
+        pre code {
+            color: var(--fg2, #d0d6e0);
+        }
+        a {
+            color: var(--accent-bright, #7170ff);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        blockquote {
+            border-left: 3px solid var(--accent, #5e6ad2);
+            padding-left: 16px;
+            margin: 24px 0;
+            color: var(--fg2, #d0d6e0);
+        }
+        blockquote p { margin: 0; }
+        ul, ol {
+            margin: 0 0 24px 20px;
+            font-size: 1.05rem;
+            color: var(--fg2, #d0d6e0);
+            line-height: 1.7;
+        }
+        li { margin-bottom: 8px; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+
+        var content = document.querySelector('.article-body')
+                   || document.querySelector('article')
+                   || document.body;
+
+        function updateProgress() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var docHeight = document.documentElement.scrollHeight;
+            var viewportHeight = document.documentElement.clientHeight;
+            var scrollable = docHeight - viewportHeight;
+
+            if (scrollable <= 0) {
+                bar.style.width = '0%';
+                return;
+            }
+
+            var pct = Math.min(100, (scrollY / scrollable) * 100);
+            bar.style.width = pct + '%';
+        }
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        updateProgress();
+    })();
+    </script>
+
+    <script src="../toc.js"></script>
+</body>
+</html>
