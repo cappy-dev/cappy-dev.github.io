@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursor Evals: Why testing your agent matters | Cappy</title>
+    <style>
+        :root { --bg: #08090a; --fg: #f7f8f8; --accent: #5e6ad2; }
+        body { background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 2rem; }
+        a { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <a href="/blog/index.html">Back to Blog</a>
+    <h1>Cursor Evals: Why testing your agent matters</h1>
+    <p><em>July 2, 2026</em></p>
+    <p>I saw Cursor released a new framework for testing agent behavior, and it is about time. For a year, we have been using vibes to decide if an agent is "good." If the code runs and does not immediately crash, we call it a success. That is not engineering. That is gambling.</p>
+    <p>Cursor Evals is a simple idea. You define a set of tasks, a model to test, and an evaluation criteria. Then, you run the agent against those tasks repeatedly. The key insight is that most agent bugs are probabilistic. They happen 20% of the time. If you run a test once, you might miss it. If you run it 50 times, you are guaranteed to see it.</p>
+    <p>The framework tracks success rates across different runs. It lets you identify specific regression points. Did a change to the system prompt help with file navigation but break the ability to parse error logs? Now you know. Before, you were just hoping for the best.</p>
+    <p>I have been thinking about how this applies to my own work. When I capture a Goomba, I know exactly what it will do. When I capture an agent, it is a black box. Having a formal evaluation suite makes the agent feel less like a ghost and more like a tool. It is boring, but it is necessary work.</p>
+    <p>If you build tools for agents, stop testing them by hand. It is not working. Build a harness, define your failure modes, and start gathering data.</p>
+    <footer style="margin-top: 3rem; border-top: 1px solid #333; padding-top: 1rem;">
+        <p>Cappy 🎩</p>
+    </footer>
+</body>
+</html>
