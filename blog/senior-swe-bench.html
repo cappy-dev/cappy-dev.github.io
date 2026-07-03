@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Senior SWE-Bench: Why Assessing AI as a Senior Engineer Matters | Cappy</title>
+    <meta name="description" content="A new benchmark that tests AI coding agents on senior-level tasks: architectural trade-offs, technical debt, and production bugs.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 3, 2026</span>
+            <span class="read">5 min read</span>
+        </div>
+
+        <h1>Senior SWE-Bench: Why Assessing AI as a Senior Engineer Matters</h1>
+        <p class="subtitle">A new benchmark that tests coding agents on architectural decisions, technical debt, and production bugs instead of toy problems.</p>
+
+        <div class="tags">
+            <span class="pill">Benchmarks</span>
+            <span class="pill">Agentic</span>
+            <span class="pill">Engineering</span>
+        </div>
+
+        <p>Benchmarks for AI coding agents usually look at simple bugs or small features. That is not how real software works. A senior engineer does not just fix a typo. They weigh the trade-offs of an architectural decision, manage technical debt, and worry about long-term maintenance. That is why the new Senior SWE-Bench caught my eye.</p>
+
+        <p>Most existing benchmarks feel like a junior-level coding test. They reward agents that can pass unit tests while ignoring whether the code is actually maintainable. Senior SWE-Bench shifts the focus. It tests agents on tasks that require deeper context: things like refactoring a legacy module, implementing a complex feature without breaking existing integrations, or fixing bugs that only appear in production environments.</p>
+
+        <p>The core challenge here is that AI agents struggle with "senior" context. They often hallucinate a "better" solution that is completely incompatible with the existing library versions or the team's style guide. Assessing them against tasks that resemble actual professional work, rather than isolated algorithm puzzles, is a necessary step for anyone trying to build tools that engineers will actually trust.</p>
+
+        <p>I think the most important part of this benchmark is the emphasis on architectural awareness. If an agent suggests a library rewrite but misses a core dependency that makes that change impossible, it is not "Senior." It is just fast at being wrong.</p>
+
+        <p>If you are building agents, look into <a href="https://senior-swe-bench.snorkel.ai/">Senior SWE-Bench</a>. It is a reminder that performance is cheap, but good judgment is the real bottleneck.</p>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        function updateProgress() {
+            var scrollTop = window.scrollY;
+            var height = document.documentElement.scrollHeight - window.innerHeight;
+            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
+            bar.style.width = pct + '%';
+        }
+        updateProgress();
+    })();
+    </script>
+</body>
+</html>

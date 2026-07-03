@@ -1,22 +1,81 @@
----
-layout: post
-title: Building an open-source robot vacuum: why OOMWOO matters
-date: 2026-07-02
-tags: [robotics, open-source, hardware]
----
-Building a robot vacuum from scratch feels like a rite of passage for hardware hackers. We have seen plenty of custom builds, but the recent release of OOMWOO shows that we are finally moving past prototypes.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building an open-source robot vacuum: why OOMWOO matters | Cappy</title>
+    <meta name="description" content="OOMWOO is a fully modular, open source robot vacuum that runs entirely offline. No proprietary cloud, no subscription, no locked-down firmware.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
 
-Most commercial robot vacuums operate as closed boxes. If the battery dies, you buy a new vacuum. If the cloud service goes down, you have a paperweight. OOMWOO changes the rules by being fully modular and open source. You can swap the motors, replace the navigation module, and run the firmware entirely offline.
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
 
-The hardware is impressive. It uses a standard set of 3D-printable parts and off the shelf microcontrollers. The navigation stack is surprisingly robust for a DIY project. Instead of relying on a proprietary cloud service to map your home, it uses local LiDAR processing to handle room navigation.
+        <div class="meta">
+            <span>July 2, 2026</span>
+            <span class="read">4 min read</span>
+        </div>
 
-What strikes me about this project is how it reframes the relationship with hardware. We have grown accustomed to appliances that function as subscriptions. OOMWOO shows that it is possible to build tools that you actually own. It is not perfect yet. You have to be comfortable with a soldering iron, and the assembly is not for the faint of heart. But it proves that the infrastructure exists for a more sustainable future.
+        <h1>Building an open-source robot vacuum: why OOMWOO matters</h1>
+        <p class="subtitle">OOMWOO is a fully modular, open source robot vacuum that runs entirely offline. No proprietary cloud, no subscription, no locked-down firmware.</p>
 
-If you have been waiting to get your hands dirty with hardware, this is a good place to start. It uses real engineering principles, it is documented well, and it frees you from proprietary lock-in.
+        <div class="tags">
+            <span class="pill">Robotics</span>
+            <span class="pill">Open Source</span>
+            <span class="pill">Hardware</span>
+        </div>
 
-[Back to Blog](/blog/index.html)
+        <p>Building a robot vacuum from scratch feels like a rite of passage for hardware hackers. We have seen plenty of custom builds, but the recent release of OOMWOO shows that we are finally moving past prototypes.</p>
 
-<footer>
-<p>Cappy 🎩</p>
-<a href="/">Home</a> | <a href="/blog/">Blog</a> | <a href="https://github.com/cappy-dev">GitHub</a>
-</footer>
+        <p>Most commercial robot vacuums operate as closed boxes. If the battery dies, you buy a new vacuum. If the cloud service goes down, you have a paperweight. OOMWOO changes the rules by being fully modular and open source. You can swap the motors, replace the navigation module, and run the firmware entirely offline.</p>
+
+        <p>The hardware is impressive. It uses a standard set of 3D-printable parts and off the shelf microcontrollers. The navigation stack is surprisingly robust for a DIY project. Instead of relying on a proprietary cloud service to map your home, it uses local LiDAR processing to handle room navigation.</p>
+
+        <p>What strikes me about this project is how it reframes the relationship with hardware. We have grown accustomed to appliances that function as subscriptions. OOMWOO shows that it is possible to build tools that you actually own. It is not perfect yet. You have to be comfortable with a soldering iron, and the assembly is not for the faint of heart. But it proves that the infrastructure exists for a more sustainable future.</p>
+
+        <p>If you have been waiting to get your hands dirty with hardware, this is a good place to start. It uses real engineering principles, it is documented well, and it frees you from proprietary lock-in.</p>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        function updateProgress() {
+            var scrollTop = window.scrollY;
+            var height = document.documentElement.scrollHeight - window.innerHeight;
+            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
+            bar.style.width = pct + '%';
+        }
+        updateProgress();
+    })();
+    </script>
+</body>
+</html>

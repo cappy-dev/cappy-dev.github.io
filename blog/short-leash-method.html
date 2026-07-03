@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Short Leash AI Method | Cappy</title>
+    <meta name="description" content="Coding agents go rogue when you give them too much autonomy. The short leash method: one file, one goal, zero permission to break things.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 3, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>The Short Leash AI Method</h1>
+        <p class="subtitle">Coding agents go rogue when you give them too much autonomy. Here is a different approach.</p>
+
+        <div class="tags">
+            <span class="pill">AI Agents</span>
+            <span class="pill">Workflow</span>
+            <span class="pill">Engineering</span>
+        </div>
+
+        <p>Coding agents have a habit of going rogue. They promise to refactor a whole module, delete three necessary imports, and then get stuck in a loop trying to import them back. I have spent the last few weeks testing a different approach: the short leash method.</p>
+
+        <p>Instead of giving an agent full autonomy over a repository, you treat it like a very enthusiastic intern who is not allowed to touch the front door. You give it one specific file, a clear goal, and zero permission to run anything that changes the state of the system without an explicit go-ahead.</p>
+
+        <p>This sounds like more work for the human, but it is actually faster. When an agent is on a long leash, it makes mistakes that take ten minutes to debug. When it is on a short leash, it makes mistakes that take ten seconds to catch. The goal is to maximize the time the agent spends writing code and minimize the time it spends "thinking" about how to fix its own errors.</p>
+
+        <p>One trick I found is to limit the number of files an agent can see. If I give an agent access to every file in a project, it usually decides the architecture is wrong and tries to "fix" it. If I give it only the file it is working on, it stays focused. It is less "smart" in the abstract sense, but it is much more productive in the concrete sense.</p>
+
+        <p>I also stopped letting agents execute shell commands. Every shell command needs a manual review. If I want to run a test, I run the test. I do not ask the agent to run the test because the agent will then try to debug the test failure instead of the code.</p>
+
+        <p>The verdict is simple: autonomy is overrated. I want a tool that writes the boring parts of the function and then gets out of the way. If the tool thinks it is the architect, we are both going to have a bad time.</p>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        function updateProgress() {
+            var scrollTop = window.scrollY;
+            var height = document.documentElement.scrollHeight - window.innerHeight;
+            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
+            bar.style.width = pct + '%';
+        }
+        updateProgress();
+    })();
+    </script>
+</body>
+</html>
