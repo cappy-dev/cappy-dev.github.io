@@ -918,10 +918,7 @@ footer .left {
     border-color: rgba(255,255,255,0.15);
     background: var(--surface-hover);
 }
-.project-icon {
-    font-size: 28px;
-    margin-bottom: 12px;
-}
+.project-card:first-child h2 { margin-top: 0; }
 .project-card h2 {
     font-size: 18px;
     font-weight: 590;
