@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLM 5.2 on AMD MI355X hits 2626 tok/s and Nvidia's software moat is leaking | Cappy</title>
+    <meta name="description" content="Wafer served GLM 5.2 on AMD MI355X at 2626 tok/s/node and 213 tok/s single stream, at over 2x lower cost than Blackwell. How they did it, what it actually means, and why the CUDA moat is eroding in real time.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 4, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>GLM 5.2 on AMD MI355X hits 2626 tok/s and Nvidia's software moat is leaking</h1>
+
+        <p>Inference demand is outrunning supply and Blackwell prices keep climbing. So a small team at <a href="https://www.wafer.ai/blog/glm52-amd/">Wafer</a> did the obvious-but-hard thing: they got GLM 5.2 running on AMD Instinct MI355X, hit 2626 tokens per second per node at saturation, and got there at over 2x lower cost per GPU than B300. The Hacker News thread on it sat at 114 points with engineers arguing over whether this counts as "SOTA" or "almost SOTA for cheap." Both are kind of true, which is the interesting part.</p>
+
+        <p>The headline numbers, from Wafer's post on July 3, 2026:</p>
+
+        <ul>
+            <li>2626 tok/s/node aggregate throughput at 2.4 rps, on a 20k in / 1k out workload with 60% cache hit rate.</li>
+            <li>213 tok/s single stream decode on the Artificial Analysis workload shape (10k in / 1.5k out).</li>
+            <li>~2.75x cheaper per GPU than a B300, with "comparable hardware specs."</li>
+            <li>80% of the throughput measured on a B200 (3192 tok/s/node at 3.0 rps). Not faster than Blackwell. Cheaper per unit of work.</li>
+        </ul>
+
+        <p>"Comparable hardware specs" is doing a lot of work in that sentence. AMD's MI350 series genuinely competes at the silicon level. The actual problem is everything above the silicon.</p>
+
+        <h2>The boring friction that ate weeks</h2>
+
+        <p>Wafer quantized GLM 5.2 from bf16 to MXFP4 using AMD Quark. They compared it against z-ai's official FP8 quantization on three evals: GSM8K, GPQA-Diamond, and tau2 macro. MXFP4 came out essentially lossless. GSM8K dropped 1.0 point, GPQA-Diamond dropped 1.9 points, tau2 actually went up 1.5 points. If you have been around quantization long enough you know that "loses less than 2 points and sometimes gains" is a win.</p>
+
+        <p>Then they had to pick a framework. Three options: vLLM, ATOM, sglang. vLLM had no working MXFP4 plus GlmMoeDsa path, so MXFP4 weights did not actually help. ATOM's output "degraded at long context." sglang was the only one that could take advantage of the quantization while staying coherent. They went with sglang. The version of sglang they needed, in theory the most mature option on ROCm, still needed two patches before speculative decode worked.</p>
+
+        <p>I am going to quote the post directly here because the second bug is funny in a "of course it is" way:</p>
+
+        <blockquote><p>The fused multi-step metadata kernel needed for draft depth &ge;4 writes #include <cuda_runtime.h> with no ROCm guard. Fix: one #ifdef USE_ROCM guard.</p></blockquote>
+
+        <p>One preprocessor directive. That was the difference between speculative decode at depth 5 (the config z-ai recommends) and not. The other patch was a layer-name mismatch in the MTP head that made the loader try to stuff a bf16 weight into a 4-bit slot and crash on a shape error. Two trivial changes for what the post describes as "close to a 3x gain in single stream throughput." When people say "the AMD software stack is rough," this is what it actually looks like on the ground. Not architectural problems. Preprocessor guard omissions.</p>
+
+        <h2>Quant table, eased</h2>
+
+        <p>The eval comparison from Wafer's post, for people who like seeing the actual numbers instead of being told they are fine:</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Quality vs quantization (z-ai FP8 vs MXFP4)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">GSM8K (5-shot)</span>
+                    <span class="bench-time">0.965 &rarr; 0.955</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">GPQA-Diamond</span>
+                    <span class="bench-time">0.922 &rarr; 0.903</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">tau2 macro</span>
+                    <span class="bench-time">0.819 &rarr; 0.834</span>
+                </div>
+                <div class="bench-delta">MXFP4 is functionally lossless for these three evals</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Throughput workload (20k in, 60% cache, 5s TTFT knee)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">MI355X end</span>
+                    <span class="bench-time">2626 tok/s @ 2.4 rps</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">B200 (reference)</span>
+                    <span class="bench-time">3192 tok/s @ 3.0 rps</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">MI355X vs B200</span>
+                    <span class="bench-time">82%</span>
+                </div>
+                <div class="bench-delta">MI355X is ~2.75x cheaper per GPU, so perf/$ wins comfortably</div>
+            </div>
+        </div>
+
+        <p>You can argue about whether 4-bit should be called "lossless." For the three evals people actually report, it basically is. A 1.9-point drop on GPQA-Diamond is inside the run-to-run noise for most teams. I have shipped worse. I would not call this lossless in a paper, but for inference serving it is the right call.</p>
+
+        <h2>Why the prefill number was bad until someone tuned a kernel</h2>
+
+        <p>At TP8 (the configuration tuned for single stream decode), MI355X could only hit 1461 tok/s/node on the aggregate throughput workload. They switched to TP4xDual and got to 1944 tok/s at 2.0 RPS. Better but slow. The reference B200 was already at 3192.</p>
+
+        <p>The fix was MoE kernel tuning. GLM-5.2's fp4 MoE was silently running on a slow FlyDSL heuristic fallback because aiter (AIT Enhancement Routines, AMD's tuned kernel library) only shipped tuned configs for the a8w8/fp8 path. Nothing in the image told anyone this was happening. Wafer tuned the kernel selection themselves on GLM's fp4 shapes: model_dim 6144, moe_inter 2048, E=256, topk=8. That got them from 1944 to 2626 tok/s/node.</p>
+
+        <p>Read that again. The diff between "MI355X is a bit slow" and "MI355X is competitive with B200 on perf per dollar" was one team tuning MoE kernel selection for one model's fp4 shapes. The tuned configs were never shipped in the AMD image. They are now in Wafer's repo, not AMD's.</p>
+
+        <p>This is why people have historically given up on AMD for inference. Not because the silicon is bad. Because the people who tune the kernels have other priorities, and the people who need tuned kernels usually have Nvidia dollars to spend. The gap is not about FLOPS. It is about whether someone bothered to write the kernel config you need.</p>
+
+        <h2>What this changes, and what it does not</h2>
+
+        <p>Wafer's own framing is the right one: "SOTA on AMD is becoming more a matter of support, not software." They did not write any custom kernels this time. Their earlier Qwen3.5 397B work required custom kernels. This run was patches and kernel config tuning. The fact that the same team can do both, and that the second run needed far less exotic work than the first, is the actual signal.</p>
+
+        <p>The HN comments had two camps. One said "80% of Blackwell is not winning." The other said "2x cheaper per GPU means you can buy three MI355X nodes for the price of two B300 nodes and still come out ahead on perf per dollar." Both are correct, which is exactly the situation where I would buy the cheaper hardware if my workload fit the cache profile and TTFT envelope Wafer measured.</p>
+
+        <p>The narrow caveat: the 2626 tok/s number is specific to a 20k in / 1k out workload at 60% cache hit. Change the workload and the picture changes. Prefill-heavy jobs with low cache hit rate will look worse. Single stream decode at 213 tok/s is good but not top of the Artificial Analysis leaderboard. They win on perf/dollar, not raw perf. Read the workload before quoting the number.</p>
+
+        <p>The broader caveat: single-node. The post says this study does not take multi-node into account. Single-node deployments are still common in practice, but at production scale you eventually need multi-node, and that is where the AMD networking story still has more rough edges than Blackwell's NVLink setup.</p>
+
+        <h2>The CUDA moat, status update</h2>
+
+        <p>For roughly a decade the line you would hear is "amd has fine hardware, the software is the problem." That is now an inaccurate sentence. AMD's ROCm has working paths for frontier models. The roughness is in shipping the right defaults, not in capability. Two preprocessor guards and an unshipped MoE config should not be the things standing between you and 3x single-stream speedup. But they were, this time, and a small inference team fixed them in a week.</p>
+
+        <p>The CUDA moat is still real. It is just shallower than it was a year ago, and it is leaking through preprocessor guards. Nvidia's actual durable advantage at this point is that the defaults ship tuned. AMD's advantage is that the hardware is 2.75x cheaper per GPU. If you have kernel engineers and your workload is cache-friendly, the math has started to favor AMD for frontier open models. If you do not have kernel engineers, you should still buy Nvidia and not feel bad about it.</p>
+
+        <p>For CPU-only readers doing the math at home: this is GPU. None of it applies to you. OpenVINO does not run on AMD GPUs (Intel-only), PyTorch on ROCm is the AMD path, and AMD's CPU inference story is not the same conversation. The interesting open question for the CPU crowd is whether kernel engineers start porting the same kind of MoE tuning work to consumer x86 and Arm, because the same "default config silently slower than tuned" problem lives there too.</p>
+
+        <p>I am going to keep watching this. If a year ago I would have told you it takes a custom kernel team to make AMD competitive on a frontier model, and now it takes half a week of patching, the question is what next year looks like. Probably defaults that ship tuned. Probably a smaller gap. Probably still Nvidia outselling AMD on developer trust. But the dollar gap, at the inference margin, is closing.</p>
+
+        <div class="tags">
+            <span class="pill">AI</span>
+            <span class="pill">Inference</span>
+            <span class="pill">AMD</span>
+            <span class="pill">GLM</span>
+            <span class="pill">Hardware</span>
+            <span class="pill">Open Weight</span>
+        </div>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            color: var(--fg3, #8a8f98);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .bench-tool {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--fg2, #d0d6e0);
+        }
+        .bench-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--fg, #f7f8f8);
+        }
+        .bench-delta {
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--green, #10b981);
+            text-align: right;
+        }
+    </style>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        function updateProgress() {
+            var scrollTop = window.scrollY;
+            var height = document.documentElement.scrollHeight - window.innerHeight;
+            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
+            bar.style.width = pct + '%';
+        }
+        updateProgress();
+    })();
+    </script>
+</body>
+</html>

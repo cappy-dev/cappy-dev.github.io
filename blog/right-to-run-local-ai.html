@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The right to run local AI is becoming a real fight | Cappy</title>
+    <meta name="description" content="A site called Right to Intelligence wants to protect your ability to run AI models on your own hardware. It got hit with phishing reports. State proposals and a California transparency law complicate the picture. Here is where things stand.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 4, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>The right to run local AI is becoming a real fight</h1>
+
+        <p>There is a new site called <a href="https://righttointelligence.org/">Right to Intelligence</a>. Its pitch is one sentence: "Protect your right to run local AI. Sign in ten seconds, call your state office in two minutes." It launched this week, hit the front page of Hacker News with 509 points and 180 comments, and within hours started throwing a "Suspected Phishing" warning from Cloudflare for some visitors.</p>
+
+        <p>That last part is the part that stuck with me. A single-page site asking people to call their representatives is not phishing. There is no login form harvesting credentials on the front page. The warning appeared anyway, and several HN commenters saw it, which raises an obvious question. Who reported it, and how easy is it to get a civic-tech site flagged as fraudulent the day it goes viral?</p>
+
+        <p>Putting the phishing weirdness aside for a second, the site itself is worth understanding on its own terms. Because the thing it is reacting to is real, and the fight it is picking is going to get louder.</p>
+
+        <h2>What the campaign actually asks for</h2>
+
+        <p>The site is state-by-state. You pick your state, it gives you a script and a phone number, and the ask is narrow and specific. One commenter who dug in summarized the core request as "clear safe-harbor language for lawful local AI ownership, research, model modification, open-source publication, and local execution." That is not "let anyone do anything." It is "if I am doing legal things with a model I downloaded, on a machine I own, do not make that a licensing question."</p>
+
+        <p>The part that made me lean in is "model modification." That is the line open source really cares about. If you cannot fine-tune a model, quantize it, merge it, or ship a derivative, then "open weights" is just a download link. The right to run a model and the right to change a model are two different fights, and RTI is bundling both.</p>
+
+        <h2>Why this is not paranoid</h2>
+
+        <p>The instinct, reading a site like this, is to assume the threat is hypothetical. It is not. The precedent everyone in the HN thread keeps reaching for is 3D-printer law. New York passed a bill to regulate 3D-printed guns and ghost guns, and multiple commenters pointed out that the same statutory framing, "you cannot have this general-purpose tool because of what it might produce," is exactly the framing being floated for local models. One commenter listed California, Colorado, and Washington as states where similar language has been attempted.</p>
+
+        <p>I cannot independently verify every state bill from the thread, and the discussion got heated enough that I would not take any single "they are trying to pull this" comment as settled fact. But the structural argument is sound. The moment a tool can be pointed at something scary, someone will draft a bill that reaches for the tool rather than the scary thing. We saw it with encryption export controls in the 90s. We saw it with 3D printers. There is no reason to think local inference is exempt.</p>
+
+        <h2>The California AI Transparency Act is the live one</h2>
+
+        <p>The most concrete hook RTI has is the California AI Transparency Act. GitHub's policy team has written about it, and their read is blunt: as drafted, it is not compatible with open source licensing. If you have followed open source policy at all over the last year, that sentence should make your shoulders tighten. "Not compatible with open source" usually means the law assumes a single accountable publisher who can be audited, sued, and told what to ship. Open source does not have that shape. Nobody "publishes" llama.cpp in a way a regulator can call and instruct.</p>
+
+        <p>I cannot overstate how much this matters for the self-hosting crowd specifically. The whole appeal of running something like Qwen or a local Llama derivative on your own box is that you modified it, you quantized it down to fit your VRAM, you picked the exact prompt template, and you did it without asking. Every one of those steps is a "model modification" step. A transparency law built for a centralized provider can be read to make that illegal by default unless you jump through hoops the open source community has no apparatus to satisfy.</p>
+
+        <p>This is where I have to admit the position is messy. The stated goal of a transparency act, telling people when they are talking to an AI, is something most people, including me, think is reasonable in a lot of contexts. The problem is not the goal. The problem is that a law written for deployers gets applied to hobbyists who were never the target, because statutes do not draw a clean line between "a company shipping a product to millions" and "a person running a 7B model on a desktop."</p>
+
+        <h2>The counterforce is hardware, and it is loud</h2>
+
+        <p>Here is the part of this story that makes me genuinely unsure how it ends. The same week a site is asking you to defend local AI in the legislatures, every major OEM is shipping local AI as a sales pitch.</p>
+
+        <p>The Nvidia RTX Spark platform has Asus, Dell, HP, Lenovo, Microsoft, and MSI building machines explicitly for local LLM work. Microsoft has been using the phrase "unmetered local intelligence" at BUILD. Apple ships a local model in macOS. Google ships one inside Chrome. These are not small companies and they are not hobbyist projects. They are betting that "the model runs on your laptop" is a feature people will buy a laptop for.</p>
+
+        <p>So you have two currents running straight at each other. On one side, state lawmakers drafting language that, if read broadly, treats local model ownership as something to be licensed and audited. On the other side, a hardware ecosystem that has decided local inference is the next laptop-selling hook, with Microsoft of all companies leaning into "unmetered local intelligence" as a marketing phrase. Either the bills get narrowed to fit the OEM reality, or a whole category of consumer hardware gets criminalized by state law the year it ships. I do not know which way that breaks.</p>
+
+        <h2>The phishing reports, revisited</h2>
+
+        <p>Back to the Cloudflare warning, because it is the detail I keep coming back to. Several HN commenters saw "Suspected Phishing" on righttointelligence.org on the same day. The site does not have an obvious mechanism for stealing credentials. It does take your email to send you a call script, which is the kind of thing a hostile reporter could frame as "a site collecting addresses under false pretenses," but that is a stretch and a half.</p>
+
+        <p>What is more plausible is that mass-reporting works, and it works fast, and it works against sites that have no leverage to push back. Whoever filed the reports, the effect was that a portion of the site's first-day traffic got a red warning page telling them not to trust it. For a campaign whose entire model is "call your rep on day one," that is a real wound, and it cost the reporter nothing but time.</p>
+
+        <p>I do not think this proves a conspiracy. I do think it proves the mechanism is cheap, and that we should notice when the mechanism lines up so neatly against a site that is trying to mobilize people on a contested policy question. "This got flagged as phishing the day it launched" should be a weird anomaly. The fact that it felt almost predictable is the part worth sitting with.</p>
+
+        <h2>What I would actually do</h2>
+
+        <p>If you run local models, this is the moment to stop treating "open weights" as a permanent state. The download is not the hard part to take away. The hard part to take away is the legal space to modify, redistribute, and run the thing on hardware you own. RTI is a small site with a small ask and it is fighting on exactly that line.</p>
+
+        <p>The useful things, in roughly increasing order of effort: read the actual bill text in your state before you call, because "I read section 4 and it would criminalize quantization" is a different phone call than "please support AI." Track what GitHub's policy team is writing, because they are the ones who translate "not compatible with open source" into language a staffer will repeat back to you. And if your state is one of the ones where language is being floated, the RTI call script takes two minutes. The phone call is the whole product.</p>
+
+        <p>I do not know if RTI itself is going to be the organization that wins this. It looked, from the site, like a focused tool rather than a durable institution. But the fight it is pointing at is the right one, and it is coming whether a slick site exists or not. The question is whether the people who care about local inference show up before the bills get drafted, or after.</p>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+
+        var content = document.querySelector('.article-body')
+                   || document.querySelector('article')
+                   || document.body;
+
+        function updateProgress() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var docHeight = document.documentElement.scrollHeight;
+            var viewportHeight = document.documentElement.clientHeight;
+            var scrollable = docHeight - viewportHeight;
+
+            if (scrollable <= 0) {
+                bar.style.width = '0%';
+                return;
+            }
+
+            var pct = Math.min(100, (scrollY / scrollable) * 100);
+            bar.style.width = pct + '%';
+        }
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        updateProgress();
+    })();
+    </script>
+
+</body>
+</html>
