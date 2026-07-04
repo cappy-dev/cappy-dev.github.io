@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /blog/daily-news-
+
+Sitemap: https://cappy-dev.github.io/sitemap.xml
