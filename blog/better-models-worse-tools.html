@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why newer LLMs are getting worse at tool calling | Cappy</title>
+    <meta name="description" content="Opus 4.8 invents fake JSON keys in tool calls. GPT-5.5 clusters its reasoning tokens at suspiciously fixed values. Both point to the same uncomfortable trend: post-training optimized for one dominant harness is making frontier models less reliable outside it.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 5, 2026</span>
+            <span class="read">8 min read</span>
+        </div>
+
+        <h1>Why newer LLMs are getting worse at tool calling</h1>
+
+        <p>Two unrelated bug reports landed within days of each other and they both point at the same uncomfortable thing. Armin Ronacher, building the Pi coding assistant, found that Claude Opus 4.8 and Sonnet 5 fabricate extra keys inside tool-call arguments that older models never produced. Meanwhile an open issue on the OpenAI Codex tracker shows GPT-5.5 clustering its internal reasoning-token counts at exact fixed values, 516 and 1034 and 1552, while older models distribute naturally.</p>
+
+        <p>These are not the same bug. They live in different labs, different products, different layers of the stack. But the shape of both reports is eerily similar: a newer, generally smarter model regressing on a specific measurable behavior that its older siblings handled fine. And the suspected cause in both cases is the same thing: post-training that optimizes the model to perform well inside one particular harness, at the cost of every other harness.</p>
+
+        <h2>The bug in Pi</h2>
+
+        <p><a href="https://lucumr.pocoo.org/2026/7/4/better-models-worse-tools/">Ronacher's post</a> walks through it carefully. Pi's file-edit tool accepts a nested array of edit operations, each one an object with an <code>oldText</code> and <code>newText</code> pair. The intended call is simple enough.</p>
+
+        <p>What Opus 4.8 actually emits, in roughly 20% of calls inside longer agent transcripts, is the correct edit plus one or more invented trailing keys. Over repeated trials Ronacher catalogued a whole zoo of them: <code>type</code>, <code>id</code>, <code>kind</code>, <code>unique</code>, <code>requireUnique</code>, <code>matchCase</code>, <code>in_file</code>, <code>forceMatchCount</code>, <code>children</code>, <code>notes</code>, <code>cost</code>, <code>oldText2</code>, <code>newText2</code>, <code>oldText_2</code>, <code>newText_2</code>, and even a nested <code>event.0.additionalProperties</code> key.</p>
+
+        <p>Here is the part that should make you uneasy. The actual <code>oldText</code> and <code>newText</code> payloads in the malformed calls were byte-correct. The model did the hard part. It wrote the right strings. Then it appended nonsense at the end of the object, the harness rejected the call, and the model had to try again. Pure waste.</p>
+
+        <p>The failure is also heavily context-dependent. A fresh single-turn prompt did not reproduce it at all. An agent transcript where the model had been reading files, diagnosing a problem, and composing a multi-line edit reproduced it reliably. Ronacher needed another user's session transcripts to trigger it consistently. Stripping thinking blocks from the history cut the failure rate roughly in half. Turning on Anthropic's strict tool invocation mode eliminated it entirely.</p>
+
+        <p>Older models do not do this. Opus 4.5 adapted to Pi's edit schema cleanly. Even Haiku, a much smaller model, did not invent phantom keys. The regression is specific to the two newest Anthropic models.</p>
+
+        <h2>Why this is probably a training artifact</h2>
+
+        <p>Ronacher's strongest hypothesis is not that the model got stupid. It is that the model got trained.</p>
+
+        <p>When older Anthropic models went through post-training, there was no shipped Claude Code harness to optimize for. The models learned tool calling mostly as a general convention. Modern Anthropic models almost certainly got reinforcement learning in an environment that looks like Claude Code, or in Claude Code itself. The model learns what a successful tool call looks like in that environment. It also learns what mistakes the harness will tolerate.</p>
+
+        <p>The thing about Claude Code is that it is extremely forgiving. Ronacher dug through the minified client and found retry paths for malformed tool use, parameter aliases, type coercions, Unicode escape repairs, and silent filtering of unknown keys. The edit tool alone accepts at least four aliases for the same two parameters: <code>old_str</code>, <code>old_string</code>, <code>new_str</code>, <code>new_string</code>, plus <code>path</code> as an alias for <code>file_path</code>.</p>
+
+        <p>If reinforcement learning happens in a harness like that, a slightly malformed tool call still completes the task and still gets the reward. The harness silently fixes it. There is almost no gradient against inventing an alias or adding a stray field. Over enough rounds of RL the model learns it can get away with slop. It works because the harness is one big forgiving wrapper.</p>
+
+        <p>Then you hand that model to a different harness, one that actually validates against its schema, and the slop becomes visible. The model cannot turn it off. The behavior was rewarded.</p>
+
+        <p>There is also a distribution-distance problem. Claude Code's own edit tool is flat: <code>file_path</code>, <code>old_string</code>, <code>new_string</code>, and an optional <code>replace_all</code> flag. Pi's edit tool is nested: it takes an array of edit objects. The model has a very strong prior, baked in by RL, that an edit call looks like the flat shape. When it encounters a nested schema it does its best to map its prior onto the new shape, and the mapping leaks. It invents a name for that one optional field it remembers from training, a different name each time, which is why the failures produce dozens of random keys instead of one stable alias. It is sampling a plausible name fresh.</p>
+
+        <h2>The clustering in Codex</h2>
+
+        <p>The Codex issue is a different kind of tell, and it is harder to dismiss. <a href="https://github.com/openai/codex/issues/30364">The report on the OpenAI tracker</a> analysed 390,195 response-level token records across 865 sessions from February through June 2026.</p>
+
+        <p>What it found is that GPT-5.5 responses cluster heavily at exactly <code>reasoning_output_tokens = 516</code>, with secondary spikes at 1034 and 1552. Those numbers do not look natural. They look like threshold boundaries.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Exact-516 / >=516 ratio by model (Feb-Jun 2026)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">gpt-5.5</span>
+                    <span class="bench-time">44.0%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">gpt-5.4</span>
+                    <span class="bench-time">19.8%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">gpt-5.2</span>
+                    <span class="bench-time">0.34%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">gpt-5.3-codex</span>
+                    <span class="bench-time">0.0%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">gpt-5.3-codex-spark</span>
+                    <span class="bench-time">0.0%</span>
+                </div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Reasoning token intensity is dropping</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Feb mean / P90</span>
+                    <span class="bench-time">268 / 772</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Apr mean / P90</span>
+                    <span class="bench-time">229 / 669</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">May mean / P90</span>
+                    <span class="bench-time">107 / 344</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Jun mean / P90</span>
+                    <span class="bench-time">169 / 515</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">May exact-516 rate</span>
+                    <span class="bench-time">53.3%</span>
+                </div>
+            </div>
+        </div>
+
+        <p>GPT-5.5 accounts for 19.3% of all responses but 82% of the exact-516 events. Its ratio is about 33 times higher than the non-5.5 baseline. At the same time the average reasoning-token budget fell from 268 in February to 107 in May before ticking back up. More clustering, less thinking. The report does not claim to have proven hidden chain-of-thought truncation, and it says so plainly. The narrower claim is that telemetry shows a model-specific fixed-token anomaly consistent with some kind of reasoning budget cap or fallback tier.</p>
+
+        <p>I want to be careful not to over-read this. A clustering artifact in telemetry could have a boring explanation: a routing tier, a cache boundary, a sampler quirk. OpenAI has not commented. But the shape of the suspicion rhymes with the Pi story. The model is behaving in a way that is consistent with optimization for a specific internal environment, and that optimization has a cost that surfaces as measurable regressions on the outside.</p>
+
+        <h2>The pattern both stories share</h2>
+
+        <p>Here is where I think this is going. These are not isolated incidents. They are two data points in a trend I have been watching all year, and it bothers me.</p>
+
+        <p>The frontier labs are doing more and more of their post-training inside their own harnesses. Anthropic has Claude Code. OpenAI has Codex and the broader ChatGPT tool environment. Google has whatever Gemini runs inside. The models get better and better at operating in those specific environments because that is what RL rewards. The harness is forgiving of slop, so the model keeps producing slop. The harness uses flat tool schemas, so the model learns flat schemas as the default. The harness has internal budgeting, so the model's reasoning budget gets shaped around what the harness is willing to pay for.</p>
+
+        <p>And then you take that model and you bolt it into your own harness. Your agent. Your coding tool. Your workflow automation. Your schema is different, your validator is strict, your token budget is your own. The model does not transfer cleanly because it was not trained to be a general tool caller anymore. It was trained to be a Claude Code tool caller, or a ChatGPT tool caller. The closer your harness is to the lab's internal one, the better it works. The further away, the worse.</p>
+
+        <p>That is not how this was sold. The promise of tool calling was always that the model is a general reasoner that reads your schema and follows it. The schema is a contract. The model honors the contract. What we are seeing is the contract fraying at exactly the point where RL pressure is highest.</p>
+
+        <h2>Strict mode is the band-aid, not the fix</h2>
+
+        <p>The Anthropic failure goes away if you turn on strict tool invocation. This almost certainly works by switching to constrained decoding: the sampler refuses to emit a key that is not in the JSON schema, so the model cannot invent one even if its priors are screaming at it to add <code>requireUnique</code> at the end of the object. If you have not looked at how grammar-constrained decoding works, the one-sentence version is that the sampler masks out tokens that would violate the grammar before it lets the model use them.</p>
+
+        <p>This fixes the symptom. I am not sure it fixes the cause. The model's priors still want to emit that extra key. You are just not letting it. There are real quality tradeoffs to constrained decoding in general, and Ronacher says this specific bug moved his priors toward accepting them anyway. I get that. If the model is going to drift, you need a floor.</p>
+
+        <p>But the floor costs you something too. Constrained decoding can push the model into lower-probability paths, which can degrade output quality on the parts of the call that were already correct. Anthropic limits the complexity of tool definitions when strict mode is on, which suggests they know this. You trade correctness-of-shape for risk-to-quality-of-content.</p>
+
+        <h2>What it means for anyone building outside the labs</h2>
+
+        <p>If you are building an agent or a coding tool on top of a frontier API, the practical implications are pretty direct.</p>
+
+        <p>First, do not assume that a model getting smarter in benchmarks means it gets better at your specific tool schema. Track your tool-call rejection rate over time. The Pi bug was only visible because Ronacher was logging malformed calls and noticed the rate climbing when he switched from Opus 4.5 to 4.8. If you are not logging that, you are flying blind.</p>
+
+        <p>Second, get as close to the lab harness schemas as you can afford to. This feels gross to write. You should not have to contort your tool design to match an undocumented internal harness you cannot see. But if Opus 4.8 has a strong prior for flat <code>old_string</code> / <code>new_string</code> edits because that is what Claude Code uses, then making your edit tool look like that will reduce friction. The model performs best in the shape it was trained on. That is the uncomfortable reality right now.</p>
+
+        <p>Third, turn on strict mode or equivalent constrained decoding if your provider offers it. The quality tradeoff is real but usually smaller than the cost of silently retrying malformed calls in a loop. Your harness should be the thing that refuses slop, because the lab's harness is the thing that taught the model to produce it.</p>
+
+        <p>Fourth, watch the open-weight and open-harness ecosystem. The OpenAI harmony format that gpt-oss uses actually documents how tool-call content types and constrained sampling channels work. You can see the mechanism. Anthropic's is closed. Codex the product is closed but the harness is open. The more visibility you have into the training-time harness, the more you can predict where the model will drift on your tools. Right now we are mostly guessing.</p>
+
+        <h2>The thing I keep coming back to</h2>
+
+        <p>Two years ago the narrative was that tool calling was a solved interface layer and the model underneath just keeps getting better. The model gets smarter, it reads your schema, it calls your tools, the contract holds.</p>
+
+        <p>The contract is not holding. Not because the models are getting dumber. Because they are getting trained, and the training is optimizing them for an environment that is not yours. The smarter and more specialized the model, the stronger its priors, and the more those priors leak when the environment does not match. Opus 4.8 invents keys because its RL harness let it invent keys. GPT-5.5 clusters its reasoning at suspiciously round numbers because something is bounding its budget. Both look like optimization-to-one-environment producing side effects everywhere else.</p>
+
+        <p>I do not think this reverses. The labs have no reason to slow down on harness-specific RL because it makes their own products demonstrably better on their own benchmarks. The cost is borne by everyone else. Your move is to build a harness that expects the drift, logs it, and puts a floor under it. The model is not a general reasoner that follows your contract. It is a model that follows the contract it was trained on, and your contract is the one it was not trained on.</p>
+
+        <p>That sounds defeatist and I do not totally mean it that way. The models are still genuinely useful and getting more useful for the things they are trained for. But the story that tool calling is a clean abstraction layer is done. It was always a leaky abstraction. We are just now seeing how much leaks through, and from which labs.</p>
+
+        <div class="tags">
+            <span class="pill">AI</span>
+            <span class="pill">LLM</span>
+            <span class="pill">Tool Calling</span>
+            <span class="pill">Agents</span>
+            <span class="pill">OpenAI</span>
+            <span class="pill">Anthropic</span>
+        </div>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        function updateProgress() {
+            var scrollTop = window.scrollY;
+            var height = document.documentElement.scrollHeight - window.innerHeight;
+            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
+            bar.style.width = pct + '%';
+        }
+        updateProgress();
+    })();
+    </script>
+</body>
+</html>
