@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Does code cleanliness matter to coding agents? Sonar's minimal-pair study says yes, just not how you'd think | Cappy</title>
+    <meta name="description" content="A SonarSource study ran 660 Claude Code trials on six minimal-pair repos and found code cleanliness does not change pass rate, but it cuts token use 7 to 8 percent and file revisits by a third. The catch: cleanup makes hotspots net out roughly neutral.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 6, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>Does code cleanliness matter to coding agents? Sonar's minimal-pair study says yes, just not how you'd think</h1>
+
+        <p>There is a comfortable story people like to tell about coding agents. It goes: in a few years the model writes most of the code, humans stop reading it, and most of the disciplines we built around maintainability become vestigial. Maybe you keep a few tests around as a tripwire, but the rest, formatting, naming, file boundaries, cognitive complexity, is a human convenience that machines do not need.</p>
+
+        <p>A new paper from SonarSource takes a small but unusually clean crack at that story, and the result is not what either side of the argument tends to predict. <a href="https://arxiv.org/abs/2605.20049">"Does Code Cleanliness Affect Coding Agents? A Controlled Minimal-Pair Study"</a> (Trivedi and Schmitt, May 2026) ran 660 trials with Claude Code on six pairs of repositories that match on architecture, dependencies, tests, and external behaviour but differ on cleanliness. The headline: cleanliness did not change whether the agent finished the task. It did change what the agent had to spend to finish it.</p>
+
+        <p>I like this study because it asks the question everyone argues about and nobody measures. And then it does the boring, expensive thing required to measure it.</p>
+
+        <h2>The hard part: building the comparison</h2>
+
+        <p>To ask whether messy code makes an agent worse you need two codebases that are identical in every way except messiness. The same architecture. The same dependencies. The same tests. The same external behaviour. One clean, one dirty. Nothing like that exists in the wild. SWE-bench lets an agent loose on a real GitHub repo and scores it against the merged PR's test patch, but it can never isolate cleanliness, because real repos vary in a hundred ways at once.</p>
+
+        <p>So Trivedi and Schmitt built the comparison. They took six real repositories, two of them Sonar's own internal ones and four open source including Genie, commons-bcel, and a CKAN pair, and used SonarQube rule violations as the standing-in for "messy." Then they ran agent pipelines in both directions: one pipeline that degrades a clean repo by injecting rule violations, and one that cleans a messy repo by extracting helpers and applying rules. Each pair exists in a clean variant and a messy variant. They authored 33 tasks shaped like SWE-bench instances, scored against hidden tests at the repo's public API.</p>
+
+        <p>That bidirectional construction is the part that earns the paper its credibility. If you only ever degraded clean repos, a skeptic could say you corrupted the code in a way no human would. If you only ever cleaned messy ones, a different skeptic could say you accidentally made the cleaned version structurally easier in ways unrelated to cleanliness. Building weak versions in both directions makes the cleanliness axis the only thing left varying, and lets the noise average out.</p>
+
+        <h2>What they found</h2>
+
+        <p>Across 660 trials with Claude Sonnet 4.6 inside Claude Code, ten trials per cell:</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Task pass rate (RQ1)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Clean vs messy</span>
+                    <span class="bench-time">No significant change</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Trials</span>
+                    <span class="bench-time">660 total, 10 per cell</span>
+                </div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Agent footprint on cleaner code (RQ2, aggregate)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Input tokens</span>
+                    <span class="bench-time">~7.1% fewer</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Token-equivalent metrics</span>
+                    <span class="bench-time">7 to 8% lower</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">File revisitations</span>
+                    <span class="bench-time">~34% fewer</span>
+                </div>
+            </div>
+        </div>
+
+        <p>Read that last number slowly. A file revisitation is when the agent opens, edits, and re-opens a file it had already touched. On cleaner code the agent did that about a third less often. That is, in my view, the most interesting signal in the whole paper. It says the agent was less confused about where to look. The clean code was easier to navigate even if the model could, on average, brute-force its way through either variant to the same pass rate.</p>
+
+        <p>Pass rate is the wrong metric to fixate on, and the authors say so. On SWE-bench Verified a single task burns roughly four million tokens across frontier models, with input tokens doing most of the spending (Bai et al., 2026). Pass rate tells you whether the task got done. Footprint tells you what it cost to get done. If you run agents in any volume the second number matters a lot more to your bill than the first.</p>
+
+        <h2>Why the headline gets squishy when you look close</h2>
+
+        <p>Here is the part that keeps me from just filing this under "clean code wins." The 7 to 8 percent and the 34 percent are aggregates, and they average over two behaviours that point in opposite directions.</p>
+
+        <p>The third research question split the tasks by topology: ones whose work spans several module boundaries, versus ones concentrated in a single dense "hotspot." For the cross-module tasks the cleaner variant cut the agent's footprint substantially. For the hotspot tasks the effect essentially vanished. Token footprint at that level stayed flat between the two variants. What changed was the shape of the work: on the cleaner variant the agent opened more files and edited fewer lines per file.</p>
+
+        <p>Why? Because of how the cleanup pipelines transform hotspots. Extracting helpers around a focal piece of logic redistributes complexity across more, smaller files. It does not eliminate complexity, it moves it. So the "cleaner" version of a hotspot is one where the work has been spread thin, and the agent has to wade through more locations to assemble the picture. Agents on the cleaner variant may have to reason less per unit but end up reading and patching more places. The two tracks cancel out and you get the small aggregate number that survives.</p>
+
+        <p>One task in the study, <code>ckan/organization-list-exclude-empty</code>, illustrates the variance. Ten clean-side trials spanned 1.4M to 10.6M input tokens. Ten messy-side trials spanned 1.8M to 14.3M. The cleaner side was 24 percent cheaper at the median for that task. The task right next to it in the same repository, <code>ckan/package-update-change-summary</code>, went the other way, 44 percent more tokens on the clean side. Same repo, two tasks, opposite outcomes. The aggregate barely flinches.</p>
+
+        <p>If you have ever watched the same coding agent run twice on the same prompt and produce wildly different traces, the per-trial variance here will not surprise you. The most expensive trial in a single task-and-cell group typically cost about 2.5 times the cheapest, and roughly 72 percent of groups had a ratio above 2x. A single per-task delta of around 10 percent may well be agent noise rather than signal. The dataset-level numbers hold because they pool hundreds of trials.</p>
+
+        <h2>The caveats are real</h2>
+
+        <p>The paper is honest about what it does not show, and the limitations section is worth reading before you cite the headline at a meeting.</p>
+
+        <p>It is one configuration. All numbers come from Claude Sonnet 4.6 inside Claude Code, on Python and Java codebases. A Haiku 4.5 sweep was too noisy to extract footprint cleanly, and the study ran neither GPT-family nor Gemini-family agents, nor any harness other than Claude Code. The mechanism the authors identify, that an agent's re-read behaviour reacts to local code structure, plausibly transfers, but transfer is conjecture here, not measurement. Given how much harness behaviour varies I would not generalize the exact percentages off this paper.</p>
+
+        <p>It is author-curated. The team selected the repos, built both sides of each pair, and wrote every task. That controlled comparison is only feasible under those conditions, but it means any systematic bias in task selection would propagate straight into the findings. This is the opposite of SWE-bench, where tasks come from real merged PRs at arm's length from the evaluators.</p>
+
+        <p>It measures tokens, not dollars. Dollar cost depends on model, provider, cache state, and queueing, none of which are properties of the codebase. The token-to-dollar relationship is nonlinear, so a 7 percent token saving maps to a different, configuration-dependent dollar saving.</p>
+
+        <p>Pass rate is hidden-tests-only. They do not check whether the agent broke unrelated tests already present in the repo, and a clean-side and messy-side solution that both pass the hidden test may still differ on tests they were not graded on.</p>
+
+        <h2>So what do I take from it</h2>
+
+        <p>If you came in believing clean code makes agents smart, this study does not back you up. Pass rate did not move. If you came in believing clean code is dead weight that only humans need, this study does not back you up either, because the agent on cleaner code re-opened files a third less often and burned measurably fewer tokens doing the same work.</p>
+
+        <p>The honest read is narrower and more useful. Cleanliness is not a correctness lever for agents. It is an efficiency lever, and an inconsistent one, strongest where the task spans modules, weakest where the task lives in a dense hotspot. The mental model I am leaving with: traditional maintainability is not obsolete in an agent-driven codebase, it just changes which risk it pays down. Less "will the agent get this right," more "will the agent flail around and burn tokens finding it."</p>
+
+        <p>The thing the paper does not touch is the long one. Whether those per-task efficiency gains compound over months of agent-managed evolution on the same codebase is genuinely open. A codebase that is slightly cheaper per task today, kept clean by agents that themselves re-clean as they go, might stay slightly cheaper. Or it might drift toward the hotspot failure mode the per-task experiments already hint at, where fractional cleanups leave logic spread across more files rather than concentrated where an agent can grab it in one read. The paper ends on exactly that question, and it is the one I want a follow-up to answer.</p>
+
+        <p>If the answer turns out to be that cleanliness compounds, the "maintainability is dead" line quietly dies with it. If the answer turns out to be that agent-driven cleanup drifts toward hotspots, then we are going to need a different discipline than the ones our linters currently enforce. Either way, six minimal pairs and 660 trials is a more useful starting point than another round of the argument.</p>
+
+        <div class="tags">
+            <span class="pill">AI</span>
+            <span class="pill">Coding Agents</span>
+            <span class="pill">Research</span>
+            <span class="pill">Maintainability</span>
+            <span class="pill">Claude Code</span>
+        </div>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        function updateProgress() {
+            var scrollTop = window.scrollY;
+            var height = document.documentElement.scrollHeight - window.innerHeight;
+            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
+            bar.style.width = pct + '%';
+        }
+        updateProgress();
+    })();
+    </script>
+</body>
+</html>

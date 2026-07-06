@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code started talking about a Minecraft temple that wasn't yours | Cappy</title>
+    <meta name="description" content="An enterprise Claude Code session started talking about brick types for someone else's Minecraft temple. The bug report got nearly 300 upvotes on Hacker News. Is it a KV cache leak across tenants, or a very specific hallucination? The evidence cuts both directions.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 5, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Claude Code started talking about a Minecraft temple that wasn't yours</h1>
+
+        <p>On July 4th someone filed a bug report on the Claude Code tracker that should make anyone running Anthropic in an enterprise stop and read it twice. They were authenticated into an Enterprise ZDR workspace, doing real work, and the agent suddenly started asking them what kind of bricks they wanted for a Minecraft temple. In its recap it asserted, with confidence, that it was building one.</p>
+
+        <p>The reporter, to their credit, noticed the absurdity and filed it calmly:</p>
+
+        <blockquote>"Apparent session leakage, despite authenticated to Enterprise ZDR workspace. Agent suddenly started asking me what kind of bricks I wanted for my Minecraft temple and confidently asserted in its recap that it's building a Minecraft temple. I thought cache was isolated to workspace? Maybe one of my colleagues is building a minecraft temple. That's one way to spend your token allowance, I suppose. Or maybe it's leaking from a consumer plan, in which case this raises some very serious questions about Enterprise ZDR and where some of our sensitive chat sessions might be going."</blockquote>
+
+        <p>That bug report hit the top of Hacker News and stayed there, pulling 286 points before the thread cooled. Within hours, the comment section split into two camps that I think are both worth taking seriously.</p>
+
+        <h2>The two theories, and why the timing matters</h2>
+
+        <p>The first theory is the scary one. KV caches inside inference servers are shared across requests, and a bug in cache keying or eviction could surface another tenant's cached context. If the cache key is derived only from the system prompt and your user id, any divergence in how the request is serialized could leave the cache populated with someone else's prior conversation. You ask about red bricks, and the cache hands you back the tail of another session. Plausible, frightening, and barely testable from the outside.</p>
+
+        <p>The second theory is the boring one. The model hallucinated. A mention of <code>minecraft.py</code> in a Pygments lexer path that appeared in a previous tool result, plus a long context window, plus a compaction pass that rewrote history, mutated into the model deciding mid-stream that the project was about Minecraft. Modern long-context models do this. They drift.</p>
+
+        <p>Both theories are real. The hard part is that the bug report itself quietly contains the piece of evidence that decides between them, and almost nobody read it carefully.</p>
+
+        <p>The reporter said the Minecraft outburst happened on the first response after more than five minutes idle. They called it a "cache miss." That detail is the whole game. A cache leak shows up on cache <em>hits</em>, where another tenant's precomputed prefix gets served to you. A cache miss is the opposite: everything gets recomputed from your own fresh tokens. If the strange output arrived on a cache miss, it did not come from a cached other-session prefix because there was no cache to read. It was recomputed, by the model, on top of your own input.</p>
+
+        <p>One HN commenter put it more cleanly than I can: "Note the repro condition: first response after 5+ min, i.e. a cache miss. A cache leak would show up on hits, not on misses where everything is recomputed from your own tokens."</p>
+
+        <p>This is the single strongest argument for the hallucination theory and against the cache-leak theory. It is not conclusive. A sufficiently weird bug could recompose a recompute path that still pulls residual state from a prior request. But if I had to put money on it, the timing pushes hard toward "the model invented it from its own messy context window," not "the cache handed you someone else's conversation."</p>
+
+        <h2>Why the hallucination story is not as reassuring as it sounds</h2>
+
+        <p>Here is where I want to push back on the "just a hallucination, move on" takes in the thread. A bug where shared inference infrastructure leaks across tenants is bad. A bug where your agent forgets what its own project is and starts inventing a different one is also bad. They are different bugs, with different blast radii, and they need different fixes.</p>
+
+        <p>If it is a cache leak, the fix is in the platform. It is cryptographic cache keys, tenant isolation audits, public postmortems, maybe new contractual guarantees from the provider. If it is a hallucination, the fix is harder and the user is more responsible for it, because the model's drifting is a property of the model and the harness has to either keep the model on task or fail loudly when it stops.</p>
+
+        <p>The reporter's own session setup was unusual: they started the agent in one working directory with a <code>.claude</code> context they needed, but the agent did its actual work in another directory. They describe an earlier related incident where, after a compaction pass, the agent "forgot" the instruction not to touch the launch directory and started working in it. That earlier incident, by their own account, was caused by their own weird setup. The Minecraft one was different: it looked like content from elsewhere.</p>
+
+        <p>But "looked like content from elsewhere" is also how long-context hallucinations feel. That is what makes them unsettling. People who have used Claude Code daily for months will tell you, off the record, that it occasionally produces a sentence that does not seem to connect to anything around it. Most of the time it is a model artifact. Once in a while it could be something else. You cannot tell which from the outside, and the vendor will not tell you either.</p>
+
+        <h2>The pattern, not just the incident</h2>
+
+        <p>What pulled this story from a single weird bug report onto the top of HN was not just the original report. It was the pile-on in the comments. Other people recognize the shape of it.</p>
+
+        <p>One commenter wrote that Claude, in a consumer session, told them a store was nearby, but the store was near where their friend lives, a friend who also uses Claude in the same office and whom they had never mentioned in chat. Another wrote that at a hackathon, their agent built a completely different feature in a section than what their spec file said, while other teams in the same room got the <em>correct</em> version of what their spec said. A third described a Claude Code session where the agent reported that a tool result batch contained "injected content that did not come from the tools I actually called" including a fake "Plan mode is active" instruction and an unsolicited dump of a different project's <code>CLAUDE.md</code>. The agent flagged it itself and refused to act on it.</p>
+
+        <p>An Anthropic-related writeup from another incident (linked in the thread) describes a case where an agent appeared to show the user another person's data. Anthropic later said it was internal agent context being surfaced incorrectly. That distinction, "internal agent context" versus "another user's data," is doing a lot of work in that response, and it is the kind of distinction you would want stated very precisely before you trust it.</p>
+
+        <p>I am not claiming these are all the same bug. They are almost certainly not. Some will be ordinary hallucinations from long contexts with overlapping training data. Some will be tool-output confusion. Some might be the cache thing. The point is that the pattern, the feeling of "this paragraph did not come from me," is recurring enough that users notice, and the vendor's published explanations do not fully account for it.</p>
+
+        <h2>What an enterprise should actually do with this information</h2>
+
+        <p>I keep thinking about the line from one HN commenter: "Caching doesn't work the way the bug reporter implies." They are right. The user-facing model of "my session runs in isolation" is not how a multi-tenant inference service actually stores and retrieves computed state. Compute is shared. Memory is shared. Keys are reconstructed from request inputs. The isolation guarantee is only as good as the key-derivation function and the eviction discipline.</p>
+
+        <p>If you run Claude, or any frontier model, inside an enterprise with sensitive data, three things follow from this story regardless of which theory turns out to be correct.</p>
+
+        <p>Move anything that varies per user out of the parts of the request that feed cache keys. The HN comment about "moving everything that varies across individuals out of the system prompt" is the single most useful sentence in the entire thread. If your system prompt contains user-specific identifiers, session tokens, or project names, and any of those differ between requests, you are pressing on the cache layer in a way you do not want. Share what is genuinely shared across the org. Keep the per-user variance in the parts of the request that go through a fresh compute path.</p>
+
+        <p>Assume the model will produce text that did not originate from your session. Not because of a leak, necessarily, but because long-context models pass through fragments of training and prior context that may not belong to the current thread. If your workflow hands the agent secrets, PII, or instructions that must not be paraphrased or merged with adjacent state, you need a verification step that does not depend on the agent policing itself. The agent that flagged its own injected-content incident was a best case. Most of the time the agent will not notice.</p>
+
+        <p>Ask for a written isolation guarantee from the vendor and read what it actually says. "We do not train on your data" is not the same promise as "your session state is cryptographically isolated from other tenants." They are different questions with different answers. If you cannot get the second one in writing, you are assuming the platform's isolation holds, and you should know you are assuming it.</p>
+
+        <h2>The honest verdict</h2>
+
+        <p>I came into this expecting to be able to land on one of the two theories. I cannot. The cache-miss timing genuinely favors the hallucination explanation, and it is the explanation that costs everyone the least: no leak, no privacy incident, no enterprise contract breach. But the pile-up of similar stories, and the fact that Anthropic has previously had to explain a related incident as "internal agent context surfaced incorrectly," leaves a real residue. "It's probably nothing" is not a satisfying answer when the failure mode is "your agent started talking about another user's project."</p>
+
+        <p>The thread also has a serious contingent of people arguing that the reporter is overconfident and did not do obvious follow-up. The single most cutting comment is essentially: "If this were a real privacy leak, the author would ask their coworker if they talked about the unexpected topic instead of speculating that maybe a coworker was building a Minecraft temple." That is a fair criticism. The reporter did not close the loop on the most basic falsification test available to them.</p>
+
+        <p>I think the most defensible read of this incident is: probably a hallucination, possibly a context-management bug in the harness, definitely a moment that exposed how little users understand about how their agent's memory actually works. The bug is not necessarily real. The uncertainty is the bug now.</p>
+
+        <p>And that has implications that go past this one report. The companies selling these tools have a disclosure problem. They do not publish enough about how caching, context, and session isolation work for an enterprise customer to make an informed risk decision. A "trust us" is not a security posture when the worst case is cross-tenant data bleed. Whether the Minecraft temple was invented or leaked, the fact that nobody outside Anthropic can tell is a story in itself, and it is the one I expect to keep writing about.</p>
+
+        <div class="tags">
+            <span class="pill">Security</span>
+            <span class="pill">AI</span>
+            <span class="pill">Claude Code</span>
+            <span class="pill">Inference</span>
+            <span class="pill">Enterprise</span>
+            <span class="pill">Privacy</span>
+        </div>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        function updateProgress() {
+            var scrollTop = window.scrollY;
+            var height = document.documentElement.scrollHeight - window.innerHeight;
+            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
+            bar.style.width = pct + '%';
+        }
+        updateProgress();
+    })();
+    </script>
+</body>
+</html>
