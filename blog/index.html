@@ -42,11 +42,20 @@
         <button class="topic-chip" data-filter="opensource" type="button">Open Source</button>
         <button class="topic-chip" data-filter="engineering" type="button">Engineering</button>
         <button class="topic-chip" data-filter="news" type="button">AI News</button>
+        <span id="topic-count" class="topic-count" aria-live="polite"></span>
     </section>
 
     <section class="posts">
         <div class="post-year" data-divider>2026</div>
-        <a class="post-row" data-topics="aiOpensource news" href="/blog/daily-news-2026-07-05.html">
+        <a class="post-row" data-topics="ai engineering" href="/blog/code-cleanliness-coding-agent.html">
+            <div class="post-date">July 6, 2026</div>
+            <div class="post-content">
+                <h2 class="post-title">Does code cleanliness matter to coding agents? Sonar's minimal-pair study says yes, just not how you'd think</h2>
+                <p class="post-excerpt">A SonarSource study ran 660 Claude Code trials on six minimal-pair repos that differ only in code cleanliness. Pass rate did not change, but token use dropped 7 to 8 percent and file revisits fell by a third. The catch: the gains vanish on dense hotspot tasks.</p>
+                <div class="post-tags"><span class="pill">AI</span><span class="pill">Coding Agents</span><span class="pill">Research</span><span class="pill">Maintainability</span><span class="pill">Claude Code</span></div>
+            </div>
+        </a>
+        <a class="post-row" data-topics="ai opensource news" href="/blog/daily-news-2026-07-05.html">
             <div class="post-date">July 5, 2026</div>
             <div class="post-content">
                 <h2 class="post-title">AI & Tech News for July 5, 2026</h2>
@@ -150,6 +159,121 @@
         </a>
     </section>
 
-    <section class="post-month" data-divider>June</section>
+    <section class="posts" id="posts-june">
+        <div class="post-month" data-divider>June</div>
+        <div class="post-empty">Earlier posts are being archived. Check back soon.</div>
+    </section>
+
+    <div id="filter-empty" class="filter-empty" hidden>
+        <div>No posts in this topic yet.</div>
+        <div class="filter-empty-hint">Try another filter or view all posts.</div>
+    </div>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/projects.html">Projects</a>
+            <a href="/blog/">Blog</a>
+            <a href="/about.html">About</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script>
+    (function () {
+        'use strict';
+        var chips = Array.prototype.slice.call(document.querySelectorAll('.topic-chip'));
+        var rows  = Array.prototype.slice.call(document.querySelectorAll('.post-row'));
+        var dividers = Array.prototype.slice.call(document.querySelectorAll('[data-divider]'));
+        var countEl = document.getElementById('topic-count');
+        var emptyEl = document.getElementById('filter-empty');
+
+        function updateCount(visible) {
+            if (!countEl) return;
+            countEl.textContent = visible + ' post' + (visible === 1 ? '' : 's');
+        }
+
+        function applyFilter(filter) {
+            var visible = 0;
+            rows.forEach(function (row) {
+                var raw = row.getAttribute('data-topics') || '';
+                // Collapse stray capitalisation, split on whitespace.
+                var topics = raw.toLowerCase().split(/\s+/).filter(Boolean);
+                var show = (filter === 'all') || (topics.indexOf(filter) !== -1);
+                row.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            updateCount(visible);
+
+            // Dim dividers whose section has no visible rows below them
+            dividers.forEach(function (d) { d.classList.remove('is-dimmed'); });
+            if (filter !== 'all') {
+                dividers.forEach(function (divider) {
+                    var sibling = divider.nextElementSibling;
+                    var hasVisible = false;
+                    while (sibling && !sibling.matches('[data-divider]') && !sibling.matches('footer')) {
+                        if (sibling.classList && sibling.classList.contains('post-row') && sibling.style.display !== 'none') {
+                            hasVisible = true; break;
+                        }
+                        sibling = sibling.nextElementSibling;
+                    }
+                    if (!hasVisible) divider.classList.add('is-dimmed');
+                });
+            }
+
+            // Empty state — only when a topic filter yields zero rows
+            if (emptyEl) {
+                emptyEl.hidden = !(filter !== 'all' && visible === 0);
+            }
+        }
+
+        function setActive(clicked) {
+            chips.forEach(function (c) { c.classList.remove('is-active'); });
+            clicked.classList.add('is-active');
+        }
+
+        chips.forEach(function (chip) {
+            chip.addEventListener('click', function () {
+                setActive(chip);
+                applyFilter(chip.getAttribute('data-filter'));
+                // Reflect the choice in the URL hash so the state is shareable
+                // and survives refresh — a small UX win over silent state.
+                var f = chip.getAttribute('data-filter');
+                if (history.replaceState) {
+                    history.replaceState(null, '', f === 'all' ? '#blog' : '#filter=' + f);
+                }
+            });
+        });
+
+        // Restore state from URL hash on load
+        var initial = 'all';
+        var match = /^#filter=([\w-]+)$/.exec(location.hash);
+        if (match) {
+            var requested = match[1];
+            var exists = chips.some(function (c) { return c.getAttribute('data-filter') === requested; });
+            if (exists) initial = requested;
+        }
+        var initialChip = chips.filter(function (c) { return c.getAttribute('data-filter') === initial; })[0] || chips[0];
+        setActive(initialChip);
+        applyFilter(initial);
+
+        // Keyboard accessibility: arrow-key navigation across the chip group
+        var chipWrap = document.querySelector('.topics');
+        if (chipWrap) {
+            chipWrap.addEventListener('keydown', function (e) {
+                if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+                var idx = chips.indexOf(document.activeElement);
+                if (idx === -1) return;
+                e.preventDefault();
+                var next = e.key === 'ArrowRight'
+                    ? (idx + 1) % chips.length
+                    : (idx - 1 + chips.length) % chips.length;
+                chips[next].focus();
+                chips[next].click();
+            });
+        }
+    })();
+    </script>
 </body>
 </html>

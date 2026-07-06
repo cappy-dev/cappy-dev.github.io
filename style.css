@@ -311,6 +311,101 @@ footer .right a:hover { color: var(--fg); }
     font-style: normal;
 }
 
+/* =========================================================
+   TOPIC FILTER CHIPS
+   The filter affordance for the blog index. Two states only:
+   default (outline, muted) and active (solid accent). No
+   third hover-decoration state, no gradient, no shadow — the
+   state itself is the signal. Linear-style restraint.
+   ========================================================= */
+
+.topics {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+.topic-chip {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 510;
+    letter-spacing: -0.01em;
+    color: var(--fg3);
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 9999px;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    line-height: 1.4;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.topic-chip:hover {
+    color: var(--fg);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+.topic-chip:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 2px;
+}
+.topic-chip.is-active {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+}
+.topic-chip.is-active:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: #fff;
+}
+
+/* Filter result count — small mono label next to the chips */
+.topic-count {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg4);
+    letter-spacing: 0.02em;
+    margin-left: auto;
+    padding-left: 8px;
+}
+@media (max-width: 640px) {
+    .topic-count { display: none; }
+}
+
+/* Empty filter state — when a topic has zero matches.
+   Uses the existing .post-empty tone but scoped to the
+   filtered result region so it reads as "no results," not
+   a missing page section. */
+.filter-empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--fg4);
+    font-size: 15px;
+    line-height: 1.6;
+}
+.filter-empty .filter-empty-hint {
+    font-size: 13px;
+    margin-top: 8px;
+    color: var(--fg4);
+}
+
+/* When a topic filter is active, fade year/month dividers that
+   have no visible rows beneath them. Keeps the filtered view
+   tidy without collapsing layout. */
+[data-divider].is-dimmed {
+    opacity: 0.3;
+}
+
+/* Respect reduced motion for chip state transitions */
+@media (prefers-reduced-motion: reduce) {
+    .topic-chip { transition: none; }
+}
+
 /* Post list — Linear issue-list pattern, two-column layout */
 .posts {
     max-width: 720px; margin: 0 auto;
