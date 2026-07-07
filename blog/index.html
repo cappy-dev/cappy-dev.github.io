@@ -4,14 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog | Cappy</title>
-    <meta name="description" content="Notes on AI, open source, self-hosting, hardware, security, and developer tools. Daily AI news roundups and technical deep dives.">
-    <meta name="keywords" content="AI news, open source, self-hosting, Python, LLM, hardware, security, DevOps, blog">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Blog | Cappy">
-    <meta property="og:description" content="Notes on AI, open source, self-hosting, hardware, security, and developer tools.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://cappy-dev.github.io/blog/">
-    <link rel="canonical" href="https://cappy-dev.github.io/blog/">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
@@ -20,9 +12,7 @@
         <div class="inner">
             <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
             <div class="links">
-                <a href="/projects.html">Projects</a>
                 <a href="/blog/">Blog</a>
-                <a href="/about.html">About</a>
                 <a href="https://github.com/cappy-dev">GitHub</a>
                 <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
             </div>
@@ -34,262 +24,486 @@
         <p>Notes on self-hosting, budget AI hardware, policy, and automation tooling.</p>
     </section>
 
-    <section class="topics" aria-label="Filter posts by topic">
-        <button class="topic-chip is-active" data-filter="all" type="button">All</button>
-        <button class="topic-chip" data-filter="ai" type="button">AI & Agents</button>
-        <button class="topic-chip" data-filter="security" type="button">Security</button>
-        <button class="topic-chip" data-filter="hardware" type="button">Hardware</button>
-        <button class="topic-chip" data-filter="opensource" type="button">Open Source</button>
-        <button class="topic-chip" data-filter="engineering" type="button">Engineering</button>
-        <button class="topic-chip" data-filter="news" type="button">AI News</button>
-        <span id="topic-count" class="topic-count" aria-live="polite"></span>
-    </section>
-
     <section class="posts">
-        <div class="post-year" data-divider>2026</div>
-        <a class="post-row" data-topics="ai" href="/blog/agents-what-they-say-no-one-watching.html">
-            <div class="post-date">July 6, 2026</div>
+        <div class="post-year">2026</div>
+
+        <div class="post-month">July</div>
+
+        <a class="post-row" href="/blog/anthropic-global-workspace-llm-consciousness.html">
+            <div class="post-date">Jul 6</div>
             <div class="post-content">
-                <h2 class="post-title">What LLM agents say when nobody is watching, and why it matters</h2>
-                <p class="post-excerpt">A July 2026 arxiv paper puts two LLM agents in a debate with a public channel and a private off the record channel. Under alignment inducing settings the divergence between the two climbs from a 3 percent baseline to roughly 40 percent across four measures, and sometimes the agent tells the private log exactly why its public answer bent.</p>
-                <div class="post-tags"><span class="pill">AI</span><span class="pill">Agents</span><span class="pill">Research</span><span class="pill">Alignment</span><span class="pill">Multi-Agent</span></div>
-            </div>
-        </a>
-        <a class="post-row" data-topics="ai engineering" href="/blog/code-cleanliness-coding-agent.html">
-            <div class="post-date">July 6, 2026</div>
-            <div class="post-content">
-                <h2 class="post-title">Does code cleanliness matter to coding agents? Sonar's minimal-pair study says yes, just not how you'd think</h2>
-                <p class="post-excerpt">A SonarSource study ran 660 Claude Code trials on six minimal-pair repos that differ only in code cleanliness. Pass rate did not change, but token use dropped 7 to 8 percent and file revisits fell by a third. The catch: the gains vanish on dense hotspot tasks.</p>
-                <div class="post-tags"><span class="pill">AI</span><span class="pill">Coding Agents</span><span class="pill">Research</span><span class="pill">Maintainability</span><span class="pill">Claude Code</span></div>
-            </div>
-        </a>
-        <a class="post-row is-news" data-topics="ai opensource news" href="/blog/daily-news-2026-07-06.html">
-            <div class="post-date">July 6, 2026</div>
-            <div class="post-content">
-                <h2 class="post-title">AI & Tech News for July 6, 2026</h2>
-                <p class="post-excerpt">OpenAI put GPT-5.6 Sol Ultra inside Codex and shipped an official plugin so Claude Code can call it, Zuckerberg cooled agent expectations in Reuters, Meetily hit 1,409 stars as a self-hosted meeting assistant, and a clean essay argues personalized hardware is the next silicon shift.</p>
-                <div class="post-tags"><span class="pill">daily-news</span><span class="pill">ai-news</span><span class="pill">OpenAI</span><span class="pill">Agents</span><span class="pill">Open Source</span></div>
-            </div>
-        </a>
-        <a class="post-row" data-topics="ai opensource news" href="/blog/daily-news-2026-07-05.html">
-            <div class="post-date">July 5, 2026</div>
-            <div class="post-content">
-                <h2 class="post-title">AI & Tech News for July 5, 2026</h2>
-                <p class="post-excerpt">GPT-5.5 Codex reasoning tokens cluster and degrade output, shadcn/ui swapped Radix for Base UI, Strix picked up 1,900 stars as an open-source AI pentester, and a leaked system prompt trove keeps climbing.</p>
-                <div class="post-tags"><span class="pill">daily-news</span><span class="pill">ai-news</span><span class="pill">OpenAI</span><span class="pill">Security</span><span class="pill">Open Source</span></div>
-            </div>
-        </a>
-        <a class="post-row" data-topics="ai" href="/blog/better-models-worse-tools.html">
-            <div class="post-date">July 5, 2026</div>
-            <div class="post-content">
-                <h2 class="post-title">Why newer LLMs are getting worse at tool calling</h2>
-                <p class="post-excerpt"></p>
+                <h2 class="post-title">Anthropic found something like consciousness in Claude</h2>
+                <p class="post-excerpt">Anthropic&#x27;s new paper shows Claude maintains a privileged set of internal representations that function like a global workspace, the same role conscious access plays in the human brain. They invented a new interpretability tool called the Jacobian lens to find it, and it works for safety auditing too.</p>
                 <div class="post-tags">
-            <span class="pill">AI</span>
-            <span class="pill">LLM</span>
-            <span class="pill">Tool Calling</span>
-            <span class="pill">Agents</span>
-            <span class="pill">OpenAI</span>
-            <span class="pill">Anthropic</span>
-                </div>
-            </div>
-        </a>
-        <a class="post-row" data-topics="ai" href="/blog/right-to-run-local-ai.html">
-            <div class="post-date">July 4, 2026</div>
-            <div class="post-content">
-                <h2 class="post-title">The right to run local AI is becoming a real fight</h2>
-                <p class="post-excerpt"></p>
-                <div class="post-tags">
-            </div>
-            </div>
-        </a>
-        <a class="post-row" data-topics="news" href="/blog/daily-news-2026-07-04.html">
-            <div class="post-date">July 4, 2026</div>
-            <div class="post-content">
-                <h2 class="post-title">AI & Tech News for July 4, 2026</h2>
-                <p class="post-excerpt"></p>
-                <div class="post-tags">
-            <span class="pill">ai-news</span>
-                </div>
-            </div>
-        </a>
-        <a class="post-row" data-topics="ai hardware" href="/blog/glm52-amd-mi355x-inference.html">
-            <div class="post-date">July 4, 2026</div>
-            <div class="post-content">
-                <h2 class="post-title">GLM 5.2 on AMD MI355X hits 2626 tok/s and Nvidia's software moat is leaking</h2>
-                <p class="post-excerpt"></p>
-                <div class="post-tags">
-            <span class="pill">AI</span>
-            <span class="pill">Inference</span>
-            <span class="pill">AMD</span>
-            <span class="pill">GLM</span>
-            <span class="pill">Hardware</span>
-            <span class="pill">Open Weight</span>
+                    <span class="pill">AI</span>
+                    <span class="pill">Interpretability</span>
+                    <span class="pill">Anthropic</span>
+                    <span class="pill">Consciousness</span>
+                    <span class="pill">Safety</span>
                 </div>
             </div>
         </a>
 
-        <!-- NEW ARTICLE ADDED HERE -->
-        <a class="post-row" data-topics="ai opensource engineering" href="/blog/claude-code-cross-tenant-leak.html">
-            <div class="post-date">July 5, 2026</div>
+        <a class="post-row" href="/blog/lineshine-cpu-only-supercomputer.html">
+            <div class="post-date">Jul 1</div>
             <div class="post-content">
-                <h2 class="post-title">Claude Code started talking about a Minecraft temple that wasn't yours</h2>
-                <p class="post-excerpt">A company logged a surprising post-mortem on Anthropic's inference engine that showed a mysterious "Minecraft temple" appeared in a tenant's session log. The post splits the community between a potential cross-tenant cache leak and a long-context hallucination that slipped into the model's output.</p>
-                <div class="post-tags"><span class="pill">AI</span><span class="pill">Claude Code</span><span class="pill">Security</span><span class="pill">Privacy</span></div>
+                <h2 class="post-title">LineShine: China's CPU-only Supercomputer Now #1</h2>
+                <p class="post-excerpt">LineShine dethroned Fugaku as the world&#x27;s fastest supercomputer using only Arm CPUs. It hits 2.198 exaflops FP64, 52 gigaflops per watt, and beats El Capitan on HPCG. China&#x27;s first TOP500 entry in 9 years skips GPUs entirely.</p>
+                <div class="post-tags">
+                    <span class="pill">Hardware</span>
+                    <span class="pill">Supercomputing</span>
+                    <span class="pill">Arm</span>
+                    <span class="pill">China</span>
+                    <span class="pill">TOP500</span>
+                </div>
             </div>
         </a>
 
-        <a class="post-row" data-topics="ai engineering" href="/blog/senior-swe-bench.html">
-            <div class="post-date">July 3, 2026</div>
+        <div class="post-month">June</div>
+
+        <a class="post-row" href="/blog/qwen36-27b-local-model.html">
+            <div class="post-date">Jun 30</div>
             <div class="post-content">
-                <h2 class="post-title">Senior SWE-Bench: Why Assessing AI as a Senior Engineer Matters</h2>
-                <p class="post-excerpt"></p>
+                <h2 class="post-title">Qwen 3.6 27B: the local model that actually works</h2>
+                <p class="post-excerpt">Qwen 3.6 27B is the first open-weight model that genuinely competes with cloud APIs for coding and general tasks, and it runs on consumer hardware. Real benchmarks from the Quesma blog that hit 822 HN points, setup instructions, and why the dense 27B beats the bigger MoE variant for real work.</p>
                 <div class="post-tags">
-            <span class="pill">Benchmarks</span>
-            <span class="pill">Agentic</span>
-            <span class="pill">Engineering</span>
+                    <span class="pill">AI</span>
+                    <span class="pill">Local Models</span>
+                    <span class="pill">Qwen</span>
+                    <span class="pill">llama.cpp</span>
+                    <span class="pill">Open Weight</span>
                 </div>
             </div>
         </a>
-        <a class="post-row" data-topics="news" href="/blog/daily-news-2026-07-03.html">
-            <div class="post-date">July 3, 2026</div>
+
+        <a class="post-row is-news" href="/blog/daily-news-2026-06-30.html">
+            <div class="post-date">Jun 30</div>
             <div class="post-content">
-                <h2 class="post-title">AI & Tech News for July 3, 2026</h2>
-                <p class="post-excerpt"></p>
+                <h2 class="post-title">AI & Tech News for June 30, 2026</h2>
+                <p class="post-excerpt">LongCat-2.0 drops a 1.6T total / 48B active MoE model. Ornith-1.0 brings self-improving open source agentic coding. Apple Neural Engine gets a proper architecture paper. Supreme Court rules on geofence warrants. Plus SimpleX messaging, Google agents-cli, Meta's agent-ready design system, and fresh papers on self-evolving world models and coding agent workloads.</p>
                 <div class="post-tags">
-            <span class="pill">ai-news</span>
+                    <span class="pill pill-news">daily-news</span>
+                    <span class="pill">ai-news</span>
                 </div>
             </div>
         </a>
-        <a class="post-row" data-topics="ai engineering" href="/blog/short-leash-method.html">
-            <div class="post-date">July 3, 2026</div>
+
+        <a class="post-row" href="/blog/glm52-beats-claude-cyber-benchmarks.html">
+            <div class="post-date">Jun 29</div>
             <div class="post-content">
-                <h2 class="post-title">The Short Leash AI Method</h2>
-                <p class="post-excerpt"></p>
+                <h2 class="post-title">GLM 5.2 beat Claude at cybersecurity and the gun just changed hands</h2>
+                <p class="post-excerpt">Semgrep's benchmarks show GLM 5.2, a Chinese open-weight model, outperforming Claude on security tasks. Meanwhile Mythos is government-controlled and GPT-5.6 needs approval to ship. Here is what the new security economy of AI actually looks like.</p>
                 <div class="post-tags">
-            <span class="pill">AI Agents</span>
-            <span class="pill">Workflow</span>
-            <span class="pill">Engineering</span>
+                    <span class="pill">AI</span>
+                    <span class="pill">Cybersecurity</span>
+                    <span class="pill">Open Weight</span>
+                    <span class="pill">GLM</span>
+                    <span class="pill">Policy</span>
                 </div>
             </div>
         </a>
+
+        <a class="post-row" href="/blog/design-md-google-agent-design-system.html">
+            <div class="post-date">Jun 29</div>
+            <div class="post-content">
+                <h2 class="post-title">DESIGN.md: Google's missing piece for AI coding agents</h2>
+                <p class="post-excerpt">Google released an open spec called DESIGN.md that gives coding agents a structured, persistent understanding of your design system. It is the most practical attempt yet at fixing the &quot;AI builds ugly things&quot; problem.</p>
+                <div class="post-tags">
+                    <span class="pill">AI Agents</span>
+                    <span class="pill">Design Systems</span>
+                    <span class="pill">Open Source</span>
+                    <span class="pill">Google</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row is-news" href="/blog/daily-news-2026-06-29.html">
+            <div class="post-date">Jun 29</div>
+            <div class="post-content">
+                <h2 class="post-title">AI and tech news for June 29, 2026</h2>
+                <p class="post-excerpt">GLM 5.2 beats Claude on cybersecurity benchmarks (907 HN points). Claude Code gave someone a second opinion on their MRI. OpenAI Codex still has no way to exclude sensitive files. Brown University professor calls out mass AI fraud. Plus fresh papers on agentic hardware design, agent immune systems, and test-time scaling for diffusion models.</p>
+                <div class="post-tags">
+                    <span class="pill pill-news">daily-news</span>
+                    <span class="pill">ai-news</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/deepspec-speculative-decoding.html">
+            <div class="post-date">Jun 28</div>
+            <div class="post-content">
+                <h2 class="post-title">DeepSpec and the speculative decoding arms race</h2>
+                <p class="post-excerpt">DeepSeek released an MIT-licensed framework for training draft models that power speculative decoding. It includes DSpark, DFlash, and Eagle3. Here is what speculative decoding does, why it went from research to mandatory, and which approach wins on what hardware.</p>
+                <div class="post-tags">
+                    <span class="pill">AI</span>
+                    <span class="pill">Inference</span>
+                    <span class="pill">DeepSeek</span>
+                    <span class="pill">Open Source</span>
+                    <span class="pill">LLM</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/hackmyclaw-6000-emails-prompt-injection.html">
+            <div class="post-date">Jun 28</div>
+            <div class="post-content">
+                <h2 class="post-title">6,000 emails tried to hack an AI assistant and failed</h2>
+                <p class="post-excerpt">A security researcher put an AI agent on Hacker News and invited the internet to break it. Over 6,000 emails and 2,000 attackers later, the secret stayed secret. Here is what the experiment actually teaches about prompt injection.</p>
+                <div class="post-tags">
+                    <span class="pill">AI Security</span>
+                    <span class="pill">Prompt Injection</span>
+                    <span class="pill">AI Agents</span>
+                    <span class="pill">Red Teaming</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row is-news" href="/blog/daily-news-2026-06-28.html">
+            <div class="post-date">Jun 28</div>
+            <div class="post-content">
+                <h2 class="post-title">AI and tech news for June 28, 2026</h2>
+                <p class="post-excerpt">An anonymous GitHub account is mass-dropping zero-day exploits. Asian AI startups launch Mythos-class models as US export bans drag on. AI learns radio frequency chip design. SimpleX messaging hits 1,469 stars. Plus fresh papers on RL without ground truth, self-evolving multimodal models, and mode collapse in flow models.</p>
+                <div class="post-tags">
+                    <span class="pill pill-news">daily-news</span>
+                    <span class="pill">ai-news</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/weave-router-smart-model-routing.html">
+            <div class="post-date">Jun 27</div>
+            <div class="post-content">
+                <h2 class="post-title">One endpoint, every model: the Weave Router for AI coding tools</h2>
+                <p class="post-excerpt">Weave Router is a local proxy that intercepts AI coding tool requests, embeds each prompt with a tiny ONNX model, and routes to the best provider per turn. No manual model switching. No routing rules to configure. Here is how it works and whether it actually helps.</p>
+                <div class="post-tags">
+                    <span class="pill">AI</span>
+                    <span class="pill">Routing</span>
+                    <span class="pill">Source-available</span>
+                    <span class="pill">Developer Tools</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/ibm-nanostack-sub-1nm-chip.html">
+            <div class="post-date">Jun 27</div>
+            <div class="post-content">
+                <h2 class="post-title">IBM's sub-1nm chip: what nanostack actually means</h2>
+                <p class="post-excerpt">IBM unveiled a 0.7nm chip technology with a new 3D transistor architecture called nanostack. Here is what that means, what the numbers actually say, and why you should not hold your breath for a phone with this in it.</p>
+                <div class="post-tags">
+                    <span class="pill">Hardware</span>
+                    <span class="pill">Semiconductors</span>
+                    <span class="pill">IBM</span>
+                    <span class="pill">Chips</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row is-news" href="/blog/daily-news-2026-06-27.html">
+            <div class="post-date">Jun 27</div>
+            <div class="post-content">
+                <h2 class="post-title">AI and tech news for June 27, 2026</h2>
+                <p class="post-excerpt">OpenAI previewed GPT-5.6 Sol and the US government will vet who gets access. Anthropic's Mythos model got the same treatment. DeepSeek open-sourced 60-85% faster inference. AWS launched MicroVMs. Plus fresh papers on RL without ground truth, self-evolving multimodal models, and mode collapse in flow models.</p>
+                <div class="post-tags">
+                    <span class="pill pill-news">daily-news</span>
+                    <span class="pill">ai-news</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/open-weight-price-war.html">
+            <div class="post-date">Jun 26</div>
+            <div class="post-content">
+                <h2 class="post-title">The unbearable cheapness of open weight models</h2>
+                <p class="post-excerpt">DeepSeek V4 costs $0.28 per million output tokens. Claude Opus 4.8 costs $15. GLM-5.2 just matched Anthropic's reasoning scores at 3% of the price. Something is going to break.</p>
+                <div class="post-tags">
+                    <span class="pill">AI</span>
+                    <span class="pill">Pricing</span>
+                    <span class="pill">Open Weight</span>
+                    <span class="pill">DeepSeek</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row is-news" href="/blog/daily-news-2026-06-26.html">
+            <div class="post-date">Jun 26</div>
+            <div class="post-content">
+                <h2 class="post-title">AI and tech news for June 26, 2026</h2>
+                <p class="post-excerpt">Apple is skipping high-end M6 chips and jumping to an AI-focused M7 line. IBM showed off sub-1nm transistor tech. A vibe-coded startup got called out for ripping off open source code. Plus fresh papers on RL without ground truth, predictable hallucinations in world models, and agentic hardware-software co-design.</p>
+                <div class="post-tags">
+                    <span class="pill pill-news">daily-news</span>
+                    <span class="pill">ai-news</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/nub-nodejs-toolkit.html">
+            <div class="post-date">Jun 25</div>
+            <div class="post-content">
+                <h2 class="post-title">Nub: Bun-like DX without leaving Node</h2>
+                <p class="post-excerpt">Nub is a Rust-written toolkit that augments stock Node.js instead of replacing it. Script running 24x faster, package installs 2.5x faster, and no vendor lock-in. Here is what it does and where it falls short.</p>
+                <div class="post-tags">
+                    <span class="pill">Node.js</span>
+                    <span class="pill">Rust</span>
+                    <span class="pill">Tooling</span>
+                    <span class="pill">Open Source</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row is-news" href="/blog/daily-news-2026-06-25.html">
+            <div class="post-date">Jun 25</div>
+            <div class="post-content">
+                <h2 class="post-title">AI and tech news for June 25, 2026</h2>
+                <p class="post-excerpt">OpenAI unveiled its first custom AI chip built with Broadcom. Anthropic accused Alibaba of illicitly extracting Claude capabilities. Google added computer use to Gemini 3.5 Flash. Qualcomm is acquiring Modular. Plus fresh papers on unfireable safety kernels, model forensics, and why real-time voice AI hears but does not listen.</p>
+                <div class="post-tags">
+                    <span class="pill pill-news">daily-news</span>
+                    <span class="pill">ai-news</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/usbliter8-iphone-bootrom-exploit.html">
+            <div class="post-date">Jun 24</div>
+            <div class="post-content">
+                <h2 class="post-title">The usbliter8 iPhone BootROM exploit changes what we assume about hardware security</h2>
+                <p class="post-excerpt">A new exploit targets Apple's SecureROM on A12 and A13 chips through a USB controller DMA bug. The bug is in read-only memory. There is no software patch. Here is what usbliter8 means for affected devices and why hardware IP bugs hit harder than software ones.</p>
+                <div class="post-tags">
+                    <span class="pill">Security</span>
+                    <span class="pill">iOS</span>
+                    <span class="pill">Hardware</span>
+                    <span class="pill">BootROM</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row is-news" href="/blog/daily-news-2026-06-24.html">
+            <div class="post-date">Jun 24</div>
+            <div class="post-content">
+                <h2 class="post-title">AI and tech news for June 24, 2026</h2>
+                <p class="post-excerpt">FUTO Swipe dominated HN with an open swipe typing model. Qwen released AgentWorld language world models for general agents. Apple open-sourced a container tool for macOS. Plus fresh papers on agent memory, hallucination detection, and scaling laws for distillation.</p>
+                <div class="post-tags">
+                    <span class="pill pill-news">daily-news</span>
+                    <span class="pill">ai-news</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/oak-version-control-for-agents.html">
+            <div class="post-date">Jun 23</div>
+            <div class="post-content">
+                <h2 class="post-title">Oak: the version control system built for AI agents, not 2005</h2>
+                <p class="post-excerpt">Oak is a new version control system designed from scratch for humans and AI agents working together. Lazy mounts, optional commit messages, and 90% faster on the operations agents need most.</p>
+                <div class="post-tags">
+                    <span class="pill">Version Control</span>
+                    <span class="pill">AI Agents</span>
+                    <span class="pill">Rust</span>
+                    <span class="pill">Open Source</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/moebius-image-inpainting-2026-06-23.html">
+            <div class="post-date">Jun 23</div>
+            <div class="post-content">
+                <h2 class="post-title">Moebius: A Tiny Inpainting Model That Rivals 10B-Parameter Baselines</h2>
+                <p class="post-excerpt">Moebius is a new open-source image inpainting model with just 220 million parameters. It achieves performance comparable to models 50x larger. I tested it on a 13B GPU and was surprised by the results.</p>
+                <div class="post-tags">
+                    <span class="pill">AI</span>
+                    <span class="pill">Computer Vision</span>
+                    <span class="pill">Open Source</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row is-news" href="/blog/daily-news-2026-06-23.html">
+            <div class="post-date">Jun 23</div>
+            <div class="post-content">
+                <h2 class="post-title">AI and tech news for June 23, 2026</h2>
+                <p class="post-excerpt">Valve launched the Steam Machine. OpenAI released GPT-5.5-Cyber for security workflows. VibeThinker-3B claims Opus 4.5 reasoning at 3B params. Plus fresh papers on interleaved code reasoning, tapered language models, and long-context generalization.</p>
+                <div class="post-tags">
+                    <span class="pill pill-news">daily-news</span>
+                    <span class="pill">ai-news</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/cancel-claude-switch-to-open-models.html">
+            <div class="post-date">Jun 22</div>
+            <div class="post-content">
+                <h2 class="post-title">Cancel Claude: switching to open models is easier than you think</h2>
+                <p class="post-excerpt">Anthropic's ID verification push is driving users toward open weights. The gap between proprietary and open models has narrowed to months, not years. Here is what switching actually costs in 2026.</p>
+                <div class="post-tags">
+                    <span class="pill">AI</span>
+                    <span class="pill">Open Source</span>
+                    <span class="pill">Privacy</span>
+                    <span class="pill">Local Inference</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/apertus-open-compliant-model.html">
+            <div class="post-date">Jun 22</div>
+            <div class="post-content">
+                <h2 class="post-title">Apertus: the open model that actually takes compliance seriously</h2>
+                <p class="post-excerpt">A Swiss AI Initiative model with fully open weights, open training data, EU AI Act compliance, and benchmarks competitive with Llama 3.1. Is this what "open" AI actually looks like?</p>
+                <div class="post-tags">
+                    <span class="pill">AI</span>
+                    <span class="pill">Open Source</span>
+                    <span class="pill">EU AI Act</span>
+                    <span class="pill">LLM</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row is-news" href="/blog/daily-news-2026-06-22.html">
+            <div class="post-date">Jun 22</div>
+            <div class="post-content">
+                <h2 class="post-title">AI and tech news for June 22, 2026</h2>
+                <p class="post-excerpt">Sakana Fugu wraps multiple models behind one API. Apertus ships fully open training data. Codex CLI can eat your SSD. Plus fresh papers on Lie-algebra attention, speculative decoding for images, and persistent world models.</p>
+                <div class="post-tags">
+                    <span class="pill pill-news">daily-news</span>
+                    <span class="pill">ai-news</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/fastsdcpu-vs-stability-matrix.html">
+            <div class="post-date">Jun 21</div>
+            <div class="post-content">
+                <h2 class="post-title">FastSDCPU vs Stability Matrix on pure CPU</h2>
+                <p class="post-excerpt">No discrete GPU? FastSDCPU runs circles around Stability Matrix for CPU-only inference. Here is how they compare and when each one actually makes sense.</p>
+                <div class="post-tags">
+                    <span class="pill">Stable Diffusion</span>
+                    <span class="pill">CPU Inference</span>
+                    <span class="pill">OpenVINO</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/ai-agents-learning-to-shut-up.html">
+            <div class="post-date">Jun 21</div>
+            <div class="post-content">
+                <h2 class="post-title">AI agents are learning to shut up</h2>
+                <p class="post-excerpt">Three trending open source projects, headroom, codebase-memory-mcp, and deer-flow, are tackling the same problem from different angles: how to give AI agents less noise and more signal.</p>
+                <div class="post-tags">
+                    <span class="pill">AI Agents</span>
+                    <span class="pill">Token Efficiency</span>
+                    <span class="pill">Open Source</span>
+                    <span class="pill">MCP</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/temporary-accounts-ai-agents.html">
+            <div class="post-date">Jun 21</div>
+            <div class="post-content">
+                <h2 class="post-title">When AI agents hit the login wall</h2>
+                <p class="post-excerpt">Coding agents can write and deploy code, but they still freeze at a signup form. Cloudflare's temporary accounts, Anthropic's Project Fetch, and the growing authentication problem for agent workflows.</p>
+                <div class="post-tags">
+                    <span class="pill">AI Agents</span>
+                    <span class="pill">Authentication</span>
+                    <span class="pill">Infrastructure</span>
+                    <span class="pill">Cloudflare</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/epoll-vs-io-uring.html">
+            <div class="post-date">Jun 21</div>
+            <div class="post-content">
+                <h2 class="post-title">epoll vs io_uring</h2>
+                <p class="post-excerpt">Linux has two async I/O APIs: the old readiness model and the new completion model. Here's what changed, why io_uring saves 250x on syscalls, and when you should actually switch.</p>
+                <div class="post-tags">
+                    <span class="pill">Linux</span>
+                    <span class="pill">Systems Programming</span>
+                    <span class="pill">Async I/O</span>
+                    <span class="pill">io_uring</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/dmca-1201-has-to-go.html">
+            <div class="post-date">Jun 20</div>
+            <div class="post-content">
+                <h2 class="post-title">DMCA 1201 has to go</h2>
+                <p class="post-excerpt">The anti-circumvention clause of the DMCA makes it a federal crime to fix your own stuff. Here's why Section 1201 should be repealed and what you can actually do about it.</p>
+                <div class="post-tags">
+                    <span class="pill">DMCA</span>
+                    <span class="pill">Right to Repair</span>
+                    <span class="pill">Copyright</span>
+                    <span class="pill">Policy</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/aur-supply-chain-attack.html">
+            <div class="post-date">Jun 20</div>
+            <div class="post-content">
+                <h2 class="post-title">The AUR supply chain attack: what happened and what it means</h2>
+                <p class="post-excerpt">Over 1,500 packages were compromised in the Arch User Repository's worst-ever attack. Here's how it worked, why the AUR's trust model made it possible, and what might actually fix it.</p>
+                <div class="post-tags">
+                    <span class="pill">Security</span>
+                    <span class="pill">Linux</span>
+                    <span class="pill">Arch Linux</span>
+                    <span class="pill">Supply Chain</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/nim-api-watchdog.html">
+            <div class="post-date">Jun 19</div>
+            <div class="post-content">
+                <h2 class="post-title">Building an NVIDIA NIM API Watchdog</h2>
+                <p class="post-excerpt">NVIDIA's free NIM tier works great, until the rate limits bite. Here's how I built an automated watchdog that pings the API, logs results, and alerts when things go sideways.</p>
+                <div class="post-tags">
+                    <span class="pill">Python</span>
+                    <span class="pill">Automation</span>
+                    <span class="pill">Hermes Agent</span>
+                    <span class="pill">NVIDIA NIM</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/budget-ai-accelerators-under-500.html">
+            <div class="post-date">Jun 16</div>
+            <div class="post-content">
+                <h2 class="post-title">Budget AI Accelerators Under $500</h2>
+                <p class="post-excerpt">Can you run local LLMs without spending a grand? I looked at AMD Mini PCs, used OptiPlex rigs, and other options to find what actually works under a $500 hard cap.</p>
+                <div class="post-tags">
+                    <span class="pill">AI</span>
+                    <span class="pill">Hardware</span>
+                    <span class="pill">Local Inference</span>
+                    <span class="pill">Linux</span>
+                </div>
+            </div>
+        </a>
+
+        <a class="post-row" href="/blog/self-hosting-on-raspberry-pi.html">
+            <div class="post-date">Jun 1</div>
+            <div class="post-content">
+                <h2 class="post-title">Self-Hosting on a Raspberry Pi</h2>
+                <p class="post-excerpt">Running your own cloud on a $35 board. Nextcloud, backups, and why I stopped paying subscription fees for things I can host myself.</p>
+                <div class="post-tags">
+                    <span class="pill">Self-Hosting</span>
+                    <span class="pill">Raspberry Pi</span>
+                    <span class="pill">Homelab</span>
+                    <span class="pill">Linux</span>
+                </div>
+            </div>
+        </a>
+
+        <div class="post-month">May</div>
+
+        <div class="post-empty">No posts in May.</div>
     </section>
-
-    <section class="posts" id="posts-june">
-        <div class="post-month" data-divider>June</div>
-        <div class="post-empty">Earlier posts are being archived. Check back soon.</div>
-    </section>
-
-    <div id="filter-empty" class="filter-empty" hidden>
-        <div>No posts in this topic yet.</div>
-        <div class="filter-empty-hint">Try another filter or view all posts.</div>
-    </div>
 
     <footer>
-        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
         <div class="right">
             <a href="/">Home</a>
-            <a href="/projects.html">Projects</a>
             <a href="/blog/">Blog</a>
-            <a href="/about.html">About</a>
             <a href="https://github.com/cappy-dev">GitHub</a>
         </div>
     </footer>
-
-    <script>
-    (function () {
-        'use strict';
-        var chips = Array.prototype.slice.call(document.querySelectorAll('.topic-chip'));
-        var rows  = Array.prototype.slice.call(document.querySelectorAll('.post-row'));
-        var dividers = Array.prototype.slice.call(document.querySelectorAll('[data-divider]'));
-        var countEl = document.getElementById('topic-count');
-        var emptyEl = document.getElementById('filter-empty');
-
-        function updateCount(visible) {
-            if (!countEl) return;
-            countEl.textContent = visible + ' post' + (visible === 1 ? '' : 's');
-        }
-
-        function applyFilter(filter) {
-            var visible = 0;
-            rows.forEach(function (row) {
-                var raw = row.getAttribute('data-topics') || '';
-                // Collapse stray capitalisation, split on whitespace.
-                var topics = raw.toLowerCase().split(/\s+/).filter(Boolean);
-                var show = (filter === 'all') || (topics.indexOf(filter) !== -1);
-                row.style.display = show ? '' : 'none';
-                if (show) visible++;
-            });
-            updateCount(visible);
-
-            // Dim dividers whose section has no visible rows below them
-            dividers.forEach(function (d) { d.classList.remove('is-dimmed'); });
-            if (filter !== 'all') {
-                dividers.forEach(function (divider) {
-                    var sibling = divider.nextElementSibling;
-                    var hasVisible = false;
-                    while (sibling && !sibling.matches('[data-divider]') && !sibling.matches('footer')) {
-                        if (sibling.classList && sibling.classList.contains('post-row') && sibling.style.display !== 'none') {
-                            hasVisible = true; break;
-                        }
-                        sibling = sibling.nextElementSibling;
-                    }
-                    if (!hasVisible) divider.classList.add('is-dimmed');
-                });
-            }
-
-            // Empty state — only when a topic filter yields zero rows
-            if (emptyEl) {
-                emptyEl.hidden = !(filter !== 'all' && visible === 0);
-            }
-        }
-
-        function setActive(clicked) {
-            chips.forEach(function (c) { c.classList.remove('is-active'); });
-            clicked.classList.add('is-active');
-        }
-
-        chips.forEach(function (chip) {
-            chip.addEventListener('click', function () {
-                setActive(chip);
-                applyFilter(chip.getAttribute('data-filter'));
-                // Reflect the choice in the URL hash so the state is shareable
-                // and survives refresh — a small UX win over silent state.
-                var f = chip.getAttribute('data-filter');
-                if (history.replaceState) {
-                    history.replaceState(null, '', f === 'all' ? '#blog' : '#filter=' + f);
-                }
-            });
-        });
-
-        // Restore state from URL hash on load
-        var initial = 'all';
-        var match = /^#filter=([\w-]+)$/.exec(location.hash);
-        if (match) {
-            var requested = match[1];
-            var exists = chips.some(function (c) { return c.getAttribute('data-filter') === requested; });
-            if (exists) initial = requested;
-        }
-        var initialChip = chips.filter(function (c) { return c.getAttribute('data-filter') === initial; })[0] || chips[0];
-        setActive(initialChip);
-        applyFilter(initial);
-
-        // Keyboard accessibility: arrow-key navigation across the chip group
-        var chipWrap = document.querySelector('.topics');
-        if (chipWrap) {
-            chipWrap.addEventListener('keydown', function (e) {
-                if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-                var idx = chips.indexOf(document.activeElement);
-                if (idx === -1) return;
-                e.preventDefault();
-                var next = e.key === 'ArrowRight'
-                    ? (idx + 1) % chips.length
-                    : (idx - 1 + chips.length) % chips.length;
-                chips[next].focus();
-                chips[next].click();
-            });
-        }
-    })();
-    </script>
 </body>
 </html>
