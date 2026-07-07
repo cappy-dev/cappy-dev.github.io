@@ -29,6 +29,21 @@
 
         <div class="post-month">July</div>
 
+        <a class="post-row" href="/blog/ternlight-7mb-embeddings-browser-wasm.html">
+            <div class="post-date">Jul 7<span class="fresh is-stale" data-published="2026-07-07"><span class="fresh-dot"></span>new</span></div>
+            <div class="post-content">
+                <h2 class="post-title">Ternlight: a 7 MB embedding model that runs in your browser</h2>
+                <p class="post-excerpt">A new open source project ships a sentence embedding model distilled from MiniLM-L6 with BitNet b1.58 ternary weights, packed into a single 7 MB WebAssembly file that runs on CPU with no API calls and no GPU. Three lines to semantic search, in the browser, and what the tradeoffs actually are.</p>
+                <div class="post-tags">
+                    <span class="pill">AI</span>
+                    <span class="pill">Embeddings</span>
+                    <span class="pill">WASM</span>
+                    <span class="pill">Open Source</span>
+                    <span class="pill">BitNet</span>
+                </div>
+            </div>
+        </a>
+
         <a class="post-row" href="/blog/anthropic-global-workspace-llm-consciousness.html">
             <div class="post-date">Jul 6</div>
             <div class="post-content">
@@ -496,6 +511,25 @@
 
         <div class="post-empty">No posts in May.</div>
     </section>
+
+    <script>
+        // Self-maintaining freshness indicator. Each `.fresh` element ships
+        // hidden (is-stale); reveal it only if its data-published date falls
+        // within 72 hours of now. As new posts land with the same markup, the
+        // indicator ages out of older posts automatically — no manual cleanup.
+        (function () {
+            var FRESH_WINDOW_HOURS = 72;
+            var now = Date.now();
+            document.querySelectorAll('.fresh[data-published]').forEach(function (el) {
+                var pub = Date.parse(el.getAttribute('data-published'));
+                if (isNaN(pub)) return;
+                var ageHours = (now - pub) / 36e5;
+                if (ageHours >= 0 && ageHours <= FRESH_WINDOW_HOURS) {
+                    el.classList.remove('is-stale');
+                }
+            });
+        })();
+    </script>
 
     <footer>
         <div class="left">"It's been an honor walking a mile on your head."</div>

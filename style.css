@@ -451,6 +451,42 @@ footer .right a:hover { color: var(--fg); }
     color: var(--accent-bright);
     border-color: rgba(94, 106, 210, 0.20);
 }
+
+/* =========================================================
+   FRESHNESS INDICATOR — newest post only
+   A small emerald status dot + mono "new" micro-label,
+   shown next to the date on the single most-recent post
+   in the blog index. Follows Linear's status-dot + Mono
+   Label pattern (emerald #27a644 for "in progress"), fired
+   for ~3 days after publish so it self-maintains as new
+   posts land. No new boxes, icons, or color slop — just
+   a dot the eye can land on when returning to the list.
+   ========================================================= */
+
+.fresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--green);
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    margin-left: 8px;
+    vertical-align: 2px;
+    white-space: nowrap;
+}
+.fresh .fresh-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.14);
+    flex-shrink: 0;
+}
+.fresh.is-stale { display: none; }
+
 .post-date {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px; font-weight: 500;
