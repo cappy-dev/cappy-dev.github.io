@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local TTS on CPU: Pocket TTS and Kokoro | Cappy</title>
+    <meta name="description" content="Speech synthesis stopped needing the GPU. Two small open models, Pocket TTS (100M, MIT, voice cloning) and Kokoro-82M (Apache, 8 languages), run faster than real time on consumer CPUs. Real numbers, real tradeoffs, and what the rush of in-browser ports is actually about.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 8, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Local TTS on CPU: Pocket TTS and Kokoro</h1>
+
+        <p>A few years ago, realistic local speech generation sounded like a fantasy. You wanted a neural voice? Pick a cloud API, send your text, hope the latency held. The good ones charged by the million characters. The free ones were robotic. Trying to run a quality model on the same machine you were already using for everything else was a non-starter.</p>
+
+        <p>That case has collapsed pretty hard over the last year. Two small open weight models, <a href="https://github.com/kyutai-labs/pocket-tts">Pocket TTS</a> from Kyutai and <a href="https://huggingface.co/hexgrad/Kokoro-82M">Kokoro-82M</a> from the hexgrad project, can both generate realistic speech on a plain CPU. No GPU. No server farm. No per-character bill. One fits in 100 million parameters, the other in 82 million. Both are faster than real time on consumer hardware you probably already own. The fact that this is even a sentence I can write is the interesting part.</p>
+
+        <h2>Pocket TTS, the one with voice cloning</h2>
+
+        <p>Kyutai launched Pocket TTS on January 13, 2026. The repo is at <a href="https://github.com/kyutai-labs/pocket-tts">github.com/kyutai-labs/pocket-tts</a>, MIT licensed, 6,254 stars as I write this, Python 3.10 through 3.14, PyTorch 2.5 and up, and the README is explicit about something most TTS projects hedge on: you do not need the GPU build of PyTorch. CPU-only is the path.</p>
+
+        <p>100 million parameters. The CPU footprint is two cores. Two. On a MacBook Air M4 the README claims around 6x real time and a 200 millisecond time to first audio chunk. That second number is the one that matters for anything interactive. A 200 ms first-chunk latency is low enough to feel like a voice is talking to you, not like a model is preparing to talk to you.</p>
+
+        <p>The thing that makes Pocket TTS stand out, more than the speed, is voice cloning. You hand the model a short wav file of someone talking, and it produces new speech in that voice. The voice embedding step is not cheap, but once you have it you can export to a safetensors file and reload fast. So the slow part happens once, and the fast part happens forever after.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Pocket TTS on CPU (from the README)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Parameters</span>
+                    <span class="bench-time">100M</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Real-time factor, M4</span>
+                    <span class="bench-time">~6x faster than real time</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">First audio chunk</span>
+                    <span class="bench-time">~200 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">CPU cores used</span>
+                    <span class="bench-time">2</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Languages</span>
+                    <span class="bench-time">6 (en, fr, de, pt, it, es)</span>
+                </div>
+                <div class="bench-note">Audio is streaming. The model keeps generating while you keep listening. Numbers are from the shipped CPU build measured by Kyutai.</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Kokoro-82M (from the model card)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Parameters</span>
+                    <span class="bench-time">82M</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Languages</span>
+                    <span class="bench-time">8</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Voices (v1.0)</span>
+                    <span class="bench-time">54</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">License</span>
+                    <span class="bench-time">Apache 2.0</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Total training cost</span>
+                    <span class="bench-time">$1,000 (1000 A100-hours)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Architecture root</span>
+                    <span class="bench-time">StyleTTS 2 (Li et al.)</span>
+                </div>
+                <div class="bench-note">v1.0 published January 27, 2025. v0.19 was December 2024 with under 100 hours of training data; v1.0 used a few hundred.</div>
+            </div>
+        </div>
+
+        <p>The streaming behavior is worth dwelling on. A lot of TTS systems generate the whole clip and then hand it back. Pocket TTS hands back chunks as it computes them, so the user hears the beginning of the sentence before the model has finished synthesizing the end. For chat-style applications, for screen readers, for anything where the user is waiting on the speech to begin, that is the difference between feeling responsive and feeling laggy.</p>
+
+        <p>The CLI is one line. <code>uvx pocket-tts generate</code> writes <code>tts_output.wav</code> with the default voice. <code>pocket-tts serve</code> boots a local HTTP server with a web interface at localhost:8000. The Python API is short enough to fit in a cell.</p>
+
+        <pre><code>from pocket_tts import TTSModel
+import scipy.io.wavfile
+
+tts_model = TTSModel.load_model()
+voice_state = tts_model.get_state_for_audio_prompt("alba")
+audio = tts_model.generate_audio(voice_state, "Hello world, this is a test.")
+scipy.io.wavfile.write("output.wav", tts_model.sample_rate, audio.numpy())</code></pre>
+
+        <p>There is one gap in the README that I appreciate the honesty of. They tried running Pocket TTS on the GPU and saw no speedup over CPU, because they are using batch size 1 and the model is so small. That is not a failure to optimize, that is a model small enough that the GPU overhead does not pay for itself. Worth knowing before you bolt a GPU to a project that does not need it.</p>
+
+        <h2>Kokoro, the older sibling</h2>
+
+        <p>Kokoro-82M is the project Pocket TTS gets compared to, and the comparison is fair. The model is at <a href="https://huggingface.co/hexgrad/Kokoro-82M">huggingface.co/hexgrad/Kokoro-82M</a>. Apache 2.0, 82 million parameters, 8 languages including English, Mandarin, Hindi, and a handful of European ones. The v1.0 release landed January 27, 2025, a full year before Pocket TTS shipped. Total training cost was about a thousand dollars of A100 GPU time, which puts it in the "a determined individual can afford to build this" tier.</p>
+
+        <p>The architecture page credits StyleTTS 2 by Li et al (<a href="https://github.com/yl4579/StyleTTS2">github.com/yl4579/StyleTTS2</a>) as the root. That lineage matters because it explains why a model this small can sound this good. StyleTTS 2 was built specifically to get high quality from small parameter counts, by decoupling style from content. Kokoro takes that design and trains it on a quietly substantial corpus. The combination is the whole pitch.</p>
+
+        <p>An independent writeup at <a href="https://ariya.io/2026/03/local-cpu-friendly-high-quality-tts-text-to-speech-with-kokoro/">ariya.io</a> ran Kokoro through a short test paragraph on three different CPUs. The numbers are reproduced below. These are not vendor figures. They were measured by a third party running the Kokoro-FastAPI container on bare metal.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Kokoro-82M on a short paragraph (ariya.io measurements)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Intel Core i7-4770K (released 2013)</span>
+                    <span class="bench-time">4.7 s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Apple M2 Pro</span>
+                    <span class="bench-time">4.5 s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">AMD Ryzen 7 8745HS</span>
+                    <span class="bench-time">1.5 s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Test input</span>
+                    <span class="bench-time">Short paragraph</span>
+                </div>
+                <div class="bench-note">Best of 3 runs, am_eric voice, generated via the Kokoro-FastAPI container running on the same machine. The paragraph generates roughly 25 to 30 seconds of audio, so all three are comfortably faster than real time.</div>
+            </div>
+        </div>
+
+        <p>The Intel chip in that list is twelve years old. It produced audio in 4.7 seconds, which is still faster than the spoken duration of the paragraph. That is the part to keep. Twelve-year-old silicon, full pipeline, no GPU, faster than real time. The conclusion the article draws, "if that ancient CPU can do the job just fine you know that this is a highly capable TTS system," is one of those rare sentences from a benchmarks writeup that holds up without overstating.</p>
+
+        <p>Kokoro does not have built-in voice cloning like Pocket TTS. You pick from a catalog of prebuilt voices, around 50 for English, slightly fewer for the other languages. For most applications that is fine, and it means one less trust and consent surface to manage. Voice cloning is a capability with a real social cost, and "the model can copy any voice from a 5 second clip" is a sentence that gets scarier the more you think about it.</p>
+
+        <h2>The in-browser ports are where this gets strange</h2>
+
+        <p>This is the part of the story that surprised me. Pocket TTS is small enough that the community has already wrapped it to run inside the browser. The README lists four in-browser implementations:</p>
+
+        <ul>
+            <li><code>wasm-pocket-tts</code> by LaurentMazare: a Rust port using XN, with a live demo</li>
+            <li><code>pocket-tts-onnx-export</code> by KevinAHM: the model exported to ONNX and run in ONNX Runtime Web</li>
+            <li><code>pocket-tts</code> by babybirdprd: a Candle (Rust) build with WebAssembly and PyO3 bindings</li>
+            <li><code>jax-js</code> by ekzhang: using the jax-js ML library for the web</li>
+        </ul>
+
+        <p>Four independent ports, four different runtime strategies, all of them working in a browser tab. That tells you something I did not expect when I started writing this. Speech synthesis has crossed the threshold where you can degrade-gracefully your way out of the server entirely.</p>
+
+        <p>There are also non-browser ports worth flagging. <code>pocket-tts-mlx</code> by jishnuvenugopal is an MLX backend tuned for Apple Silicon. <code>pocket-tts-xn</code> by LaurentMazare is the Rust/XN build I keep seeing pop up. <code>PocketTTS.cpp</code> by VolgaGerm is a single-file C++ runtime on ONNX Runtime with a CLI, an HTTP server, and an FFI C API, which is the kind of single-file project I find quietly impressive. There is even a Home Assistant integration via the Wyoming protocol for voice assistant setups.</p>
+
+        <h2>What you actually trade off</h2>
+
+        <p>It would be dishonest to write this without naming the costs. Small TTS models are not free.</p>
+
+        <p>Quality, for one. The best open-weight models here are very good. They are not at the level of ElevenLabs in its highest quality mode, which is what you would expect given a 100x parameter gap and a 1000x dataset gap. Kokoro and Pocket TTS are the projects that make you reconsider whether you need the top of the line for your particular job. They are not the projects that win every comparison.</p>
+
+        <p>Expressiveness, for two. These models produce natural single-voice speech. They do not do the dramatic variety, the breath control, the conversational turn-taking that the biggest proprietary models are starting to ship. If your use case is "read this article to me in a steady voice" you are fine. If your use case is "act out a dialogue with emotional beats" you are going to notice the gap.</p>
+
+        <p>Consent, for three. The Pocket TTS voice cloning feature presumes that you have the right to clone the voice you are cloning. The README acknowledges this by pointing at a per-voice license page. The community has been responsible enough not to make this frictionless, but the capability exists and the trust model is "you handle it."</p>
+
+        <p>Hardware variance, for four. The Kokoro numbers above show a 3x swing between a high-end modern AMD chip and a decade-old Intel one. Both work. Both are faster than real time. Both will feel different. There is no way to know how your exact machine will land without trying it.</p>
+
+        <h2>Where I think this goes</h2>
+
+        <p>The two trends worth watching are running together. Small models are getting good enough to be the default for a lot of jobs, and the WebAssembly tooling to ship them into a browser tab is getting good enough that "the model lives on my page" stops being exotic.</p>
+
+        <p>If you are building a documentation tool, a chat interface, a local screen reader, a kiosk, an offline-first app, a privacy-sensitive workflow where the text never leaves the user's device, you should be trying one of these two models this week. Not because they are perfect, but because the cost of finding out they are good enough rounds down to zero.</p>
+
+        <p>If you are doing enterprise-grade IVR, audiobook narration at scale, or anything where you need the absolute best expressive quality, the gap is still real. You are still paying per character for the hosted thing. The gap is smaller than it was. It is not closed.</p>
+
+        <p>Kyutai's README has a line I keep coming back to. They note they support additional languages only if they get clean enough data, and that "additional languages may be added in the future." Read that as: this is an active research lab shipping a thing, not a company trying to win the TTS market. The fact that they shipped a model this good with this small a parameter count and put an MIT license on it is the kind of move that bends the price floor for the whole category. Whatever you were paying for TTS last year, you are paying too much this year.</p>
+
+        <p>The repos are at <a href="https://github.com/kyutai-labs/pocket-tts">github.com/kyutai-labs/pocket-tts</a> and <a href="https://huggingface.co/hexgrad/Kokoro-82M">huggingface.co/hexgrad/Kokoro-82M</a>. Both have live demos. Click through. Listen to the output on your hardware. That is the only honest way to decide whether your specific use case fits through the door these two opened.</p>
+
+    </article>
+
+    <script>
+        window.addEventListener('scroll', () => {
+            const winHeight = window.innerHeight;
+            const docHeight = document.documentElement.scrollHeight - winHeight;
+            const scrolled = (window.scrollY / docHeight) * 100;
+            document.getElementById('reading-progress').style.width = scrolled + '%';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ternlight: a 7 MB embedding model that runs in your browser | Cappy</title>
+    <meta name="description" content="A new open source project ships a sentence embedding model distilled from MiniLM-L6 with BitNet b1.58 ternary weights, packed into a 7 MB WebAssembly bundle that runs on CPU with no API calls and no GPU. Real numbers from the README and the HN thread.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 7, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Ternlight: a 7 MB embedding model that runs in your browser</h1>
+
+        <p>Most embedding tools assume a server. You send your text out, the server turns it into a vector, the vector comes back. The default assumption is that the inference is too heavy to do where the user is. A new open source project called <a href="https://github.com/soycaporal/ternlight">Ternlight</a> challenges that, and the way it does it is more interesting than the headline "7 MB embeddings in the browser" suggests.</p>
+
+        <p>The project shipped July 5, 2026 and hit the front page of Hacker News the next day at about a hundred points. The pitch is straightforward: one npm package, the full model plus tokenizer plus inference engine in a single 7 MB WebAssembly file, no API calls, no GPU, runs on CPU in a few milliseconds. Three lines and you have semantic search.</p>
+
+        <pre><code>npm install @ternlight/base
+
+import { embed, cosineSim } from '@ternlight/base';
+cosineSim(embed('reset my password'), embed('I forgot my password'));   // 0.88</code></pre>
+
+        <p>That is genuinely the whole API. A string goes in, a 384-dimensional L2-normalized vector comes out, and cosine similarity does the rest. There is no model download step at runtime because the weights are baked into the wasm.</p>
+
+        <h2>How 7 MB gets hit</h2>
+
+        <p>The repo's README is unusually honest about how the size target gets hit. A few design choices stack on top of each other, and none of them are new on their own. The combination is.</p>
+
+        <p>First, the weights are ternary. Every parameter is one of -1, 0, or +1. That comes from <a href="https://arxiv.org/abs/2402.17764">BitNet b1.58</a> (Ma et al., Microsoft Research, 2024). The interesting part is that the model is trained as a ternary model from the start, not quantized down after the fact. Inference becomes adds and subtracts instead of multiplies, which is faster per operation and packs much more densely.</p>
+
+        <p>Second, it is one bundle. Model, BERT tokenizer, and engine all live in a single <code>.wasm</code>. No postinstall step, no runtime fetch, no separate weights file somewhere on a CDN. You get one file that just works in Node 18 and up, browsers, Cloudflare Workers, Vercel Edge, Deno, and Bun. The package routes each environment to the right loader.</p>
+
+        <p>Third, the inference engine is hand-written Rust compiled to WASM SIMD. The add and subtract math rides CPU vector instructions. On a single core that is enough to do 195 embeddings per second on the bigger tier and around 400 on the smaller one.</p>
+
+        <p>The teacher model is <a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2</a>. The student is distilled down from that with quantization-aware training using the open source <a href="https://github.com/schneiderkamplab/bitlinear">bitlinear</a> PyTorch implementation. The Rust engine in <code>engine/src/kernels.rs</code> is an independent reimplementation of bitlinear's <code>BitLinear.forward()</code> for the WASM target, with parity tests that guard against drift. That level of care is a good sign. It means the numbers are not just ad copy.</p>
+
+        <h2>Numbers from the README</h2>
+
+        <p>The README publishes two tiers. Both ship the full pipeline in one wasm. The smaller one trades some quality for size and speed.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Two tiers, same API</div>
+                <div class="bench-row">
+                    <span class="bench-tool">@ternlight/mini (small/fast)</span>
+                    <span class="bench-time">5.0 MB</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">@ternlight/base (quality)</span>
+                    <span class="bench-time">7.2 MB</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Latency p50, mini</span>
+                    <span class="bench-time">2.5 ms</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Latency p50, base</span>
+                    <span class="bench-time">5.1 ms</span>
+                </div>
+                <div class="bench-note">Wire size is gzipped wasm. Numbers from the shipped int4 builds, measured on M-series Mac in Node/V8.</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Quality versus the MiniLM teacher</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Spearman, mini vs MiniLM-L6</span>
+                    <span class="bench-time">0.820</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Spearman, base vs MiniLM-L6</span>
+                    <span class="bench-time">0.844</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">SciFact NDCG@10, mini</span>
+                    <span class="bench-time">0.439</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">SciFact NDCG@10, base</span>
+                    <span class="bench-time">0.465</span>
+                </div>
+                <div class="bench-note">Both tiers output a 384-dim L2-normalized vector. Max input is 128 tokens, about 95 words.</div>
+            </div>
+        </div>
+
+        <p>For comparison, the MiniLM-L6 teacher model is about 22 MB on disk in float32, and a lot more than that in memory at inference time. Ternlight's base tier hits 0.844 Spearman correlation to that teacher at 7.2 MB on the wire. That is about a 30x compression with what the Pareto chart in the repo calls a "modest" accuracy drop. Whether that modest is modest enough depends a lot on what you are doing.</p>
+
+        <p>If you need pinpoint retrieval over a million documents, a 0.844 correlation probably is not enough and you should keep paying for a bigger model on a server. If you want live "did the user mean this" fuzzy matching on top of a few thousand docs, fast and free, then the trade starts to look very reasonable.</p>
+
+        <h2>What people on Hacker News actually noticed</h2>
+
+        <p>The comment thread is worth reading because the things people picked up on are revealing. One person asked the obvious question: how does this compare to gte-small? Another asked a sharper one. How much of that 0.84 Spearman is the quantization-aware training doing the work, versus what you would get from a post-training ternary quant of the same encoder? That is the right question. The answer in the README is that the model is trained as a ternary model from the start, which is what BitNet's whole pitch is. A naive round-to-ternary after the fact would almost certainly lose more.</p>
+
+        <p>Someone else pointed out a real use pattern. You can do a one time indexing run on the server and just ship the embeddings to the frontend. Inference stays cheap and instant on the client. That is a nice hybrid. The corpus gets indexed once with whatever model you like, the search itself happens at the user's fingertips with no network round trip.</p>
+
+        <p>The best comment, in my opinion, was the one complaining that the demo makes laptop fans spin up when the page loads. That is a fair criticism and also a useful signal. There is no free lunch. Local inference on CPU does cost battery and heat. For a production site you would want to lazy load the wasm and only spin the engine when the user actually interacts with search, not the moment the page mounts. The current demo does the opposite. It boots the engine immediately to show off the throughput counter, and that boot is not free.</p>
+
+        <h2>What on-device embeddings actually unlock</h2>
+
+        <p>The README has a section on this and it is the part I keep returning to. The list is not hype. It is a list of shapes of application that stop working well the moment you add a network dependency.</p>
+
+        <p>Search-as-you-type stops being search-as-you-because-the-results-come-back-next-week. Results appear before the user finishes typing, faster than any network round trip can be. Privacy-sensitive apps stop needing data-handling agreements because the queries and documents never leave the device. Offline-first apps like Obsidian plugins or browser extensions get semantic search without a backend. Cloudflare Workers, Deno Deploy, and Vercel Edge get embeddings co-located with the request handler, with no separate inference service to call.</p>
+
+        <p>The one I find most interesting is static sites. Hugo, Jekyll, Astro. Ship the model with the bundle, semantic search just works, no backend. That has been the missing piece for a lot of small documentation sites. If you have a few hundred pages of docs and no budget for a hosted vector search, until now your options were Algolia with its free tier limits, or lunr-style keyword search that breaks the moment someone phrases things differently than you wrote them. Ternlight sits in between. It costs nothing to run, lives in the page, and actually understands that "reset my password" and "I forgot my password" mean the same thing.</p>
+
+        <h2>Where the tradeoffs land</h2>
+
+        <p>I keep wanting to be careful here because small model stories have a tendency to get oversold. "Runs in browser" is a strong claim but the constraints are real. Max input is 128 tokens, so about 95 words. That is fine for a search query, a doc title, a paragraph, or a tweet. It is not fine for embedding whole long documents in one shot. You would chunk them first, same as you would with any embedding model.</p>
+
+        <p>The output is 384-dimensional. That is the same as MiniLM-L6. For a personal corpus of a few thousand items it works great. At hundreds of thousands of items the 384 dim starts to get crowded and recall suffers. That is not a Ternlight problem, it is a Small Model problem, and the fix is the same fix the big hosters use: re-rank with a second pass.</p>
+
+        <p>The architecture is small on purpose. Two transformer layers, d_model of 384 for the base or 256 for the mini, six or four attention heads. About 15 million parameters on the base tier. That is a tiny model. People on HN kept asking the right question, which is, okay but is it actually good. The answer is "good enough for these specific jobs and not for others."</p>
+
+        <p>What it is not is a replacement for a hosted embedding API on a serious IR workload. If you are doing enterprise search, if you have millions of documents, if you care about the last few percent of recall, keep using a bigger model. If you are building a documentation site, a desktop note-taking tool, a browser extension, a search box on a personal blog, or anything where the value is in not having a backend at all, this is the thing you have been waiting for whether you knew it or not.</p>
+
+        <h2>Why I think this matters more than the size number</h2>
+
+        <p>The 7 MB figure is what gets the clicks. The thing I think is actually new is the engineering combination.</p>
+
+        <p>Ternary weights have been around as an idea since BitNet. Quantization-aware training is older than that. Distilling a smaller student from a teacher is a well-trodden path. WASM SIMD is just WASM SIMD. The single-bundle packaging is a packaging decision. None of those are individually surprising.</p>
+
+        <p>What is surprising is that someone did all of them at once, for a model that people actually use, with parity tests, MIT licensing, working on five runtimes, and shipped it with a live demo and a benchmark table you can check. That is a lot of small details to get right. Each one in isolation is unglamorous. Stacked together they make a category of application dramatically cheaper to build.</p>
+
+        <p>The README ends with a note that there is "still tons of headroom for perf and quality improvements" and that the author is curious about other modalities, "specially generative use cases that fit the same tight constraints." Read that as: this is version 0.1.0 of something. If the bit-ternary WASM inference pattern catches on, the interesting follow-ups are not just slightly better sentence embeddings. They are small generative models that boot instantly and run locally. The embedding model is the proof of concept.</p>
+
+        <p>The repo is at <a href="https://github.com/soycaporal/ternlight">github.com/soycaporal/ternlight</a> and the live demo (fans and all) is at <a href="https://ternlight-demo.vercel.app">ternlight-demo.vercel.app</a>. Both are worth clicking. The demo makes you feel the cost. The README makes you believe the cost was worth it.</p>
+
+    </article>
+
+    <script>
+        window.addEventListener('scroll', () => {
+            const winHeight = window.innerHeight;
+            const docHeight = document.documentElement.scrollHeight - winHeight;
+            const scrolled = (window.scrollY / docHeight) * 100;
+            document.getElementById('reading-progress').style.width = scrolled + '%';
+        });
+    </script>
+</body>
+</html>
