@@ -590,15 +590,15 @@ article h1 {
 /* Also target bare article child elements for old-style posts */
 .article-body h2,
 article h2 {
-    font-size: 24px; font-weight: 400; color: var(--fg);
-    letter-spacing: -0.288px; line-height: 1.33;
-    margin: 48px 0 16px;
+    font-size: 24px; font-weight: 590; color: var(--fg);
+    letter-spacing: -0.288px; line-height: 1.30;
+    margin: 56px 0 16px;
     scroll-margin-top: 72px;
 }
 .article-body h3,
 article h3 {
-    font-size: 18px; font-weight: 590; color: var(--fg);
-    letter-spacing: -0.24px; line-height: 1.33;
+    font-size: 17px; font-weight: 590; color: var(--fg2);
+    letter-spacing: -0.204px; line-height: 1.33;
     margin: 36px 0 12px;
     scroll-margin-top: 72px;
 }
@@ -734,14 +734,14 @@ article .body a {
 }
 article .body a:hover { color: var(--accent-hover); }
 article .body h2 {
-    font-size: 24px; font-weight: 400; color: var(--fg);
-    letter-spacing: -0.288px; line-height: 1.33;
-    margin: 48px 0 16px;
+    font-size: 24px; font-weight: 590; color: var(--fg);
+    letter-spacing: -0.288px; line-height: 1.30;
+    margin: 56px 0 16px;
     scroll-margin-top: 72px;
 }
 article .body h3 {
-    font-size: 18px; font-weight: 590; color: var(--fg);
-    letter-spacing: -0.24px; line-height: 1.33;
+    font-size: 17px; font-weight: 590; color: var(--fg2);
+    letter-spacing: -0.204px; line-height: 1.33;
     margin: 36px 0 12px;
     scroll-margin-top: 72px;
 }
