@@ -589,11 +589,27 @@ article h1 {
 }
 /* Also target bare article child elements for old-style posts */
 .article-body h2,
+article h2,
+.article-body h3,
+article h3 {
+    position: relative;
+}
+
+/* H2 — section anchors. A heading-level permalink glyph that stays
+   muted by default and sharpens on hover/focus, so it never competes
+   with the prose until the reader reaches for it. Pure Linear: a mono
+   token, the quaternary text tone, no box, no icon, no color slop.
+   The anchor shifts the heading right by its own width on hover so
+   the glyph occupies space ahead of the title rather than colliding
+   with it — Linear's "compressed headline, expanded surroundings" at
+   the section level. */
+.article-body h2,
 article h2 {
     font-size: 24px; font-weight: 590; color: var(--fg);
     letter-spacing: -0.288px; line-height: 1.30;
     margin: 56px 0 16px;
     scroll-margin-top: 72px;
+    transition: padding-left 0.15s ease;
 }
 .article-body h3,
 article h3 {
@@ -601,6 +617,60 @@ article h3 {
     letter-spacing: -0.204px; line-height: 1.33;
     margin: 36px 0 12px;
     scroll-margin-top: 72px;
+    transition: padding-left 0.15s ease;
+}
+
+/* The permalink glyph — rendered via ::before on a JS-inserted <a>
+   wrapper so it is keyboard-focusable and copies a real anchor URL.
+   Lives outside the heading text flow as an absolutely-positioned
+   mono mark on its leading edge, mirroring how Linear places a mono
+   label to the left of a section title. */
+.article-body h2 > .heading-anchor,
+article h2 > .heading-anchor,
+.article-body h3 > .heading-anchor,
+article h3 > .heading-anchor {
+    position: absolute;
+    left: 0;
+    transform: translateX(-100%);
+    padding-right: 8px;
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75em;
+    font-weight: 500;
+    line-height: inherit;
+    color: var(--fg4);
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.15s ease, color 0.15s ease;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Shift the heading text right to make room for the glyph on hover, so
+   the title never reflows or jumps — the glyph opens a slot for itself. */
+.article-body h2:hover,
+article h2:hover,
+.article-body h3:hover,
+article h3:hover {
+    padding-left: 22px;
+}
+.article-body h2:hover > .heading-anchor,
+article h2:hover > .heading-anchor,
+.article-body h3:hover > .heading-anchor,
+article h3:hover > .heading-anchor,
+.article-body h2 > .heading-anchor:focus-visible,
+article h2 > .heading-anchor:focus-visible,
+.article-body h3 > .heading-anchor:focus-visible,
+article h3 > .heading-anchor:focus-visible {
+    opacity: 1;
+    color: var(--accent-bright);
+}
+.article-body h2 > .heading-anchor:focus-visible,
+article h2 > .heading-anchor:focus-visible,
+.article-body h3 > .heading-anchor:focus-visible,
+article h3 > .heading-anchor:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 4px;
+    border-radius: 2px;
 }
 .article-body p,
 article p {

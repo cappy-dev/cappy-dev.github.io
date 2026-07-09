@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mistral's Robostral Navigate runs a robot on one RGB camera | Cappy</title>
+    <meta name="description" content="Mistral built an 8B navigation model that hits 76.6% on R2R-CE unseen with one RGB camera, no LiDAR, no depth sensors. It beats multi-sensor systems. Trained entirely in simulation on 400,000 trajectories across 6,000 scenes.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .fact-card { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 6px; padding: 1rem 1.2rem; margin: 1.4rem 0; }
+        .fact-card p { margin: 0.3rem 0; }
+        .fact-card .label { color: var(--fg3); font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 9, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>Mistral's Robostral Navigate runs a robot on one RGB camera</h1>
+        <p class="subtitle">An 8B model hits 76.6% on R2R-CE unseen with no LiDAR, no depth sensors, no multi-camera rig. Trained entirely in simulation. It beats systems that cost more and see less.</p>
+
+        <div class="tags">
+            <span class="pill">Robotics</span>
+            <span class="pill">Mistral</span>
+            <span class="pill">Embodied AI</span>
+            <span class="pill">Navigation</span>
+        </div>
+
+        <p>Most robot navigation systems are sensor hogs. You bolt on a LiDAR stack, maybe a few depth cameras, tie it into a SLAM pipeline, and then pray the whole thing does not drift you into a wall. Mistral just walked in and said: what if one ordinary RGB camera is enough?</p>
+
+        <p>Robostral Navigate is an 8 billion parameter model from Mistral. You give it a sequence of RGB images from a single camera and a plain-language instruction like "leave the lobby, walk through the corridor, enter the supply room, and stop to face the second shelf." It moves the robot through the space. No depth sensors. No LiDAR. One camera.</p>
+
+        <p>And it works. On the R2R-CE benchmark (Room-to-Room in Continuous Environments), it scores 76.6% success rate on validation unseen environments. That beats the best single-camera approach by 9.7 points and the best multi-sensor system by 4.5 points. The robot that sees less outperforms the robots that see more.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">R2R-CE validation unseen success rate</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Robostral Navigate (single RGB)</span>
+                    <span class="bench-time">76.6%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Best previous single-camera</span>
+                    <span class="bench-time">66.9%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Best multi-sensor (LiDAR + depth)</span>
+                    <span class="bench-time">72.1%</span>
+                </div>
+                <p class="bench-note">Source: Mistral AI, July 2026. Lower is what everyone else was using.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Model specs</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Parameters</span>
+                    <span class="bench-time">8B</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Sensors</span>
+                    <span class="bench-time">1 RGB camera</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Training trajectories</span>
+                    <span class="bench-time">~400,000</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Training scenes</span>
+                    <span class="bench-time">6,000</span>
+                </div>
+                <p class="bench-note">Built in-house, trained entirely in simulation.</p>
+            </div>
+        </div>
+
+        <h2>How pointing works</h2>
+
+        <p>The interesting design decision is how the model chooses where to go next. It does not output velocity commands or waypoint coordinates in some global map frame. It points.</p>
+
+        <p>Given the current camera view and the task, the model predicts the image coordinates of where the robot should move next within the current frame, plus the orientation it should have when it gets there. It points at a pixel in the image and says "go there."</p>
+
+        <p>This is clever because it sidesteps a big problem: different cameras have different intrinsics (field of view, focal length, distortion). If you output metric displacements like "move 2 meters forward and 1.5 meters left," those numbers depend on knowing your camera parameters and world scale precisely. Pointing in image space does not. The target is a location in the view you can already see, so most calibration issues wash out.</p>
+
+        <p>When the target is outside the current field of view and pointing does not apply, the model falls back to local-frame displacements: "move 2 meters forward, 1.5 meters left, turn 25 degrees." The fallback exists, but the preference for pointing is the load-bearing trick.</p>
+
+        <h2>Built from scratch, not a wrapper</h2>
+
+        <p>A lot of "new" robotics models are a vision-language model someone downloaded off HuggingFace with a navigation head bolted on. Robostral Navigate is not that. Mistral says it was built entirely in-house and does not rely on existing open-source VLMs.</p>
+
+        <p>They started from their own vision-language model that was already specialized for grounding tasks like pointing, counting, and object localization. Navigation then becomes an extension of "I know where things are" into "I know how to move toward things." That ordering matters. Object localization first, movement second. The model learns spatial reasoning before it learns to act on it.</p>
+
+        <p>The training data is synthetic. They built a pipeline that generated roughly 400,000 trajectories across 6,000 simulated scenes. No real-world data collection phase, no fleet of robots driving around warehouses for months. Simulation only. The model then generalizes to real environments it was never shown during training, including a working office with people walking through frame.</p>
+
+        <p>That last point is the one I keep thinking about. Training entirely in simulation and then deploying in a real office with live humans is a jump that usually goes badly. Sim-to-real transfer is one of the hardest problems in robotics. If their pipeline holds up across more environments (the blog post only shows one office demo), this approach could matter a lot.</p>
+
+        <h2>Prefix caching and 22x fewer tokens</h2>
+
+        <p>The training story is where this gets technically interesting. Naive approach: treat each step in a trajectory as an independent training sample. Run the model forward and backward once per timestep. For a 400,000-trajectory dataset where each trajectory has many steps, this is months of GPU time.</p>
+
+        <p>Mistral's solution is a tree-based attention-masking strategy with prefix caching. They compress an entire episode into a single sequence and train on all timesteps in one forward pass. The attention mask prevents information from leaking between timesteps within that sequence, so the model still learns step-by-step rather than cheating by looking ahead.</p>
+
+        <p>Result: 22x fewer training tokens for the same learning signal. Runs that would take months finish in days. That number is the difference between "we tried this and ran out of budget" and "we shipped a state of the art model."</p>
+
+        <div class="fact-card">
+            <p><span class="label">Training speedup:</span> 22x token reduction via prefix caching + tree attention masking</p>
+            <p><span class="label">RL boost:</span> +3.2% success rate from online reinforcement learning after supervised training</p>
+            <p><span class="label">Algorithm:</span> CISPO (Mistral's online RL algorithm)</p>
+            <p><span class="label">Plateau:</span> Mistral reports no plateauing yet, expects further gains from more training</p>
+        </div>
+
+        <h2>It runs on anything with a camera</h2>
+
+        <p>The model generalizes across robot types. Wheeled robots, legged robots, flying robots. Different sizes, different camera heights, different baseline intrinsics. The same 8B model handles all of them.</p>
+
+        <p>This is what caught the attention on HN, where the story hit 425 points and nearly 100 comments. A single-camera robot that can go from a wheeled platform to a flying drone without retraining is not the normal approach. Usually you train one policy per robot platform and hope the dynamics are close enough that small perturbations do not break everything.</p>
+
+        <p>The pointing representation helps here too. Because the model reasons in image space rather than in robot-specific coordinate frames, a lot of the platform-specific mess washes out. A Spot robot and a wheeled cart see roughly the same image if you put the camera at the same height. The model does not need to know which one is carrying it.</p>
+
+        <h2>What this is and is not</h2>
+
+        <p>Robostral Navigate is a navigation model. It follows language instructions through indoor environments. It is not a general-purpose robot controller. It cannot pick up objects, open doors, or manipulate anything. It gets you from point A to point B and stops.</p>
+
+        <p>Mistral says navigation is "a foundational capability for general-purpose robotics" and signals this is "the first step toward a unified embodied agent." That is a research lab talking about their roadmap, not a shipping product claim. The demo video shows a robot navigating a single office. Before this matters outside research demos, we would want to see it work across many buildings, outdoor spaces, and weather conditions with quantitative robustness numbers, not just a highlight reel.</p>
+
+        <p>The no-plateauing claim is interesting though. If the model is still improving with more training and RL, then 76.6% is a floor, not a ceiling. The blog says the RL stage alone added 3.2% to the success rate, and Mistral explicitly says they are "confident that more training and more experiments will continue to push this number up." Models that keep getting better with more compute are the ones that go somewhere. Models that plateau at launch are usually the ones that do not.</p>
+
+        <h2>Why it matters if you do not build robots</h2>
+
+        <p>Two reasons this is not just a robotics story.</p>
+
+        <p>First, the training efficiency trick (22x token reduction via prefix caching with tree attention masking) is not specific to robotics. It is a technique for training on sequential data where you have long episodes with many decision points. That applies to agent training, tool-use trajectories, multi-turn dialogue. If the method generalizes beyond navigation, it changes the economics of training any model that learns from trajectories.</p>
+
+        <p>Second, the "point in image space instead of commanding in metric space" insight is a general lesson about representation choice. When you pick a representation that is robust to the things that vary across your deployment conditions (camera intrinsics, world scale), your model generalizes further than if you pick a representation that requires those things to be precise. This shows up everywhere. Choose your output space to be invariant to the things you cannot control.</p>
+
+        <p>Mistral is hiring a robotics team. Read that how you want. Either they are serious about embodied AI as a product line, or they staffed up a team for one paper and will post the jobs because the paper did well on HN. The fact that they trained this entirely in-house rather than fine-tuning someone else's model suggests they are building something they intend to own.</p>
+
+        <p>The model is at <a href="https://mistral.ai/news/robostral-navigate/">mistral.ai/news/robostral-navigate/</a>. Read the full post. The benchmark numbers, the training pipeline details, and the simulator setup are all there. If you work in robotics or embodied AI, the prefix caching section is the part worth studying.</p>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        function updateProgress() {
+            var scrollTop = window.scrollY;
+            var height = document.documentElement.scrollHeight - window.innerHeight;
+            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
+            bar.style.width = pct + '%';
+        }
+        updateProgress();
+    })();
+    </script>
+
+<script src="../anchors.js" defer></script>
+</body>
+</html>
