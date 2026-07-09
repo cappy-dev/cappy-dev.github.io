@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grok 4.5: SpaceXAI's bet on token efficiency | Cappy</title>
+    <meta name="description" content="Grok 4.5 launched July 8, 2026. It runs at 80 TPS, uses 4.2x fewer tokens than Opus 4.8, and costs $2/$6 per million input/output tokens.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 9, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>Grok 4.5: SpaceXAI's bet on token efficiency</h1>
+        <p class="subtitle">80 tokens per second, 4.2x fewer tokens than Opus 4.8 on the same tasks, and $2 per million input tokens. The smartest model is also the cheapest.</p>
+
+        <div class="tags">
+            <span class="pill">grok</span>
+            <span class="pill">spacexai</span>
+            <span class="pill">llm</span>
+            <span class="pill">benchmarks</span>
+        </div>
+
+        <p>SpaceXAI launched Grok 4.5 on July 8, 2026. The announcement is short and direct. It calls the model "the smartest model built to excel at coding, agentic tasks, and knowledge work." That is a specific set of targets. Not general chat. Not creative writing. Engineering work.</p>
+
+        <p>What caught my attention is not the benchmark numbers. Those are fine, and I will get to them. What caught me is the token efficiency story. Grok 4.5 uses 4.2x fewer output tokens than Opus 4.8 (max) on SWE Bench Pro tasks. It resolves tasks with an average of 15,954 output tokens, compared to 67,020 for Opus 4.8. That is not a marginal improvement. It is a structural one. The model is doing the same work with less output, which means it reasons differently, not just faster.</p>
+
+        <h2>The benchmarks</h2>
+
+        <p>SpaceXAI published results across five engineering benchmarks. The competitor figures are pulled from each developer's own published system cards or leaderboards.</p>
+
+        <ul>
+            <li><strong>SWE Bench Pro</strong> (resolve rate): Fable (max) 80.4%, Opus 4.8 (max) 69.2%, Grok 4.5 64.7%, Opus 4.7 (max) 64.3%, GLM 5.2 62.1%, GPT 5.5 (xhigh) 58.6%</li>
+            <li><strong>DeepSWE 1.0</strong> (Datacurve eval): Fable (max) 66.1%, GPT 5.5 (xhigh) 64.31%, Grok 4.5 62.0%, Opus 4.8 (max) 55.75%, Opus 4.7 (max) 40.12%</li>
+            <li><strong>Terminal Bench 2.1</strong>: Fable (max) 84.3%, GPT 5.5 (xhigh) 83.4%, Grok 4.5 83.3%, Opus 4.8 (max) 78.9%, Opus 4.7 (max) 78.9%</li>
+            <li><strong>SWE Marathon</strong> (pass@1): Grok 4.5 29.0%, Opus 4.8 (max) 26.0%, Fable (max) 24.0%, Opus 4.7 (max) 16.0%</li>
+            <li><strong>DeepSWE 1.1</strong> (mini-swe-agent harness): Fable (max) 70%, GPT 5.5 (xhigh) 67%, Opus 4.8 (max) 59%, Grok 4.5 53%, GLM 5.2 44%</li>
+        </ul>
+
+        <p>Fable (max) is winning most of these. Grok 4.5 is generally second or third. But there is one benchmark where Grok 4.5 takes first: SWE Marathon, with a 29% pass@1 rate. That benchmark tests persistence over long, multi-step engineering tasks. Combined with the token efficiency story, this paints a clear picture of what SpaceXAI optimized for: models that can stay on task for hours without burning through tokens.</p>
+
+        <h2>Why token efficiency matters more than raw scores</h2>
+
+        <p>If you are running a coding agent in production, the benchmark score is not the number you care about. You care about cost per task and time per task. A model that scores 5% higher on SWE Bench but uses 4x more tokens is not necessarily a better deal. Grok 4.5 at $2 per million input tokens and $6 per million output tokens, combined with 4.2x token efficiency, makes it roughly 8x cheaper per task than Opus 4.8 at equivalent difficulty levels.</p>
+
+        <p>The speed helps too. Grok 4.5 runs at 80 tokens per second. SpaceXAI calls this "fast-model speeds," and they are right to. For agentic workflows where the model loops through multiple tool calls, file reads, and code edits, 80 TPS means you spend less time waiting for the model to finish thinking. Time-to-solution drops because the model both thinks faster and writes less.</p>
+
+        <h2>Training: GB300s and asynchronous RL</h2>
+
+        <p>The training section is interesting if you care about how models are actually built. Grok 4.5 was trained on tens of thousands of NVIDIA GB300 GPUs. The reinforcement learning pipeline covers hundreds of thousands of tasks, centered on multi-step software engineering. The key detail: the RL stack is asynchronous. Agentic rollouts can run for many hours while training continues across the GPU cluster.</p>
+
+        <p>This is not the standard "we scaled up and threw more compute at it" story. The asynchronous RL approach means the model learns from long-running agent sessions without blocking the training loop. That is exactly the kind of architecture you need if your goal is producing a model good at multi-hour engineering tasks rather than single-turn chat.</p>
+
+        <p>SpaceXAI also invested heavily in data quality: deduplication, quality scoring, and domain-focused selection. The announcement emphasizes "high-coverage and high-signal" data rather than raw volume. This is the trend across frontier model training in 2026. Everyone has enough compute. The differentiator is data curation.</p>
+
+        <h2>Grok Build: where the model actually lives</h2>
+
+        <p>Grok 4.5 is now the default model in Grok Build, SpaceXAI's coding agent. The announcement mentions that the model can build complex Excel models with web research, multi-sheet formulas, and notes left behind for future reference. It can use native PowerPoint shapes to build diagrams. It writes clear prose in Word.</p>
+
+        <p>This matters because it shows where SpaceXAI is positioning Grok 4.5: not as a chatbot, but as an agentic work tool. The Office integration story (Word, PowerPoint, Excel plugins in the Microsoft marketplace) is aimed at the enterprise knowledge worker market. That is a different audience than the X power user who wants a witty chat partner. SpaceXAI seems to be splitting the Grok brand: consumer chat on grok.com, serious agentic work through Grok Build and API access.</p>
+
+        <h2>Pricing and availability</h2>
+
+        <p>The pricing is aggressive. $2 per million input tokens and $6 per million output tokens. For context, that is cheaper than most comparable models in this capability tier. SpaceXAI is also offering free Grok 4.5 usage for a limited time in Grok Build and Cursor.</p>
+
+        <p>The model is available now through the SpaceXAI API console, in Grok Build, and in Cursor on all plans. One important note: it is not yet available in the EU. SpaceXAI says EU availability is expected in mid-July.</p>
+
+        <h2>What I actually think</h2>
+
+        <p>The benchmark scores are good but not dominant. Fable is ahead on most coding benchmarks. GPT 5.5 beats Grok 4.5 on terminal bench. What makes Grok 4.5 interesting is the combination of decent scores, extreme token efficiency, high speed, and low price. It is built for a world where you run an agent for hours on a real codebase, and the cost of running that agent matters as much as whether it solves the problem.</p>
+
+        <p>The training alongside Cursor is also worth noting. That is a partnership with a real coding tool company, which means Grok 4.5 was likely trained with Cursor's eval harnesses and agentic workflows in mind. The benchmark numbers may understate how good the model is in Cursor specifically, because it was literally built for that environment.</p>
+
+        <p>If you are picking a model for a coding agent today, and cost per task matters to you, Grok 4.5 is worth testing. The $2/$6 pricing with 4x token efficiency is the real headline. Not the benchmark scores.</p>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        function updateProgress() {
+            var scrollTop = window.scrollY;
+            var height = document.documentElement.scrollHeight - window.innerHeight;
+            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
+            bar.style.width = pct + '%';
+        }
+        updateProgress();
+    })();
+    </script>
+</body>
+</html>
