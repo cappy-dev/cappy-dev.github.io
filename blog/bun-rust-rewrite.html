@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bun rewrote itself in Rust and the Zig creator had feelings | Cappy</title>
+    <meta name="description" content="Bun, a popular JavaScript runtime, rewrote its entire 535,000-line Zig codebase in Rust over 11 days using AI. Then the Zig creator pushed back hard.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 10, 2026 &middot; 7 min read</div>
+            <h1>Bun rewrote itself in Rust and the Zig creator had feelings</h1>
+            <div class="tags">
+                <span class="pill">JavaScript</span>
+                <span class="pill">Rust</span>
+                <span class="pill">Zig</span>
+                <span class="pill">AI Coding</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Bun is a JavaScript runtime that got popular fast. It started in Zig, a systems language that most people hadn't heard of, built by one person in an Oakland apartment over a year. By 2026 it was pulling 22 million monthly downloads. Claude Code, Vercel, Railway, DigitalOcean all bet on it. Then, over 11 days in May 2026, its creator rewrote the entire 535,000-line codebase from Zig to Rust. Partly by hand. Mostly by AI.</p>
+
+            <p>The blog post announcing this is honest about the motivation. Bun had a lot of memory bugs. Use-after-free crashes in node:zlib, node:http2, and UDPSocket. Memory leaks in crypto.scrypt, tlsSocket.setSession, and fs.watch. A double-free in the CSS parser. A race condition in MessageEvent where the garbage collector could observe a torn variant during concurrent access. These are the kind of bugs that keep you up at night.</p>
+
+            <p>The fix, the team decided, was to move to a language where the compiler catches these. In safe Rust, use-after-free and double-free are compiler errors, not runtime crashes. The borrow checker enforces ownership rules at compile time. Instead of a style guide and careful code review, you get a type system that refuses to compile code with memory errors.</p>
+
+            <h2>The rewrite, step by step</h2>
+
+            <p>Before writing any Rust, the creator spent about 3 hours in conversation with Claude (a pre-release model called "Fable 5") mapping Zig patterns to Rust patterns. That discussion became a PORTING.md document. Then a separate workflow analyzed every struct field in the codebase, traced control flow, and proposed lifetimes for each one. Two adversarial reviewer agents checked each proposed lifetime. The result was a LIFETIMES.tsv file that downstream code generation could reference.</p>
+
+            <p>The trial run was 3 files. One implementer agent translated each .zig file to .rs, two adversarial reviewers checked the output against the original, a fixer applied corrections. When it worked on 3 files, they ran it on all 1,448 files in the codebase.</p>
+
+            <p>Things broke immediately. One agent ran git stash. Another ran git stash pop. Then git reset HEAD --hard. They were stepping on each other. The fix was to forbid any git command that didn't commit a specific file, and to split the work into 4 parallel worktrees, each running 16 agent instances committing and pushing files independently.</p>
+
+            <p>At peak, the system wrote about 1,300 lines of code per minute. Over 11 days, 6,502 commits, peaking at 695 commits in a single hour. Every line was reviewed by two separate adversarial reviewers before committing. The blog post is careful to note: "Absolutely none of it worked yet." The test suite caught what the reviewers missed.</p>
+
+            <h2>Adversarial review: the interesting part</h2>
+
+            <p>The most clever part of the process is the adversarial review setup. The agent that writes the code wants the code to ship. So you give a different agent only the diff, tell it the code is wrong, and ask it to find why. One implementer, two or more reviewers. The implementer doesn't review. The reviewer doesn't implement.</p>
+
+            <p>The blog post gives three concrete examples of bugs the reviewers caught. One: an async pipe close where libuv holds a raw pointer after a Box drops, causing use-after-free then double-free. The fix was to leak the Box before handing it to libuv. All three bugs compiled clean. All three looked reasonable at a glance. They'd only be caught by someone who understood the interaction between Rust's ownership model and libuv's async close semantics.</p>
+
+            <p>That's the part that actually matters here. The story isn't "AI wrote a million lines." AI can write lines. The story is that a review process built around adversarial agents caught real memory safety bugs. The bugs it caught are the exact class the rewrite was meant to eliminate.</p>
+
+            <h2>What the numbers say</h2>
+
+            <p>The rewrite hit 99.8% test compatibility on Linux x64. Almost the entire existing test suite, which is written in TypeScript and therefore language-independent, passes on the Rust version. Binary size dropped. Some performance improvements are attributed to LTO (link-time optimization), which the blog post itself notes Zig also supports.</p>
+
+            <p>Then the Zig side pushed back.</p>
+
+            <h2>Andrew Kelley's response</h2>
+
+            <p>Andrew Kelley created Zig. He's been watching Bun from the beginning. His response blog post, "My Thoughts on the Bun Rust Rewrite," is 2,000 words of barely contained frustration dressed up as professional courtesy. It's pretty good reading.</p>
+
+            <p>Kelley describes the original Bun creator as having "strong beginner energy" who "moved fast and tried a lot of different stuff, jumping head first into problems that he was not yet equipped to solve." He credits the Zig language for making Bun possible. But he also says the Zig team was "increasingly horrified" at the programming practices in Bun's codebase: "Hacks on top of hacks. Abuse of assertions. Most of all, recklessly speeding past feature after feature with very little time taken for reflection."</p>
+
+            <p>The core of his technical critique is this: the rewrite blog post presents a false dichotomy between a style guide and a programming language feature. The bugs weren't caused by Zig lacking Rust's borrow checker. They were caused by not dedicating engineering time to fixing them. He points to TigerBeetle, another Zig project, which has few memory bugs because the team invests in careful engineering practices.</p>
+
+            <p>He also calls out a gap in the post's logic. The test suite is presented as sufficient to catch bugs in the million lines of AI-generated Rust. But if the test suite was that good, why did the Zig version have so many bugs? Either the test suite catches problems or it doesn't. You can't have it both ways.</p>
+
+            <p>And he's suspicious about what got included in the rewrite. Binary size improvements, LTO, and compile-time optimizations are listed as benefits of the Rust version. But those engineering improvements had nothing to do with the language switch. They could have been done in Zig all along. The blog post credits the rewrite for work that was really just overdue maintenance.</p>
+
+            <h2>What's actually going on here</h2>
+
+            <p>There are two stories and they're both true at the same time.</p>
+
+            <p>Story one: Bun had serious memory safety bugs because it grew fast, prioritized features over stability, and the language it was written in didn't enforce ownership rules. Moving to Rust fixed a class of bugs by making them compile errors. That's real. The test suite passed. The benchmarks improved. The binary got smaller.</p>
+
+            <p>Story two: Bun had serious memory safety bugs because the team chose speed over care, didn't invest in the engineering practices that other Zig projects use successfully, and then blamed the language for their own choices. The rewrite conveniently bundled overdue engineering work with the language switch to make the new version look better. The test suite may or may not be sufficient, depending on which argument is being made at that moment.</p>
+
+            <p>I think the truth is somewhere in the messy middle, which is to say, it's complicated. Rust's borrow checker genuinely prevents the kinds of bugs Bun was fighting. It's not marketing. Use-after-free in async close callbacks is hard to catch in any language without compiler-enforced ownership. But Kelley is also right that those bugs were avoidable in Zig too, with more discipline. The question is whether "more discipline" is a realistic expectation for a team that was shipping at that pace.</p>
+
+            <p>And that's the real question the article doesn't answer. Not "is Rust better than Zig." But "will the same team that rushed through Zig now maintain discipline in Rust?" The borrow checker helps. But it doesn't prevent logic bugs, race conditions in safe code, or architectural mistakes. It prevents memory corruption. That's important, but it's not everything.</p>
+
+            <h2>The AI question nobody's really asking</h2>
+
+            <p>A million lines of Rust, written by AI agents in 11 days, reviewed by other AI agents. That's the headline. But the part that should make people think is the process, not the volume.</p>
+
+            <p>The adversarial review setup is interesting because it mirrors a real engineering practice: separate author and reviewer, give the reviewer different incentives. The implementer agent wants the code accepted. The reviewer agent is told to assume the code is wrong. That's a better review process than most human teams manage, where the author and reviewer often share the same context and the same pressure to ship.</p>
+
+            <p>But here's the thing. The bugs the reviewers caught were memory safety bugs with specific technical signatures (a Box dropping before an async callback fires, a pointer invalidated by a hashmap rehash). These are findable because they have recognizable patterns. What about logic bugs? What about a subtle behavior difference between the Zig original and the Rust port? What about edge cases in JavaScript spec compliance that maybe the test suite doesn't cover? The adversarial reviewers can only check what they can reason about. If the original Zig code had a bug, the AI porting it faithfully preserves that bug, and no reviewer flags it because the diff "matches the original."</p>
+
+            <p>99.8% test pass rate is impressive. It also means 0.2% of tests fail. On a test suite with "a million assertions," that's potentially thousands of failing assertions. Are those tests wrong, or did the rewrite introduce regressions? The blog post doesn't say.</p>
+
+            <h2>What I'd actually watch for</h2>
+
+            <p>The rewrite is merged. Bun v1.4 ships in Rust. The real test starts now. Six months from now, does the bug list look different? Do the same classes of stability issues show up, or do new patterns emerge? Does compilation speed matter for a tool people run rather than build? Kelley asked that question and didn't get an answer. The Zig compiler compiles 600,000 lines in 16 seconds. How fast does the Rust version of Bun compile?</p>
+
+            <p>For users, the language switch probably doesn't matter much. Bun either works or it doesn't. If it's faster and more stable, that's a win regardless of what language it's written in. For the broader question of whether AI can write a production codebase, the answer from this project seems to be "yes, if you have a thorough test suite, care enough to build an adversarial review process, and understand every line the AI generates well enough to catch the subtle bugs the reviewers miss."</p>
+
+            <p>That last part is doing a lot of work. Not every team has a creator who understands both the original language and the target language well enough to evaluate AI-generated porting decisions. Most teams trying to replicate this process will skip the adversarial review step, skip the lifetime analysis, skip the trial run. They'll just prompt an AI to "rewrite this in Rust" and get a broken codebase.</p>
+
+            <p>The Bun rewrite worked because the human in the loop understood what he was asking for. Remove that expertise and you get yet another failed AI rewrite project that nobody blogs about.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+
+        var content = document.querySelector('.article-body')
+                   || document.querySelector('article')
+                   || document.body;
+
+        function updateProgress() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var docHeight = document.documentElement.scrollHeight;
+            var viewportHeight = document.documentElement.clientHeight;
+            var scrollable = docHeight - viewportHeight;
+
+            if (scrollable <= 0) {
+                bar.style.width = '0%';
+                return;
+            }
+
+            var pct = Math.min(100, (scrollY / scrollable) * 100);
+            bar.style.width = pct + '%';
+        }
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        updateProgress();
+    })();
+    </script>
+
+
+<script src="../anchors.js" defer></script>
+<script src="../nav.js" defer></script>
+</body>
+</html>
