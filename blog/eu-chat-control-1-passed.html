@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EU Chat Control 1.0 passed against the majority's will | Cappy</title>
+    <meta name="description" content="The European Parliament quietly reauthorized suspicionless mass scanning of private messages on July 9, 2026. More MEPs voted against it than for it. Here is how the procedural trick worked, what gets scanned now, and why the numbers behind the surveillance argument do not hold up.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .vote-box { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.2rem 1.4rem; margin: 1.6rem 0; }
+        .vote-box .vote-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.35rem 0; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; }
+        .vote-box .vote-row:first-of-type { border-top: none; }
+        .vote-box .vote-label { color: var(--fg3); }
+        .vote-box .vote-num { font-weight: 500; }
+        .vote-box .vote-num.against { color: #ef4444; }
+        .vote-box .vote-num.for { color: #10b981; }
+        .vote-box .vote-num.threshold { color: var(--accent-bright); }
+        .stat-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .stat-card .stat-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.5rem; font-family: 'JetBrains Mono', monospace; }
+        .stat-card .stat-value { font-size: 1.5rem; font-weight: 510; color: var(--fg); font-family: 'JetBrains Mono', monospace; }
+        .stat-card .stat-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.4rem; }
+        blockquote { border-left: 3px solid var(--accent); padding-left: 1.2rem; margin: 1.6rem 0; color: var(--fg2); font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 10, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>EU Chat Control 1.0 passed against the majority's will</h1>
+
+        <p>On July 9, 2026, the European Parliament voted to reauthorize suspicionless mass scanning of private communications. The thing is, more MEPs voted against the measure than for it. The bill passed anyway, through a procedural gap that required an absolute majority to reject it rather than a simple majority to pass it.</p>
+
+        <p>The vote tally tells the story plainly.</p>
+
+        <div class="vote-box">
+            <div class="vote-row">
+                <span class="vote-label">Voted AGAINST (rejecting the regulation):</span>
+                <span class="vote-num against">314</span>
+            </div>
+            <div class="vote-row">
+                <span class="vote-label">Voted FOR (keeping mass scanning):</span>
+                <span class="vote-num for">276</span>
+            </div>
+            <div class="vote-row">
+                <span class="vote-label">Abstentions:</span>
+                <span class="vote-num">17</span>
+            </div>
+            <div class="vote-row">
+                <span class="vote-label">Absolute majority threshold needed to reject:</span>
+                <span class="vote-num threshold">361</span>
+            </div>
+        </div>
+
+        <p>The motion to reject failed with 314 votes, short of the 361 absolute majority needed. So the regulation went through despite most voting MEPs opposing it. The European Parliament had already rejected this same regulation twice in March. Third time, the mechanism broke differently.</p>
+
+        <h2>What Chat Control 1.0 actually does</h2>
+
+        <p>The regulation lets US tech companies scan private messages without a warrant or any prior suspicion. This is not a new power. It is a reauthorization of a practice that was temporarily banned in April 2026 after the Parliament rejected it earlier in the year. The interim rule stays in effect until 2028, or until a permanent "Chat Control 2.0" regulation gets negotiated.</p>
+
+        <p>Affected platforms include direct messages on Instagram, Discord, Snapchat, Skype, and Xbox, plus email through Gmail and iCloud. The scanning targets unencrypted private communications. These are the platforms where the server (not the user) holds the keys, so the company can read message contents if it chooses to.</p>
+
+        <p>Here is what does not change: public social media posts and cloud storage files were already scannable without this law. Private messages could already be reported by users or monitored through court-ordered wiretaps. The only thing that was temporarily banned and is now restored is the indiscriminate, warrantless searching of private unencrypted messages from people with no suspicion attached to them.</p>
+
+        <h2>What is still not scanned</h2>
+
+        <p>End-to-end encrypted chats, like WhatsApp, remain exempt. European providers of messaging and email services have never implemented chat control measures. A symbolic exemption for encrypted communications was also adopted, though it is largely moot since providers do not scan end-to-end encrypted content anyway.</p>
+
+        <p>The practical implication is that the surveillance falls almost entirely on US platforms. If you message someone on WhatsApp, your content is not scanned. If you DM them on Instagram, it is. That asymmetry has little to do with the relative risk of the platforms and a lot to do with which companies volunteered to participate in the scanning program. Meta operates both. The difference is which protocol each product uses.</p>
+
+        <h2>The numbers do not support the surveillance</h2>
+
+        <p>The strongest argument against Chat Control is not the privacy theory. It is the data the EU Commission itself published. The patrol results are the ones advocates point to when they say the scanning was never about catching offenders.</p>
+
+        <div class="stat-box">
+            <div class="stat-card">
+                <div class="stat-label">Reports from unencrypted DMs</div>
+                <div class="stat-value">36%</div>
+                <div class="stat-note">Share of all abuse reports in 2024 from mass-scanned private chats. The majority came from public posts and cloud storage (EU Commission).</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">False alarms (BKA)</div>
+                <div class="stat-value">48%</div>
+                <div class="stat-note">Of all incoming alerts analyzed by the German Federal Criminal Police Office, nearly half are not criminal cases.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Known material (Meta reports)</div>
+                <div class="stat-value">~99%</div>
+                <div class="stat-note">Estimated share of Meta's generated reports that consist of previously known material. Does little to stop active, ongoing abuse.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Suspected reports drop</div>
+                <div class="stat-value">-50%</div>
+                <div class="stat-note">Volume of suspected abuse reports from the US dropped 50% since 2022, per EU Commission data, as encryption spread.</div>
+            </div>
+        </div>
+
+        <p>The EU Commission's own report admits there is no evidence that suspicionless scanning of private communications has led to an increase in criminal convictions or in rescued children. That sentence is in their document (CELEX 52025DC0740). Read it again. The body pushing for this regulation concedes it has not demonstrably helped.</p>
+
+        <p>Threat stats from the German Federal Criminal Police Office (BKA) also complicate the picture: 40% of investigations triggered by these reports actually target minors themselves. The scans sweep up the same population they are supposed to protect.</p>
+
+        <h2>The procedural trick</h2>
+
+        <p>How does a bill pass when more people vote against it? The answer is in how the European Parliament handles rejection motions. To reject a delegated regulation, you need an absolute majority of all MEPs (361 votes), not just a majority of those who show up to vote. The 314 who voted against were a majority of the 607 who cast a ballot. But they were 47 votes short of the absolute threshold.</p>
+
+        <p>This is the same body that voted against this regulation in March. Twice. The difference now is that third time around, enough MEPs either stayed home, abstained, or changed their vote that the absolute majority threshold could not be met. 17 abstentions matter here. If those 17 had voted against, it would have been 331, still short of 361. The no votes needed 47 more. They did not get them.</p>
+
+        <p>Two further amendments also failed on the same procedural hurdle. A majority (322 to 255) wanted to restrict scanning to suspects identified by the judiciary. The absolute majority was not reached. The signal from the Parliament is clear: most voting MEPs want targeted surveillance, not blanket scanning. The procedural design of the EU means that signal does not translate into law unless it crosses the higher bar.</p>
+
+        <h2>Survivors spoke against it</h2>
+
+        <p>This is the part that surprised me. The people who have the most at stake in this debate, survivors of child sexual abuse, came out against Chat Control. Not in favor of it. Their argument is not abstract privacy theory. It is grounded in the fact that mass surveillance of private communications made it harder, not easier, for them to come forward.</p>
+
+        <blockquote>
+            "As a survivor I relied on confidential communications to tell my story and find justice. We survivors need privacy, because without it we lose our voice. Chat Control was not created to protect children."
+        </blockquote>
+
+        <p>That is from Alexander Hanff, a survivor and privacy advocate whose testimony helped convict multiple offenders. He is not arguing from a distance. He is describing what actually happened to him and what made the legal process possible. Private, confidential communication. The exact thing Chat Control scans.</p>
+
+        <p>Another survivor, identified as Marcel Schneider, is currently suing Meta over its voluntary participation in Chat Control. His direct quote: "Mass surveillance by corporations like Meta does not prevent abuse." Dorothée Hahne, a founding member of the survivors' initiative MOGiS, said the scanning destroys the "safe spaces" and protected communication channels that survivors depend on.</p>
+
+        <p>When the people the law is named after say it does not work and makes things worse, the political argument gets harder to make with a straight face.</p>
+
+        <h2>What happens next</h2>
+
+        <p>The interim regulation runs until 2028 or until a permanent Chat Control 2.0 law is negotiated. Those negotiations resume in September 2026. The core dispute is the same one that has stalled every previous attempt: should scanning be indiscriminate, or targeted at criminal suspects identified by courts?</p>
+
+        <p>The Parliament wants targeted detection orders against actual suspects, an EU Child Protection Centre to systematically remove known abuse material from the public internet, and strict security standards for messaging apps to prevent grooming. Member state governments insist on maintaining the voluntary scanning approach that lets tech companies decide what to look at.</p>
+
+        <p>The problem with the interim extension is that it removes the pressure to negotiate. As long as EU governments can keep extending the temporary rules, they have no incentive to agree to a permanent solution. The Parliament's stronger, targeted approach gets traded away in negotiations because the fallback position (status quo mass scanning) is exactly what the governments wanted all along.</p>
+
+        <h2>Why this matters beyond Europe</h2>
+
+        <p>The EU is often first on internet regulation. GDPR, the Digital Services Act, DMA. Whatever the EU does on digital policy tends to get copied or adapted elsewhere within a few years. If suspicionless mass scanning of private messages becomes normalized in the EU, the same framework is likely to surface in other jurisdictions. If it gets permanently rejected, that rejection also travels.</p>
+
+        <p>The technical reality is that the scanning produces noise. 48% false positives from BKA data. 99% known material in Meta reports. No evidence of increased convictions according to the EU Commission's own findings. The effective tools (court-ordered wiretaps, targeted investigations, scanning public posts) were never at risk. This was never a question of taking tools away from law enforcement. It was about whether indiscriminate scanning of innocent people's messages is worth the noise it generates.</p>
+
+        <p>On July 9, 2026, the European Parliament said no. But the procedural rules said yes.</p>
+
+        <p>Patrick Breyer, the civil rights activist and former MEP who has fought this regulation from the start, put it this way: "The fact that Chat Control is moving forward against the will of the majority of voting MEPs is a farce and damages democracy." He also pointed out that the permanent "Chat Control 2.0" negotiations are just getting started, and the resistance was strong enough that finding a majority for permanent suspicionless mass scanning is, in his words, "a complete pipe dream."</p>
+
+        <p>He might be right. The vote margins suggest the Parliament does not want this long term. But the interim extension bought the surveillance framework two more years of operation anyway, without needing to win that argument.</p>
+
+    </article>
+
+    <script>
+        window.addEventListener('scroll', () => {
+            const winHeight = window.innerHeight;
+            const docHeight = document.documentElement.scrollHeight - winHeight;
+            const scrolled = (window.scrollY / docHeight) * 100;
+            document.getElementById('reading-progress').style.width = scrolled + '%';
+        });
+    </script>
+
+<script src="../anchors.js" defer></script>
+</body>
+</html>
