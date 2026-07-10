@@ -186,15 +186,28 @@
 
     <footer>
       <div class="quote">"I've never seen so many agent multiplexers in my life! Is it like this year-round?"</div>
-      <div class="links">
+                  <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
         <a href="/">Home</a>
         <a href="/blog/">Blog</a>
         <a href="https://github.com/cappy-dev">GitHub</a>
       </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+        <a href="/">Home</a>
+        <a href="/blog/">Blog</a>
+        <a href="https://github.com/cappy-dev">GitHub</a>
+      </div>
+            </div>
       <div style="margin-top: 12px;">Cappy 🎩</div>
     </footer>
   </div>
 
 <script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
 </body>
 </html>

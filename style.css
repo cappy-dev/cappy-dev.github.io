@@ -1055,6 +1055,136 @@ footer .left {
 }
 
 /* =========================================================
+   MOBILE NAVIGATION
+   Linear-style responsive collapse. The desktop bar stays exactly
+   as-is above 640px; below it, the inline links hide behind a
+   hamburger icon-button (Linear icon-button: translucent bg,
+   50% radius, hairline border) that toggles a stacked panel.
+   ========================================================= */
+
+/* Hamburger toggle — hidden on desktop, shown on mobile */
+.nav-toggle {
+    display: none; /* JS reveals it under 640px */
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+}
+.nav-toggle:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.12);
+}
+.nav-toggle:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 2px;
+}
+
+/* Hamburger icon — three lines, no decorative SVG */
+.nav-toggle .nav-toggle-bar {
+    display: block;
+    width: 16px;
+    height: 1.5px;
+    background: var(--fg2);
+    border-radius: 1px;
+    margin: 2px 0;
+    transition: opacity 0.15s, transform 0.15s;
+    transform-origin: center;
+}
+/* Close (X) state when active */
+.nav-toggle.is-active .nav-toggle-bar:nth-child(1) {
+    transform: translateY(3.5px) rotate(45deg);
+}
+.nav-toggle.is-active .nav-toggle-bar:nth-child(2) {
+    opacity: 0;
+}
+.nav-toggle.is-active .nav-toggle-bar:nth-child(3) {
+    transform: translateY(-3.5px) rotate(-45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-toggle .nav-toggle-bar { transition: none; }
+}
+
+/* Collapsible panel — holds the same .links but stacked */
+.nav-collapse {
+    display: none; /* Override below 640px */
+}
+
+/* The panel needs to sit in the nav inner so the logo stays put.
+   On mobile we switch nav .inner to column and let the panel
+   flow below the bar.
+   The .js class is added by nav.js — without JS, the inline links
+   stay visible and the panel/toggle remain hidden (noscript fallback). */
+@media (max-width: 640px) {
+    nav .inner {
+        position: relative;
+    }
+    /* Only collapse when JS is active. Without JS, inline links stay. */
+    html.js nav > .inner > .links {
+        display: none;
+    }
+    html.js .nav-toggle {
+        display: inline-flex;
+    }
+    .nav-collapse {
+        display: block;
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.2s ease-out;
+        border-top: 1px solid var(--border);
+    }
+    html.js .nav-collapse {
+        display: block;
+    }
+    /* Without JS, keep the panel entirely hidden. */
+    html:not(.js) .nav-collapse {
+        display: none;
+    }
+    .nav-collapse.is-open {
+        max-height: 400px;
+    }
+    .nav-collapse .links {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 8px 0;
+    }
+    .nav-collapse .links a {
+        font-size: 15px;
+        font-weight: 510;
+        color: var(--fg2);
+        padding: 11px 24px; /* 44px total touch target */
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        transition: background 0.15s, color 0.15s;
+    }
+    .nav-collapse .links a:hover {
+        color: var(--fg);
+        background: rgba(255,255,255,0.03);
+    }
+    .nav-collapse .links a.cta {
+        margin: 8px 16px;
+        justify-content: center;
+        border-radius: 6px;
+        min-height: 40px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-collapse { transition: none; }
+}
+
+/* =========================================================
    RESPONSIVE
    ========================================================= */
 
