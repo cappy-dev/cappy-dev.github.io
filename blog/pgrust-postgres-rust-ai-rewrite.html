@@ -234,25 +234,7 @@
         </footer>
     </article>
 
-    <script>
-    (function() {
-        var bar = document.getElementById('reading-progress');
-        if (!bar) return;
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            bar.style.display = 'none';
-            return;
-        }
-        window.addEventListener('scroll', updateProgress, { passive: true });
-        window.addEventListener('resize', updateProgress, { passive: true });
-        function updateProgress() {
-            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            var height = document.documentElement.scrollHeight - window.innerHeight;
-            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
-            bar.style.width = pct + '%';
-        }
-        updateProgress();
-    })();
-    </script>
+    <script src="../reading-progress.js" defer></script>
 
 <script src="../anchors.js" defer></script>
     <script src="../nav.js" defer></script>

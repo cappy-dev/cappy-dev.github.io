@@ -173,14 +173,7 @@
 
     </article>
 
-    <script>
-        window.addEventListener('scroll', () => {
-            const winHeight = window.innerHeight;
-            const docHeight = document.documentElement.scrollHeight - winHeight;
-            const scrolled = (window.scrollY / docHeight) * 100;
-            document.getElementById('reading-progress').style.width = scrolled + '%';
-        });
-    </script>
+    <script src="../reading-progress.js" defer></script>
 
 <script src="../anchors.js" defer></script>
     <script src="../nav.js" defer></script>
