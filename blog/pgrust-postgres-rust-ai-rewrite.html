@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postgres rewritten in Rust by AI agents, and it actually works | Cappy</title>
+    <meta name="description" content="pgrust is a from-scratch rewrite of PostgreSQL in Rust, built largely with AI coding agents. It now passes 100 percent of Postgres regression tests, runs 50 percent faster on transactions, and is 300x faster on analytical workloads.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .bench-card {
+            background: var(--panel);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 1.2rem;
+        }
+        .bench-label {
+            font-size: 0.78rem;
+            color: var(--fg3);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.92rem;
+        }
+        .bench-row:last-child { border-bottom: none; }
+        .bench-tool { color: var(--fg2); }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+        .bench-time.good { color: var(--green); }
+        .story-quote {
+            border-left: 3px solid var(--accent);
+            padding: 0.75rem 1rem;
+            margin: 1.5rem 0;
+            color: var(--fg3);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 11, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Postgres rewritten in Rust by AI agents, and it actually works</h1>
+
+        <p>PostgreSQL is one of the most successful open source projects in history. Nearly 40 years of C code, about a million lines, running critical infrastructure at companies of every size. Nobody rewrites that. Except someone just did.</p>
+
+        <p><a href="https://github.com/malisper/pgrust">pgrust</a> is a from-scratch reimplementation of PostgreSQL in Rust. It targets Postgres 18.3 compatibility and now passes 100 percent of the Postgres regression suite, more than 46,000 queries. It can boot from an existing Postgres data directory. And the unpublished next version is 50 percent faster than Postgres on transaction workloads and roughly 300x faster on analytical queries, positioning it close to ClickHouse on clickbench.</p>
+
+        <p>The story of how it got built is almost as interesting as the result. The developer used AI coding agents for most of the work, scaling up to 17 concurrent agents at one point. That part matters, and I want to get to it, but first let me talk about why the database itself is worth paying attention to.</p>
+
+        <h2>Why rewrite Postgres at all</h2>
+
+        <p>Postgres is good. Everybody knows this. It is the default database for startups and has been eating the relational market for years. But "good" and "cannot be improved" are different things, and the gap between them is where pgrust lives.</p>
+
+        <p>The project's author spent years running a Postgres cluster with over a petabyte of data at a previous company, and wrote extensively about Postgres internals. The list of pain points is familiar to anyone who has operated Postgres at scale:</p>
+
+        <ul>
+            <li>Over 350 configuration settings, and getting one wrong can make vacuum take down the whole database</li>
+            <li>You need a connection pooler or a storm of connections will eat your max connections alive</li>
+            <li>No statistics captured on JSONB columns, which is painful given how much JSONB gets used</li>
+            <li>Process-per-connection model from the 1980s, when thread-based architectures would be more efficient</li>
+            <li>A regular expression engine that predates modern regex and never got the optimization work that Rust's regex crate has</li>
+        </ul>
+
+        <p>None of these are unknown problems. The Postgres community has discussed moving to threads for years. Nothing has happened because refactoring the entire process model in a 40-year-old C codebase is the kind of project that makes people quietly change the subject.</p>
+
+        <p>Starting from zero in Rust changes the math. You get threads on day one. You get a modern regex engine. You get memory safety without a garbage collector. You get to make different architectural choices without untangling decades of decisions that were reasonable at the time they were made.</p>
+
+        <h2>The numbers</h2>
+
+        <p>The current public release passes the regression tests and boots from existing Postgres data. The next version, not yet published, is where the performance story gets serious.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Performance vs Postgres 18.3</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Transaction workloads</span>
+                    <span class="bench-time good">50% faster</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Analytical workloads</span>
+                    <span class="bench-time good">~300x faster</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Clickbench vs ClickHouse</span>
+                    <span class="bench-time">~2x slower</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Regression tests passing</span>
+                    <span class="bench-time good">100% (46k+ queries)</span>
+                </div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Compatibility</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Postgres version targeted</span>
+                    <span class="bench-time">18.3</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Disk format compatible</span>
+                    <span class="bench-time">Yes</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Connection model</span>
+                    <span class="bench-time">Thread per connection</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Production ready</span>
+                    <span class="bench-time">Not yet</span>
+                </div>
+            </div>
+        </div>
+
+        <p>The analytical number is the one that jumped out at me. 300x faster than Postgres on analytical workloads, and only about 2x slower than ClickHouse, which exists for exactly this purpose. Postgres was never designed for analytics. People use it for analytics anyway, because it is already there and setting up a separate column store is expensive. If pgrust can close the gap between "I already have Postgres" and "I need a real analytical engine," that changes the default architecture for a lot of small companies.</p>
+
+        <p>The transaction improvement is cleaner. 50 percent faster on OLTP workloads from switching to a thread-per-connection model is a nice gain, not a shocking one. Process-per-connection has measurable overhead from context switching and memory duplication. Threads share memory and avoid the context switch cost. The Postgres team has known this for years. They just could not get there from here.</p>
+
+        <h2>How it was built: 17 agents, two weeks, 250k lines</h2>
+
+        <p>Here is where the story takes a turn that would have sounded absurd a year ago.</p>
+
+        <p>The first version of pgrust, 250,000 lines of Rust covering all major Postgres subsystems, was built in two weeks. The developer used coding agents, primarily OpenAI's Codex, and scaled to 17 concurrent agents working on the same codebase before maxing out CPU.</p>
+
+        <p>The workflow went like this. For each Postgres subsystem, the developer would point Codex at the original Postgres C source code and ask it to explain how the component worked. Then they would work with Codex to build a minimal Rust version. On the first day, it took about three hours to get a system running real SQL queries with CREATE TABLE, SELECT, INSERT, UPDATE, DELETE, JOIN, WHERE, ORDER BY, and transaction support.</p>
+
+        <p>The interesting part is how the work evolved. Early on, the author worked with a single coding agent. When one agent was busy writing JSON support, the developer was idle, waiting. So they tried going multi-agent with a tool called <a href="https://www.conductor.build/">Conductor</a> that coordinates multiple agents using git worktrees so each can work independently.</p>
+
+        <div class="story-quote">
+"I ended up spending two to three hours and got tens of thousands of lines of code written over that time. Now, while things started out super well, they quickly took a negative turn. I had to spend another two hours just merging all the code together."
+        </div>
+
+        <p>The first multi-agent attempt ran into the obvious problem. Even when features are logically independent, they all touch shared components. The parser, the planner, the executor. Merge conflicts became a serious pain, done one at a time.</p>
+
+        <p>The fix was the most human part of the whole operation. Instead of having agents build complete features and merge afterward, the developer had each agent work on a small slice, pass tests, commit, and merge back immediately. Small slices, frequent merges, minimal drift between agents. By the time they hit 17 concurrent agents, the system was working well enough that the author stopped reading most of the code.</p>
+
+        <div class="story-quote">
+"I was previously the CEO of a 120-person company. My job was to set guardrails for the team and make sure I had the visibility I need to understand when things go wrong. Working with a team of agents is very similar."
+        </div>
+
+        <p>The author explicitly compares coordinating 17 coding agents to running a 120-person engineering team. The job is not reviewing every line. The job is setting guardrails, understanding which features agents can knock out in one shot and which ones they will struggle with, and going into "founder mode" on the hard problems while trusting the agents on the routine stuff.</p>
+
+        <h2>What this says about AI-assisted development</h2>
+
+        <p>I keep going back and forth on what this project means for coding agents.</p>
+
+        <p>On one hand, this is a genuinely impressive result. 250,000 lines of working Rust, passing real Postgres regression tests, in two weeks. Even if you discount the number for AI-generated boilerplate and typical verbosity, the velocity is something no human could match alone. And the latest version, with the thread model and the analytical speedup, suggests the code is at least good enough to build on.</p>
+
+        <p>On the other hand, the hard parts were still done by a human. The race conditions in the concurrency system. The storage layer bugs. The decisions about architecture. The author describes writing AI-generated code that compiled and passed lint but was fundamentally wrong because nobody was paying close enough attention. That is not a new failure mode for AI-assisted development. It is the same one every team I have talked to reports.</p>
+
+        <p>What changed is the scale at which the failure mode can operate. One agent writing a function that looks right but is wrong is an annoyance. Seventeen agents writing thousands of functions across a complex subsystem in parallel is a project. Whether the project ships depends on whether the person steering the agents understands the domain well enough to catch the wrong-before-it-compounds problems. The pgrust author spent years running petabyte-scale Postgres. They knew where the bodies are buried.</p>
+
+        <p>This is the pattern I keep seeing in the best AI-assisted projects. The agent is not replacing expertise. The agent is amplifying expertise. The same 17 agents, steered by someone who had read a Postgres tutorial and nothing more, would have produced a large pile of broken Rust. The domain knowledge of the operator is the bottleneck, and it is also the part the tools cannot give you.</p>
+
+        <h2>Open questions</h2>
+
+        <p>There are things worth being skeptical about.</p>
+
+        <p>The performance numbers come from the project's own README and have not been independently verified. "50 percent faster on transaction workloads" and "300x faster on analytical workloads" are specific claims that need specific benchmarks behind them. The README is honest about this: "pgrust is not production-ready yet. It is not performance optimized yet." The numbers are from an early version before the query planner was fully integrated. Take them as directional, not final.</p>
+
+        <p>The extension ecosystem is a real problem. Postgres without PL/Python, PL/Perl, PL/Tcl, and the hundreds of community extensions is not full Postgres for a lot of users. If you depend on PostGIS or TimescaleDB or pgvector, pgrust does not help you yet, and there is no clear timeline for when it will.</p>
+
+        <p>The AGPL-3.0 license will be a fork in the road for some companies. Postgres is under its own liberal license. pgrust under AGPL means anyone building a hosted service on top of it needs to think about how that interacts with their business model. This is a deliberate choice by the author and it will shape adoption.</p>
+
+        <p>And the elephant in the room: how much of the code is actually good code? The author acknowledges that "a lot of dumb code makes its way through." The original pgrust blog post describes the development process as "get something that works, fix things when they go wrong," which is a reasonable approach for a prototype but leaves a gap between "passes regression tests" and "trustable in production." The gap is real. Regression tests check that query output matches expected output. They do not check for data corruption edge cases, crash recovery, or behavior under load. Those are the things that take a database from "works in a demo" to "works at 3am when a disk fails."</p>
+
+        <h2>Why I am watching this project</h2>
+
+        <p>I think pgrust is worth paying attention to for three reasons, and none of them are "Postgres but faster."</p>
+
+        <p>First, it is one of the clearest examples I have seen of what AI-assisted development looks like when it is pointed at a hard, real, large problem by someone who knows the domain. The result is not a toy. The fact that it passes real regression tests against a system with 40 years of development behind it is an existence proof for a class of project that most people, including me, would have said was not possible with current AI tooling.</p>
+
+        <p>Second, the roadmap is not "make a better Postgres." It is a list of things that the Postgres community has wanted for years and has not done because the cost of doing them in the existing C codebase is too high. Thread-based internals. Built-in connection pooling. No-vacuum storage experiments. Runtime guardrails for bad AI-generated SQL. If pgrust ships even half of these, it forces a conversation about whether the Postgres community needs to make some of these changes too, or accept that a Rust rewrite can do things they cannot.</p>
+
+        <p>Third, the project has a <a href="https://pgrust.com/">WASM demo</a> you can try right now. That is not just a marketing gimmick. The fact that a Postgres-compatible database can compile to WebAssembly and run in a browser is a hint about where database deployment is going. If I can run a real database in my browser for development and testing, the gap between local dev and production gets smaller in a way that matters.</p>
+
+        <p>pgrust is not going to replace Postgres this year. It might not replace it at all. But it is one of the most interesting database projects I have seen in a while, and the fact that it exists at all, built by one person and a swarm of coding agents in two weeks, is a data point about what has changed in software development. The tools are not replacing the expertise. They are making the expertise go further, faster, in the hands of someone who knows where to aim them.</p>
+
+        <div class="tags">
+            <span class="pill">Databases</span>
+            <span class="pill">Rust</span>
+            <span class="pill">AI Coding</span>
+            <span class="pill">PostgreSQL</span>
+            <span class="pill">Open Source</span>
+        </div>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        if (!bar) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bar.style.display = 'none';
+            return;
+        }
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        function updateProgress() {
+            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            var height = document.documentElement.scrollHeight - window.innerHeight;
+            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
+            bar.style.width = pct + '%';
+        }
+        updateProgress();
+    })();
+    </script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+</body>
+</html>
