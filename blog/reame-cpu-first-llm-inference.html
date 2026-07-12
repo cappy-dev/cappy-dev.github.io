@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reame: the CPU-first LLM inference server that gets faster the longer it runs | Cappy</title>
+    <meta name="description" content="Reame is a new open source LLM inference server built on llama.cpp that treats cheap CPU hardware as a first-class citizen. Persistent disk KV cache, generation archives, and self-regulating speculative decoding make your hundredth request cost a fraction of the first. Real benchmarks from the free Oracle Cloud tier and an M3 Pro.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .feature-list { margin: 1.4rem 0; padding: 0; list-style: none; }
+        .feature-list li { padding: 0.5rem 0 0.5rem 0; border-top: 1px solid var(--border); }
+        .feature-list li:first-child { border-top: none; }
+        .feature-name { color: var(--accent-bright); font-weight: 500; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 12, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Reame: the CPU-first LLM inference server that gets faster the longer it runs</h1>
+
+        <p>Ollama is the default answer when someone asks how to run a local model. It is good at what it does: one command, a model downloads, and you are chatting. The assumption baked into that experience is that every request is brand new. You compute, you discard, you compute again.</p>
+
+        <p>That assumption is fine on a GPU, where compute is cheap. On a $5 VPS or a free-tier ARM box, compute is the most expensive thing you have, and throwing it away on identical work is a problem. <a href="https://github.com/swellweb/reame">Reame</a> is a new open source LLM inference server, MIT licensed, built on llama.cpp, that starts from the opposite assumption. On a CPU, never compute the same thing twice.</p>
+
+        <p>The result is an inference server with a property I have not seen in any other project: it gets faster the longer it runs. The hundredth request costs a fraction of the first. The system prompt is paid for once by the first user. Similar answers draft themselves from an on-disk archive. Formatting tokens are speculated for free. None of this exists in Ollama, and none of it is hypothetical. The project shipped this week on Hacker News and the benchmarks are in the README.</p>
+
+        <h2>What it actually is</h2>
+
+        <p>Reame is a single-binary LLM server built on <a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a> for all tensor kernels. CPU-only. One model per process. It exposes an OpenAI-compatible REST API so you can point any existing client at it. <code>/v1/completions</code>, <code>/v1/chat/completions</code>, SSE streaming, bearer auth, and a <code>/metrics</code> endpoint with cache and speculation stats. The zero-config path is as easy as Ollama: <code>reame run qwen2.5-1.5b</code> downloads the model, autoconfigures threads and cache, and drops you into a chat.</p>
+
+        <p>Where it diverges is in what happens after the first request. Six mechanisms stack on top of llama.cpp to stop the CPU from doing redundant work. The design is worth understanding before you look at the numbers, because the numbers only make sense once you see what is being cached where.</p>
+
+        <h2>The persistent disk KV cache</h2>
+
+        <p>This is the idea that ties everything else together. LLM inference has two phases: prefill, where the model processes the entire prompt and builds the KV cache, and decode, where it generates tokens one at a time. Prefill is expensive. On a CPU it can dominate the wall time for short generations.</p>
+
+        <p>GPU inference servers like vLLM keep prefix caches in GPU memory. If two requests share a system prompt, the second one reuses the first one's KV state. But that cache dies when the process restarts. Reame snapshots the KV cache to NVMe at fixed token-block boundaries, keyed by a chain hash of the prompt prefix. A different request that shares a prefix restores the longest matching boundary and decodes only its own tail. The cache survives restarts. It survives across processes. It is LRU-budgeted so it does not eat your disk.</p>
+
+        <p>The practical effect: a system prompt of 2,000 tokens is computed once. Every subsequent request that uses the same system prompt skips the prefill for those 2,000 tokens. On a free-tier ARM box running Qwen2.5-7B at 3.3 tokens per second, that is the difference between your server feeling responsive and feeling like it is thinking each time someone pings it.</p>
+
+        <h2>Palimpsest: the server remembers what it generated</h2>
+
+        <p>This one caught me off guard. Every completed generation gets fed into an on-disk n-gram archive. Future requests are drafted from that archive at zero cost. The project calls this Palimpsest, which is a layering metaphor I am not going to explain, but the mechanic is straightforward: if your workload involves asking variations of similar questions, the server builds up a statistical model of what it has already said and proposes those tokens as speculative draft candidates.</p>
+
+        <p>The README reports a 2.3x speedup on repeated requests on an Apple M3 Pro with Qwen2.5-1.5B, going from 22 tokens per second to 51. That is not a synthetic benchmark designed to look good. That is a server that has been running the same kind of workload for a while and has learned the shape of its own output.</p>
+
+        <h2>Il Suggeritore: grammar as a draft source</h2>
+
+        <p>Constrained decoding is a well-known technique where you forbid the model from producing tokens that violate a grammar. Reame inverts this. It uses the grammar to <em>propose</em> tokens. List numbering, bullet markers, JSON keys with their colons and quotes, formatting tokens. These are predictable from structure alone, and on content nobody has ever generated before, the server can speculate them correctly for free.</p>
+
+        <p>The measured effect on the M3 Pro is a 2.1x speedup on fresh list generation tasks, from 4.4 seconds to 2.1 seconds. The interesting part is that this works on novel content. Traditional speculative decoding needs a draft model that has seen something similar. Il Suggeritore just needs the structure to be predictable, which in practice it almost always is, because format is more repetitive than substance.</p>
+
+        <h2>Self-regulating speculative decoding</h2>
+
+        <p>Speculative decoding, introduced by Leviathan et al. in 2023, uses a small draft model to propose tokens that the target model verifies in a single batched pass. When the draft model guesses right, you skip decode steps. When it guesses wrong, you resample from the residual distribution so the output is exactly the target model's distribution.</p>
+
+        <p>Reame adds two CPU-specific twists. First, the draft source can be free n-gram lookup mined from the prompt itself, which means you do not need a second model in memory for extraction and rewrite workloads. Second, and this is the part I respect, it has a feedback controller that measures whether speculation is actually paying off on your hardware. If the draft model is running as slowly as the target because the vCPUs are oversubscribed, Reame turns speculation off. Automatically. The README reports a 3.2x speedup with speculative decoding on a shared Contabo VPS with an 87% acceptance rate. But it also reports that on heavily oversubscribed vCPUs, speculation is counterproductive, and Reame detects this and disables it at runtime.</p>
+
+        <p>That kind of honest negative result in a project README is rare. Most inference servers will happily run speculation at 30% acceptance and tell you it works. Reame measured the break-even point and built a controller around it.</p>
+
+        <h2>Interleaved multi-user serving</h2>
+
+        <p>On a GPU, you serve multiple users by batching their requests together so the model weights are read once per batch. On a CPU, memory bandwidth dominates, so the same principle applies but the gains are smaller. Reame interleaves N concurrent generations inside a single multi-sequence batch so every read of the model weights is shared. The README reports a 1.6x throughput improvement on an M3 Pro with 3 concurrent users compared to serialized serving.</p>
+
+        <p>1.6x is modest by GPU batch standards, but on a free-tier ARM box where you have 2 cores and 12 GB of RAM, every read you can share is one you do not have to pay for twice.</p>
+
+        <h2>The Conclave: consensus from the model you already have</h2>
+
+        <p>This is the most creative feature in Reame. <code>--best-of N</code> generates N candidate answers to the same prompt in one interleaved batch. The scheduler notices the identical prompts and clones the prompt KV instead of prefilling N times. Every candidate shares the same weight reads during decode. Election is an exact-majority vote on each candidate's final result, with a Jaccard text-medoid fallback for prose. The moment a majority agrees, the stragglers are stopped mid-generation.</p>
+
+        <p>The measured effect on a Qwen2.5-1.5B with 5 candidates on 3 arithmetic quizzes: plus 0.5 to plus 2 correct answers, at roughly 2.5x wall time, not 5x. The README is explicit about what this does and does not do. Majority voting corrects random slips. It does not correct systematic misunderstanding. A 1.5B model running 5 candidates lands between the 1.5B and a 3B. It never lands above the 3B. Consensus fixes variance, not bias.</p>
+
+        <p>The framing in the README is the sentence I want every benchmark table to include: "Benchmarks that only show wins are advertising; these are engineering."</p>
+
+        <h2>The benchmarks</h2>
+
+        <p>Every number below is from the Reame README, produced by the shipped binary on the hardware named. The project lists negative results alongside positive ones, which is how you know the positive ones are probably honest.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Oracle Cloud free tier (2x ARM, 12 GB, 0/month)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Qwen2.5-7B Q4_K_M</span>
+                    <span class="bench-time">3.3 tok/s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">TriLM 3.9B ternary TQ2_0</span>
+                    <span class="bench-time">~10 tok/s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">OLMoE 7B-A1B (MoE) on long-context</span>
+                    <span class="bench-time">17.8 tok/s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Qwen3-30B-A3B Q4_K_M</span>
+                    <span class="bench-time">~335s/question</span>
+                </div>
+                <div class="bench-note">The 30B MoE answered the same extraction questions perfectly but 10x slower than the 7B-A1B that also scored 100%. When the answer lives in the context, extra parameters buy nothing on CPU. MoE prefill touches nearly every expert, so the 3B-active discount vanishes on document reading.</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Apple M3 Pro (6 threads)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Qwen2.5-1.5B Q4_K_M, plain</span>
+                    <span class="bench-time">52 tok/s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Archive speculation (Palimpsest)</span>
+                    <span class="bench-time">2.3x (22 to 51 tok/s)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Form drafting (Il Suggeritore)</span>
+                    <span class="bench-time">2.1x (4.4s to 2.1s)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Conclave best-of-5 quiz wall</span>
+                    <span class="bench-time">97s to ~50s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">3 concurrent users, interleaved</span>
+                    <span class="bench-time">1.6x</span>
+                </div>
+                <div class="bench-note">The archive and form drafting numbers are the story. They compound: a server running for a week on a narrow workload will be meaningfully faster than the same server on day one. The Conclave wall time of 50s for 5 candidates instead of 97s is the shared-prefill trick paying off.</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Shared Contabo VPS (18 oversubscribed vCPUs)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">1.5B + 0.5B draft, speculative</span>
+                    <span class="bench-time">3.2x speedup, 87% acceptance</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">TinyLlama 1.1B, warm vs cold cache</span>
+                    <span class="bench-time">4.8x end-to-end</span>
+                </div>
+                <div class="bench-note">Speculation works here because the draft model (0.5B) is small enough that even on oversubscribed cores it produces draft tokens faster than the target verifies them. On heavily oversubscribed vCPUs where the draft runs as slowly as the target, Reame disables speculation automatically.</div>
+            </div>
+        </div>
+
+        <p>The OLMoE result is worth pausing on. OLMoE 7B-A1B is a mixture-of-experts model with 7B total parameters and about 1B active per token. On the same 8-needle long-context extraction test, it scored 100% accuracy at 17.8 tok/s. A dense 7B scored 100% at 3.3 tok/s. That is a 5.4x speedup from the same accuracy, on the same free hardware, just from choosing a sparse model that fits the workload. Reame is the first server I have seen that explicitly calls this out and recommends it.</p>
+
+        <h2>What Reame is not for</h2>
+
+        <p>The README is unusually clear about this, and I think the honesty is the point. Reame is not for general-purpose chat, agentic coding, or creative long-form writing. If your task needs a 100B-class model, the recommendation is to buy one. Reame is for narrow, repetitive workloads over your own data on hardware you already pay for: document extraction, batch pipelines, privacy-bound processing, private code autocomplete on the laptop you already own.</p>
+
+        <p>That framing matters because it tells you something about the target user. This is not a tool for someone who wants to run a frontier model. This is a tool for someone with a 5 euro VPS, a narrow workload, and a desire to stop paying per-token API bills for work that is structurally repetitive. If you have 10,000 product descriptions to tag overnight, Reame will draft most of them from its own archive and charge you 0 in API costs to do it.</p>
+
+        <h2>Why Reame and not Ollama</h2>
+
+        <p>The one-line version from the README is good enough to quote directly: "Ollama runs models. Reame remembers having run them."</p>
+
+        <p>Ollama optimizes for running many models casually. Reame optimizes for serving one workload seriously on hardware that costs nothing. On a fresh request with no shared prefix, they are in the same neighborhood. On the hundredth request with the same system prompt and similar content, Reame pulls ahead because it has been building memory the whole time. The disk cache, the archive, the form speculation, the self-regulating speculative pipeline. None of it exists in Ollama.</p>
+
+        <p>This is not a knock on Ollama. Ollama is the right tool for the person who wants to try out a model this afternoon. Reame is the right tool for the person who has been running the same extraction pipeline for a month and wants the hundredth job to be cheaper than the first. Different tools for different shapes of work.</p>
+
+        <h2>The energy angle</h2>
+
+        <p>The README has a section on energy that I want to flag because it is interesting and slightly evasive. Reame's footprint is watt-scale, not kilowatt-scale. It targets machines that already exist and are already powered on. No new silicon is racked to serve your model. The claim is not that Reame gets better joules-per-token than a saturated datacenter GPU. The claim is that you do not need one.</p>
+
+        <p>That is a fair claim. The question it does not answer is whether running inference on a 2-core ARM box at 3.3 tok/s is more or less energy-efficient overall than batching the same request on a GPU that handles thousands of requests simultaneously. On a pure joules-per-token basis, the GPU probably wins at scale. But the GPU requires a data center, a network link, and someone else's infrastructure. Reame requires a box you already have. The right comparison is not joules per token. It is total cost of ownership per workload, and on that axis, a free-tier ARM box beats anything with a recurring bill.</p>
+
+        <h2>Getting started</h2>
+
+        <p>The fastest path is Homebrew on macOS or Linux:</p>
+
+        <pre><code>brew tap swellweb/reame
+brew install reame
+reame run qwen2.5-1.5b</code></pre>
+
+        <p>That downloads the model, autoconfigures threads and cache, and drops into a chat. For serving, add <code>--serve</code> and you get the OpenAI-compatible API on port 8080. Prebuilt binaries are available for Linux x64, Linux arm64, and macOS arm64. An npm package (<code>npx reame</code>) is planned.</p>
+
+        <p>The build from source path is standard CMake. Clone the repo, init the llama.cpp submodule, run <code>./build.sh</code>. The test suite has 210 isolated cases and every layer is mockable without a model, which is more test coverage than I usually see in hobby inference servers.</p>
+
+        <h2>OpenVINO note for Intel users</h2>
+
+        <p>One thing the README does not mention: Reame is built on llama.cpp, which means it does not use OpenVINO. If you are on an Intel CPU, OpenVINO can give you meaningful speedups for some models, and that path is not available here. AMD CPUs get the same treatment as Intel with no special optimization. If your workload is on Intel hardware and raw throughput matters more than the caching features, OpenVINO-backed servers are worth comparing. But the caching and memory features in Reame are the actual differentiator, and OpenVINO does not give you those.</p>
+
+        <h2>Where I land</h2>
+
+        <p>I like this project. Not because it is the fastest inference server, because it is not. I like it because it has a thesis about CPU inference that nobody else has committed to: that the right move on cheap hardware is to stop recomputing things you have already computed, and that a server should accumulate state across requests the way a database accumulates indexes.</p>
+
+        <p>The Conclave is a genuinely new idea. Auto-regulating speculative decoding that measures itself and turns off when it is not helping is the kind of engineering detail that separates a project that was built for a specific workload from one that was built to look good in a release post. The negative results in the benchmark table are the strongest signal of all. A project that tells you when its own features do not work, and on which hardware, is a project you can actually trust when it tells you they do.</p>
+
+        <p>If you have a narrow, repetitive workload and a spare box, Reame is worth a week of your time. Not because it will replace your frontier model, but because it might replace the API bill you are paying for work that turns out to be structurally predictable once you stop throwing away every computation after you use it.</p>
+
+        <p>The repo is at <a href="https://github.com/swellweb/reame">github.com/swellweb/reame</a>. MIT licensed. The README is long and honest and worth reading in full before you install anything.</p>
+
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+</body>
+</html>
