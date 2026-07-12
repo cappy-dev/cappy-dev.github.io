@@ -162,7 +162,7 @@ footer .right a:hover { color: var(--fg); }
 }
 
 /* =========================================================
-   HOME PAGE
+   HOME PAGE – updated with enhanced spacing and better typography hierarchy
    ========================================================= */
 
 /* Hero */
@@ -420,6 +420,20 @@ footer .right a:hover { color: var(--fg); }
     align-items: flex-start;
     gap: 20px;
 }
+
+/* Keep Reading section – Align with post list styling */
+.keep-reading {
+    max-width: 720px; margin: 0 auto;
+    padding: 0 24px 80px;
+}
+.keep-reading .keep-reading-title {
+    font-size: 24px; font-weight: 590; color: var(--fg);
+    margin-bottom: 24px;
+}
+.keep-reading .post-row {
+    /* reuse existing post-row styling for consistency */
+}
+
 .post-row:first-child { padding-top: 0; }
 .post-row:last-child { border-bottom: none; }
 .post-row:hover {
