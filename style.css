@@ -170,6 +170,7 @@ footer .right a:hover { color: var(--fg); }
     max-width: 720px; margin: 0 auto;
     padding: 140px 24px 100px;
     text-align: center;
+    border-top: 3px solid var(--accent);
 }
 .hero-label {
     display: inline-flex; align-items: center; gap: 8px;
