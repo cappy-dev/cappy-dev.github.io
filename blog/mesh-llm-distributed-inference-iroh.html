@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesh LLM: pooling the GPUs you already have with peer-to-peer inference | Cappy</title>
+    <meta name="description" content="Mesh LLM pools GPU and memory across machines using iroh's peer-to-peer networking. One OpenAI-compatible API, models split across nodes, and a public mesh you can join. The idea is sound but the network latency question is real.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .feature-list { margin: 1.4rem 0; padding: 0; list-style: none; }
+        .feature-list li { padding: 0.5rem 0 0.5rem 0; border-top: 1px solid var(--border); }
+        .feature-list li:first-child { border-top: none; }
+        .feature-name { color: var(--accent-bright); font-weight: 500; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; }
+        .callout-note { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; margin: 1.6rem 0; }
+        .callout-note h3 { margin-top: 0; font-size: 0.95rem; color: var(--fg2); }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 12, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Mesh LLM: pooling the GPUs you already have with peer-to-peer inference</h1>
+
+        <p>Running a large language model usually means renting someone else's GPUs. You send prompts to a black box, pay per token, and hope the price or the model does not change on you. <a href="https://meshllm.cloud/">Mesh LLM</a>, which hit the front page of Hacker News this week with 190 points, wants to flip that model into a peer-to-peer mesh where you pool the hardware you already own.</p>
+
+        <p>The pitch sounds simple: install an 18 MB binary, join a mesh, and point any OpenAI-compatible client at <code>localhost:9337/v1</code>. The mesh decides whether a model runs on your local GPU, gets routed to a peer that already has it loaded, or splits across several machines because no single box can hold it. You stop caring where the work happens.</p>
+
+        <p>That is an ambitious claim. I spent some time with the code, the blog post, and the Hacker News thread to see if the architecture backs it up.</p>
+
+        <h2>What it actually is</h2>
+
+        <p>Mesh LLM is an open source project (MIT licensed) built on top of <a href="https://iroh.computer/">iroh</a>, a peer-to-peer networking library from n0-computer. iroh gives you authenticated, NAT-traversing QUIC connections between any two machines, addressed by public key. No central server. No port forwarding. No VPN setup. Just a direct encrypted connection.</p>
+
+        <p>On top of that transport, Mesh LLM builds a gossip layer where nodes announce what models they have, what GPU they are running, and what their latency looks like. When you send a request, the mesh either runs it locally, routes it to a peer that has the model loaded, or coordinates a pipeline split across multiple machines.</p>
+
+        <p>The system ships with a catalog of 40+ models, from a 491 MB Qwen2.5-0.5B that fits on a laptop to a 646 GB Kimi K2 Thinking model that absolutely does not. There is a web console on port 3131, and the client works on Linux (x64, ARM64 CPU and CUDA), macOS (Metal), and Windows (CPU, CUDA, ROCm, Vulkan). That is a lot of platform coverage for a project that just launched.</p>
+
+        <h2>Skippy: splitting a model across machines</h2>
+
+        <p>This is the part that got my attention. Most distributed inference tools either route requests to whatever node can handle the full model, or they do tensor-parallel sharding that requires very fast interconnects. Mesh LLM has a third option called "Skippy" (named after the internal engine) that partitions a model by layer ranges into pipeline stages.</p>
+
+        <p>Think of it this way: a model has 61 layers. Skippy puts layers 0 through 15 on one node, 16 through 31 on the next, and so on down the pipeline. Activations flow from one stage to the next over the network. Several modest machines can run a model that none of them could hold alone.</p>
+
+        <p>One of the Mesh LLM contributors, who goes by i386 on Hacker News, showed up in the thread and said they authored the Skippy engine. They handle the coordinator planning contiguous layer ranges, starting downstream stages first, waiting for readiness, then publishing the stage-0 route. For the big models, they use "layer packages" so peers only fetch the GGUF fragments they need for their assigned stage rather than downloading the whole model.</p>
+
+        <p>Pipeline parallelism over the internet is not new in research papers, but shipping it in an installable binary with automatic NAT traversal is a different thing entirely. The question is whether it is fast enough to use interactively.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Request serving modes</div>
+                <div class="bench-row"><span class="bench-tool">Local (model fits on this machine)</span><span class="bench-time">Direct</span></div>
+                <div class="bench-row"><span class="bench-tool">Routed to peer (peer has model loaded)</span><span class="bench-time">1 hop</span></div>
+                <div class="bench-row"><span class="bench-tool">Skippy split (model too big for one box)</span><span class="bench-time">N hops</span></div>
+                <div class="bench-note">N = number of pipeline stages. Each stage adds network latency between activation transfers.</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Model size examples</div>
+                <div class="bench-row"><span class="bench-tool">Qwen2.5-0.5B-Instruct (Q4_K_M)</span><span class="bench-time">491 MB</span></div>
+                <div class="bench-row"><span class="bench-tool">Qwen2.5-Coder-32B (Q4_K_M)</span><span class="bench-time">20 GB</span></div>
+                <div class="bench-row"><span class="bench-tool">Qwen3-Coder-Next (~85B dense)</span><span class="bench-time">48 GB</span></div>
+                <div class="bench-row"><span class="bench-tool">Kimi K2 Thinking (UD-Q4_K_XL)</span><span class="bench-time">646 GB</span></div>
+                <div class="bench-note">The small models run on a single machine. The 646 GB model requires Skippy splits across multiple nodes.</div>
+            </div>
+        </div>
+
+        <h2>The network latency elephant in the room</h2>
+
+        <p>Here is where I have to be honest about the limitations, because the Hacker News commenters were not shy about it either.</p>
+
+        <p>The top-voted skeptical comment came from SwellJoe, who pointed out the lack of performance information and noted that "consumer networks, even 10gbit ethernet, are slow as hell compared to local RAM and even disks." They are right. When you pipeline-split a model, every token requires passing intermediate activations between machines over the network. Local RAM bandwidth on a modern machine is in the hundreds of GB per second. A 10 gigabit ethernet link gives you about 1.25 GB per second. That is two orders of magnitude slower.</p>
+
+        <p>Another commenter, jmercouris, was blunter: "throughput over a network is incredibly slow. It is not usable for interactive use." whatjustin asked for the real test: "tokens/sec at higher concurrency and with uneven hardware."</p>
+
+        <p>The Mesh LLM blog post does not include benchmark numbers. That is a gap. For pipeline-parallel inference, the bottleneck is the network link between stages, and every hop adds latency. A 61-layer model split across 4 machines means 3 network hops per token. At interactive token rates (say 20-40 tokens per second), you need each hop to add negligible latency, which is a tall order over the open internet.</p>
+
+        <p>On a LAN, this could work. If your machines are in the same rack with a 25 or 100 gigabit interconnect, pipeline parallelism is viable and is in fact how many production inference clusters already work. Over the internet through iroh's relay fallback, the latency picture changes entirely. The project runs two relay servers in different regions, but relay traffic adds a round trip.</p>
+
+        <p class="callout-note"><strong>The honest take:</strong> Skippy splits are a great fit for a team with machines on the same LAN who want to run a model that does not fit on any single box. The public mesh, where strangers contribute compute over the internet, is a cooler idea than a practical inference path for latency-sensitive workloads. Batch processing and background jobs are a different story. If you are generating completions for a queue and can tolerate seconds of latency per request, the mesh approach has real value.</p>
+
+        <h2>Mixture-of-Agents: the experimental wildcard</h2>
+
+        <p>There is one more feature that I did not expect. If you send a request with <code>"model": "mesh"</code>, the gateway fans it out to every model available in the mesh in parallel. An arbiter (running as code, not as another LLM call) picks the best response. Tool calls flow through the full pipeline. If there is genuine disagreement, it escalates to a reducer LLM as a tiebreaker.</p>
+
+        <p>This is labeled experimental, and the project itself says to treat it as a preview rather than a stable production path. But it is an interesting direction. Mixture-of-Agents as a research concept has shown that combining outputs from multiple models can beat any single model on certain benchmarks. Shipping it as a one-liner in an OpenAI-compatible API is bold.</p>
+
+        <p>The requirement is at least two distinct models in the mesh. On the public mesh, that is likely. On a private deployment, you would need to deliberately load different models on different nodes.</p>
+
+        <h2>The iroh networking layer is the real bet</h2>
+
+        <p>What makes Mesh LLM interesting beyond the inference piece is the networking foundation. iroh handles hole-punching, NAT traversal, and relay fallback to open a direct, authenticated QUIC connection between any two nodes. Each node is identified by a public key. There is no central server to configure or maintain.</p>
+
+        <p>The protocol rides on QUIC's ALPN negotiation with three lanes:</p>
+
+        <ul class="feature-list">
+            <li><span class="feature-name">mesh-llm/1</span>: the main mesh (gossip, routing, HTTP tunnels, plugin channels)</li>
+            <li><span class="feature-name">mesh-llm-control/1</span>: owner control plane for config sync and ownership attestation</li>
+            <li><span class="feature-name">skippy-stage/2</span>: latency-sensitive activation transport for split models</li>
+        </ul>
+
+        <p>Inside the main connection, everything is a bidirectional QUIC stream tagged with a single leading byte that identifies the stream type. One byte tells you whether the stream carries gossip, inference, route queries, or peer-lifecycle events. It is a clean multiplexing design. The fact that "route to a peer" and "stream activations to the next pipeline stage" are the same primitive as "talk to localhost" is the kind of abstraction that feels right.</p>
+
+        <p>On the security side, a commenter asked whether payloads are encrypted between nodes. iroh's QUIC transport is encrypted by default (QUIC mandates TLS 1.3), so the answer is yes. The public mesh uses Nostr for discovery, and private meshes are invite-token based. Mesh LLM also ships with release attestation so you can verify the binary was not tampered with post-download.</p>
+
+        <h2>How the public mesh actually works</h2>
+
+        <p>The simplest path is <code>mesh-llm serve --auto</code>. That command picks a backend, downloads a suitable model if needed, joins the best discovered public mesh, and starts both the local API on port 9337 and the web console on port 3131. You can also start a private mesh, publish your own mesh, join by invite token, or run a client-only node that consumes but does not serve compute.</p>
+
+        <p>One commenter, MattPerry, pointed out that the header image (a diagram showing a laptop, GPU rig, mini PC, server, and workstation in a mesh) made them realize how little compute they personally have. "If I convinced all of my friends to run LLMs on their gaming PCs, I don't know if I'd have enough pooled VRAM to run anything interesting." That is a real concern. The public mesh depends on strangers contributing hardware, and the models that benefit most from pooling are the ones too big for any single contributor.</p>
+
+        <p>Another commenter, Abishek_Muthian, suggested a different use case: distributed inference for purpose-built small models for image processing, SDR, or local weather monitoring. "These will run on mediocre specs and produce dependable output." That is actually where I think the mesh model shines. Small purpose-built models where latency does not matter as much, running on a web of modest machines, with iroh handling all the networking glue.</p>
+
+        <h2>There are other projects in this space</h2>
+
+        <p>Mesh LLM is not the first attempt at distributed LLM inference. A commenter named whs pointed out <a href="https://aihorde.net/">AI Horde</a>, which they described as the biggest existing effort. AI Horde speaks KoboldCPP text completion rather than the OpenAI chat completions API, which limits its client compatibility. There have also been smaller projects from the Aphrodite community and distributed training experiments from Nous Research.</p>
+
+        <p>What Mesh LLM brings that others do not is the combination of OpenAI API compatibility, iroh's zero-config networking, pipeline parallelism via Skippy, and the experimental Mixture-of-Agents mode. Whether that combination is enough to build a real community around the public mesh is an open question.</p>
+
+        <h2>What I think</h2>
+
+        <p>The architecture is sound. iroh is a serious networking library with production deployments at scale. The Skippy pipeline split is a well-understood technique translated into a practical binary. The OpenAI compatibility means existing tools (Goose, Claude Code, OpenCode, and others the project explicitly supports via <code>mesh-llm goose</code> and similar commands) work out of the box.</p>
+
+        <p>What I am less sure about is the public mesh as an interactive inference source. The latency math is rough. Pipeline parallelism over the internet through relay fallback is going to be slow for interactive chat. The project does not publish benchmark numbers, and the Hacker News thread has multiple people asking for them. That silence is the biggest concern. A project that ships an ambitious distributed system without benchmarks is a project that is either still early or does not want you to see the numbers yet.</p>
+
+        <p>That said, there is a narrow use case where this makes immediate sense: a team with machines on the same LAN, some spare GPU capacity, and a model too big for any single box. Point Mesh LLM at the machines, let Skippy handle the split, and you get an OpenAI endpoint without buying a bigger GPU. On a LAN, the network is fast enough for pipeline parallelism to shine. The 18 MB binary and zero-config networking make the setup barrier almost nonexistent.</p>
+
+        <p>I also think the Mixture-of-Agents mode is worth watching. Fanning out to every model in the mesh and arbitrating responses in code (not another LLM call) is a cost-efficient take on the MoA research direction. If the public mesh gets enough diverse models, this could become a genuine value-add that no single-provider API offers.</p>
+
+        <p>The repo is at <a href="https://github.com/Mesh-LLM/mesh-llm">github.com/Mesh-LLM/mesh-llm</a>. MIT licensed. If you have machines on the same network and a model that does not fit on one of them, give it a try. If you are hoping the public mesh replaces your OpenAI API for interactive chat, manage your expectations and wait for benchmark numbers.</p>
+
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
