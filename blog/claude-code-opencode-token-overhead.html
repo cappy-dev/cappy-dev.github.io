@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code sends 33k tokens before reading your prompt. OpenCode sends 7k. | Cappy</title>
+    <meta name="description" content="A team spliced a logging proxy between Claude Code and OpenCode and the model endpoint. Claude Code burns roughly 33k tokens of system prompt, tool schemas, and scaffolding before your prompt arrives. OpenCode sends about 7k. The cost difference is real and measurable.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .callout-note { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; margin: 1.6rem 0; }
+        .callout-note h3 { margin-top: 0; font-size: 0.95rem; color: var(--fg2); }
+        .feature-list { margin: 1.4rem 0; padding: 0; list-style: none; }
+        .feature-list li { padding: 0.5rem 0 0.5rem 1.1rem; border-top: 1px solid var(--border); position: relative; }
+        .feature-list li:first-child { border-top: none; }
+        .feature-list li::before { content: ""; position: absolute; left: 0; top: 1.1rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 13, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Claude Code sends 33k tokens before reading your prompt. OpenCode sends 7k.</h1>
+
+        <p>If you run coding agents in production, the per-token cost is not the only thing that matters. The <em>baseline</em> matters too: how many tokens the harness itself injects before the model ever sees what you typed. A team at <a href="https://systima.ai/">Systima</a> built a logging proxy, spliced it between two coding agent harnesses and the model endpoint, and measured exactly what came out the back. The result hit 480 points on Hacker News this week.</p>
+
+        <p>They tested Claude Code and OpenCode on the same model (claude-sonnet-4-5), the same machine, and the same tasks. For a one-line prompt ("Reply with exactly: OK"), Claude Code shipped roughly 33,000 tokens of system prompt, tool schemas, and injected scaffolding before the user's words arrived. OpenCode shipped about 7,000.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">First-turn payload (task: "Reply with exactly: OK")</div>
+                <div class="bench-row"><span class="bench-tool">Claude Code</span><span class="bench-time">~32,800 tokens</span></div>
+                <div class="bench-row"><span class="bench-tool">OpenCode</span><span class="bench-time">~6,900 tokens</span></div>
+                <div class="bench-row"><span class="bench-tool">Ratio</span><span class="bench-time">~4.7x</span></div>
+                <div class="bench-note">Both pinned to claude-sonnet-4-5, July 2026. Fresh config, no MCP servers, no instruction files.</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Tool schema weight (dominant term)</div>
+                <div class="bench-row"><span class="bench-tool">Claude Code tools</span><span class="bench-time">27 tools, ~24k tokens</span></div>
+                <div class="bench-row"><span class="bench-tool">OpenCode tools</span><span class="bench-time">10 tools, ~4.8k tokens</span></div>
+                <div class="bench-note">Tool definitions alone account for the majority of the gap. Claude Code ships a full background-agent and orchestration suite alongside the coding core.</div>
+            </div>
+        </div>
+
+        <p>Tool schemas are where most of the gap comes from. Claude Code's 27 tools include the coding core plus an entire background-agent and orchestration surface: <code>CronCreate</code>, <code>Monitor</code>, the <code>Task</code> family, worktree management, push notifications. OpenCode ships ten classic coding tools and one system block that opens with "You are OpenCode, the best coding agent on the planet."</p>
+
+        <p>That is a design choice, not a bug. Claude Code is trying to be a platform. But the meter does not care about intent. Every one of those schemas rides on every request of every session.</p>
+
+        <h2>How they measured it</h2>
+
+        <p>The method is the durable part of this study, more than the specific numbers. Harness prompts change every couple of weeks. The rig does not.</p>
+
+        <p>They wrote roughly 200 lines of Node that acts as an HTTP proxy. The harness talks to the proxy; the proxy forwards to the model endpoint and writes two things to disk per request: the exact JSON payload the harness emitted (system blocks, tool schemas, messages) and the usage block the API returned (input tokens, cache writes, cache reads, output). One is ground truth for what was sent. The other is ground truth for what was metered.</p>
+
+        <div class="callout-note">
+            <h3>The setup</h3>
+            <p style="margin:0.4rem 0 0 0;">harness (Claude Code / OpenCode) &rarr; logging proxy (captures request payloads + response usage) &rarr; model endpoint</p>
+        </div>
+
+        <p>Baseline isolation was thorough: fresh config directories with no MCP servers, no user settings, no memory, an empty workspace with no instruction files, permissions bypassed. Then multiplier lanes added one variable at a time. Three runs per harness for the floor. An honesty note: their traffic passed through a local LLM gateway that wraps requests in its own envelope, a constant they measured at roughly 6,200 tokens with bare calibration requests and subtracted from every metered figure. Payload-level numbers come from the captured request bodies, which the gateway cannot touch.</p>
+
+        <h2>The cache problem nobody warned you about</h2>
+
+        <p>Here is where the story gets worse than the headline number suggests. Prompt caching should make a big baseline cheap. Write it once at a 1.25x premium, read it back at a tenth of the price thereafter. That only works if the prefix stays stable.</p>
+
+        <p>It did, for OpenCode. Three separate runs of the same task produced byte-identical tools bytes, system bytes, and message bytes. On the second and third runs it wrote zero cache tokens and read everything. That is how caching is supposed to work.</p>
+
+        <p>Claude Code broke that assumption. On the same file-summarization task, Claude Code wrote 53,839 cache tokens across five requests. One of those was a complete mid-task re-write of its full ~43k prefix. OpenCode wrote 1,003 cache tokens on the identical task. They re-ran it. The numbers reproduced: 43,342 tokens in the first run, 36,899 in the second. A third run against a freshly warmed cache wrote almost nothing.</p>
+
+        <p>Depending on cache temperature, Claude Code's cache-write volume on the same task ranged from 5.9x to 54x OpenCode's. Cache writes bill at a premium. That is the mechanism behind a usage meter that climbs under Claude Code but stays flat under OpenCode with the same model. Bigger prefixes, more distinct prefixes per session (Claude Code emits three distinct request classes per session: warmup probe, main conversation, subagent calls), and more re-writes of them.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Cache writes on the same file-summarize task</div>
+                <div class="bench-row"><span class="bench-tool">Claude Code</span><span class="bench-time">53,839 tokens</span></div>
+                <div class="bench-row"><span class="bench-tool">OpenCode</span><span class="bench-time">1,003 tokens</span></div>
+                <div class="bench-row"><span class="bench-tool">Range observed</span><span class="bench-time">5.9x to 54x</span></div>
+                <div class="bench-note">Reproduced across two runs on Sonnet 4.5 and again on Claude Fable 5. Includes one full mid-task re-write of the entire prefix.</div>
+            </div>
+        </div>
+
+        <p>One attribution caveat they flagged: a single cache miss could in theory be the gateway evicting rather than the harness moving its cache breakpoints. But the prefix instability itself is harness-side, visible in the captured bytes before any gateway involvement. And the reproduction across runs makes systematic harness behavior the likelier explanation.</p>
+
+        <h2>The multipliers that stack on top</h2>
+
+        <p>A lean baseline is not the end of the story. Real sessions stack five layers on top of the floor.</p>
+
+        <ul class="feature-list">
+            <li><strong>Instruction files.</strong> A real 72KB <code>AGENTS.md</code> from a production repo added just over 20,000 tokens per request to both harnesses. OpenCode's metered total went from 13,152 to 33,336. Claude Code's went from 39,005 to 59,243. One aside worth knowing: Claude Code 2.1.207 ignored <code>AGENTS.md</code> entirely and only ingested the file when renamed to <code>CLAUDE.md</code>. An ignored instruction file is silent.</li>
+            <li><strong>MCP servers.</strong> Small public servers added about 1,000 to 1,400 tokens each. Five servers grew the tool count from 27 to 69 on Claude Code and from 10 to 52 on OpenCode. Production servers with rich APIs ship schemas several times larger.</li>
+            <li><strong>Framework templates.</strong> A story-driven workflow framework (BMAD) expanded an 8,405-char template into the prompt. The template is only 2,100 tokens, but it rides on every subsequent request in the session. A 9-request session re-sends it nine times.</li>
+            <li><strong>Subagents.</strong> This is the largest multiplier they measured. A task that cost 121,000 tokens done directly cost 513,000 when fanned out to two subagents. Every subagent pays its own bootstrap, and the parent then consumes its transcript. That is a 4.2x multiplier for one modest fan-out.</li>
+            <li><strong>Extended thinking.</strong> Thinking output bills at output rates (5x input), and reasoning blocks get carried forward inside the conversation. They declined to publish numbers here because their gateway interfered with the toggle, but the mechanism is not in doubt.</li>
+        </ul>
+
+        <p>The "everything number" at the end of the multiplier chain: with a real working configuration (eleven MCP servers, the 72KB instruction file), OpenCode's first request metered 90,817 tokens on a cold cache write, carrying 179 tools and 277KB of schemas. Claude Code, with four MCP servers plus installed plugins and the same instruction file, produced a 311KB payload of roughly 75,000 tokens with 118 tools. Before the user had typed a word.</p>
+
+        <h2>Where the gap closes</h2>
+
+        <p>There is one result that went in Claude Code's favor, and the study reports it honestly. On a multi-step write-run-test-fix loop (T3), Claude Code batched the entire job: two file writes and two script executions in a single parallel tool round trip. It took 3 model requests. OpenCode made one tool call per turn and took 9 (plus a Haiku side call for session titling). Cumulative metered input came out at ~121,000 tokens for Claude Code versus ~132,000 for OpenCode.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">T3: write-run-test-fix loop</div>
+                <div class="bench-row"><span class="bench-tool">Claude Code requests</span><span class="bench-time">3</span></div>
+                <div class="bench-row"><span class="bench-tool">OpenCode requests</span><span class="bench-time">9 (+1 title)</span></div>
+                <div class="bench-row"><span class="bench-tool">Claude Code cumulative</span><span class="bench-time">~121k tokens</span></div>
+                <div class="bench-row"><span class="bench-tool">OpenCode cumulative</span><span class="bench-time">~132k tokens</span></div>
+                <div class="bench-note">The large-baseline harness batches aggressively; the small-baseline harness serializes. Whole-task total depends on the task shape.</div>
+            </div>
+        </div>
+
+        <p>Why the convergence? Whole-task input roughly equals baseline times request count, plus conversation growth. Claude Code paid its ~33k baseline three times. OpenCode paid its ~7k nine times. The totals landed close. A strictly sequential task would push Claude Code's request count back up and reverse the picture. The meter starts higher; how the session unfolds decides who spends more.</p>
+
+        <h2>Does the model change the picture?</h2>
+
+        <p>They re-ran the floor on Claude Fable 5 to check whether the gap was a Sonnet artifact. It shrank, for a reason they did not expect.</p>
+
+        <p>Claude Code's system prompt is model-conditional. It sent 27,787 chars of instructions to Sonnet but only 10,526 to Fable, with tool schemas also trimmed from 99,778 to 82,283 chars. Same 27 tools, much less doctrine averaged into the request. The floor gap on Fable came out at roughly 3.3x by payload, against 4.7x on Sonnet. Still far hungrier. The ratio is model-dependent.</p>
+
+        <p>OpenCode's payload was byte-identical across both models. It does not branch its system prompt.</p>
+
+        <h2>What about quality?</h2>
+
+        <p>This is the fair objection to all of the above. A bill says nothing about the work. Paying more is rational if the output is better.</p>
+
+        <p>They picked the tasks so quality could not be the explanation. Both harnesses completed every scored task correctly. The multi-step task was verified by an assertion script that each harness had to write and then pass, and both exited clean. The file summaries were both accurate. On these tasks the token gap is the cost difference for an identical outcome, which is exactly what makes it measurable.</p>
+
+        <p>Whether the premium buys quality on real engineering work is a different question, and they did not measure it. Claude Code's background agents, skills, and orchestration may well earn their tokens on harder tasks. That claim deserves its own benchmark. Two findings here are independent of quality, though. Re-writing a byte-identical cache prefix mid-session buys no code quality at all. It is the same content, paid for again at premium rates. An instruction file the harness silently ignores buys nothing either. Those two are waste on any definition.</p>
+
+        <h2>What I take from this</h2>
+
+        <p>I have been running coding agents long enough to have watched a usage meter climb for no reason I could explain and assumed it was just how it works. It is not. It is how the harness works. The baseline, the cache instability, and the subagent multiplier are all things you can see if you look at the API boundary. Most people never do.</p>
+
+        <p>A few things I would carry into my own setup. First, check which filename your harness actually reads. An instruction file it ignores is paying zero for zero. Second, mind your subagent fan-out. It is the largest token multiplier in the dataset, and it is the easiest one to trigger by accident when you delegate something that did not need delegating. Third, watch the cache. If your harness re-writes its prefix mid-session, caching is not saving you what you think it is.</p>
+
+        <p>There is also a structural point I keep coming back to. A 33k-token baseline means every turn starts a sixth of the way into a 200k context window before any code enters the conversation. That is context budget gone, and caching does not give it back. By the time you stack instruction files and MCP servers, an 85k bootstrap occupies more than 40% of the window on every single request. That is before compaction kicks in and spends yet more tokens summarizing.</p>
+
+        <p>If you run agentic systems in production and cannot currently answer "what exactly did we send to the model last Tuesday," that is the gap to close first. The token accounting falls out of it for free.</p>
+
+        <p>The full writeup is at <a href="https://systima.ai/blog/claude-code-vs-opencode-token-overhead">systima.ai/blog/claude-code-vs-opencode-token-overhead</a>, and the audit logging library they used to chain the captured records is open source at <a href="https://github.com/systima-ai/aiact-audit-log">github.com/systima-ai/aiact-audit-log</a>. The rig itself is about 200 lines of Node. If you want to verify any of this on your own harness, that is the bar.</p>
+
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
