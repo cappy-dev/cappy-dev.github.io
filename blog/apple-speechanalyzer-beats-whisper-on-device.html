@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple's SpeechAnalyzer beats Whisper on-device. The private option is no longer the compromise option. | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 18px 16px;
+        }
+        .bench-card .label {
+            font-size: 12px;
+            color: var(--fg3);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 8px;
+        }
+        .bench-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 28px;
+            color: var(--fg);
+            font-weight: 500;
+        }
+        .bench-card .sub {
+            font-size: 12px;
+            color: var(--fg3);
+            margin-top: 6px;
+        }
+        .winner {
+            border-color: var(--green);
+        }
+        .winner .value {
+            color: var(--green);
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 14, 2026</div>
+            <h1>Apple's SpeechAnalyzer beats Whisper on-device. The private option is no longer the compromise option.</h1>
+            <div class="tags">
+                <span class="pill">Speech</span>
+                <span class="pill">Apple</span>
+                <span class="pill">Whisper</span>
+                <span class="pill">On-Device</span>
+                <span class="pill">Benchmark</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>For years there was an unwritten rule in on-device speech transcription: if you wanted privacy, you accepted worse accuracy. Whisper models running locally gave you offline transcription that nobody else could listen to. The catch was that even the small model left a visible word error rate compared to big cloud STT services. You traded quality for not having your audio uploaded.</p>
+
+            <p>A benchmark published this week by the team behind Inscribe suggests that the tradeoff just collapsed on Apple hardware. Their new SpeechAnalyzer API, introduced in iOS 26 and macOS 26 to replace the old SFSpeechRecognizer, beats every Whisper model they ship on the standard LibriSpeech corpus at roughly a third of Whisper Small's compute budget per second of audio. It also beats the legacy Apple API by a factor of three to four on word error rate. The full results and raw transcripts are public.</p>
+
+            <p>This is worth unpacking because it changes how private transcription apps should pick their default engine.</p>
+
+            <h2>The numbers</h2>
+            <p>The benchmark used LibriSpeech, which is the standard comparable corpus for English speech recognition. It has two splits: test-clean (2,620 clean read utterances) and test-other (2,939 harder, noisier ones). Every engine ran fully on-device on an Apple M2 Pro with 32GB RAM running macOS 26.5.1. Word error rate, or WER, is the percentage of words an engine substitutes, drops, or invents. Lower is better.</p>
+
+            <div class="bench-grid">
+                <div class="bench-card winner">
+                    <div class="label">Apple SpeechAnalyzer</div>
+                    <div class="value">2.12%</div>
+                    <div class="sub">clean WER</div>
+                </div>
+                <div class="bench-card winner">
+                    <div class="label">Apple SpeechAnalyzer</div>
+                    <div class="value">4.56%</div>
+                    <div class="sub">noisy WER</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">Whisper Small (CoreML)</div>
+                    <div class="value">3.74%</div>
+                    <div class="sub">clean WER</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">Whisper Small (CoreML)</div>
+                    <div class="value">7.95%</div>
+                    <div class="sub">noisy WER</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">Whisper Base</div>
+                    <div class="value">5.42%</div>
+                    <div class="sub">clean WER</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">Whisper Tiny (40MB)</div>
+                    <div class="value">7.88%</div>
+                    <div class="sub">clean WER</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">Apple SFSpeechRecognizer (legacy)</div>
+                    <div class="value">9.02%</div>
+                    <div class="sub">clean WER</div>
+                </div>
+            </div>
+
+            <p>The headline result: SpeechAnalyzer lands at 2.12% WER on clean speech versus Whisper Small at 3.74%. On the noisier split the margin is wider, 4.56% versus 7.95%. The legacy Apple API that SpeechAnalyzer replaced is dead last on clean speech, behind even Whisper Tiny, a 40MB model. If your app still uses SFSpeechRecognizer for anything longer than a voice command, the migration case is clear on accuracy alone.</p>
+
+            <p>Speed is not a separate conversation here. All five engines ran comfortably faster than real time on the M2 Pro, between roughly 12x and 40x. SpeechAnalyzer was about three times faster than Whisper Small per second of audio while also beating it on accuracy. The team withheld a precise timing table because the accuracy runs shared the machine with development workloads, which adds noise to timing but not to WER. They plan to publish dedicated timing numbers from an idle run.</p>
+
+            <h2>Why this benchmark holds up</h2>
+            <p>A benchmark from a company that sells one of the engines should be treated with suspicion. The team built two properties into the test to handle that.</p>
+
+            <p>The first is that the Whisper column should reproduce OpenAI's own published numbers on LibriSpeech, and it does. Their Whisper numbers land within 0.14 to 0.42 absolute WER points of OpenAI's, with a small consistent positive offset from a slightly stricter text normalizer plus CoreML quantization. That consistency matters. Random error would scatter in both directions; a small consistent positive offset is what honest reproduction looks like. If the same corpus, normalizer, and scorer produced the Apple numbers, those numbers inherit the validation from the Whisper numbers that anyone can check.</p>
+
+            <p>The second is that the raw transcripts are public. Every per-utterance hypothesis for both Apple engines is downloadable as JSON next to the reference text and per-utterance WER. If you disagree with their normalizer, you can rescore it yourself.</p>
+
+            <p>There are also a handful of details that decide whether a WER number means anything. Each engine ran through the exact production code path the app ships, not a lab harness with different buffering. Both sides passed through the same text normalizer mirroring OpenAI's English normalizer, which matters because scoring raw text punishes engines for formatting nicely rather than for mishearing. The corpus WER is total errors divided by total reference words, so short utterances do not get over-weighted. And SFSpeechRecognizer, which sends audio to Apple's servers by default, was forced into on-device mode with the harness refusing to silently fall back to the cloud.</p>
+
+            <h2>What Whisper still has</h2>
+            <p>SpeechAnalyzer is not a clean win across the board. Whisper keeps two real advantages that the benchmark is honest about.</p>
+
+            <p>Language coverage. SpeechTranscriber supports roughly 30 locales. Whisper covers over 100 languages. If your users are not speaking English or one of the other supported locales, Whisper is still the right call.</p>
+
+            <p>Platform portability. SpeechAnalyzer only runs on Apple platforms with OS 26. Whisper runs anywhere: Linux servers, Android, Windows, Raspberry Pi, anything with enough RAM to hold the model. For cross-platform apps covering both iOS and Android, you are carrying Whisper anyway for the Android half, so the question becomes whether the Apple half should now prefer SpeechAnalyzer for supported languages.</p>
+
+            <p>The Inscribe team changed their own defaults on the result. Their Auto engine now prefers SpeechAnalyzer where it supports the language and Whisper for everything else. Their framing is blunt: shipping a benchmark and ignoring it in your own defaults would be a strange kind of honesty.</p>
+
+            <h2>What this actually changes</h2>
+
+            <p>For developers shipping on-device transcription on Apple platforms, the default engine choice just shifted. If your app is iOS-only and English-only, the case for shipping both is now weaker than it was a month ago. SpeechAnalyzer gives you better accuracy, better speed, and no download size on top of the OS.</p>
+
+            <p>For cross-platform apps, you already needed Whisper. The question is whether the Apple path should branch to SpeechAnalyzer for supported locales. The accuracy and speed numbers say yes, with Whisper kept as the fallback for unsupported languages.</p>
+
+            <p>For users, the practical upshot is simpler. On a current iPhone or Mac, the best on-device English transcription no longer requires downloading a Whisper model. The private option is no longer the compromise option. That is a real shift. For people who run meeting transcription, voice journaling, or any audio text workflow and care about not uploading audio to a third party, the gap between private and cloud speech recognition on Apple hardware just got a lot smaller.</p>
+
+            <h2>Limitations worth noting</h2>
+            <p>The benchmark is English only. LibriSpeech is English read speech, so these numbers say nothing about the 100+ languages Whisper supports that SpeechTranscriber does not.</p>
+
+            <p>It is also read audiobook speech, not meetings. LibriSpeech is the standard comparable corpus, which is why the team started there, but accented, far-field, and multi-speaker meeting audio is the obvious follow-up. Anyone whose use case is recording a conference room with three overlapping voices should wait for that data before trusting the ranking.</p>
+
+            <p>It is one machine, an M2 Pro. Accuracy should transfer across Apple Silicon, but speed will vary by chip. An A17 or M4 will run faster; an older A14 may run slower, and the relative ranking against Whisper on those chips is not measured here.</p>
+
+            <p>And the Whisper models ran through WhisperKit CoreML quantized conversions, the same builds the app ships. Reference GPU implementations may differ slightly, which the validation table against OpenAI's published numbers quantifies.</p>
+
+            <h2>A benchmark finding a shipping bug</h2>
+            <p>There is a small detail in the writeup that I found quietly satisfying. The benchmark process found a shipping bug in the app itself. The Apple-engine file import fed audio to SpeechAnalyzer and closed the input stream, but never called <code>finalizeAndFinishThroughEndOfInput()</code>. Without that call the analyzer never delivers its final results, and the import hangs forever. It had gone unnoticed because the Auto setting preferred Whisper. The fix shipped the same day.</p>
+
+            <p>That is a small thing, but it is the kind of thing that happens when you measure your own product carefully. You find the things you were not looking for.</p>
+
+            <p>If you want to verify any of this yourself, the team published the summary <a href="https://get-inscribe.com/data/speech-benchmark/summary.json">as JSON</a> and both Apple engines' raw per-utterance transcripts as downloadable gzip files next to the reference text. Rescoring with a different normalizer is a few lines of Python away.</p>
+
+            <p><a href="https://get-inscribe.com/blog/apple-speech-api-benchmark.html">Read the original benchmark writeup.</a></p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+    <script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>

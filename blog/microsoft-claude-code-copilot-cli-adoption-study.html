@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microsoft studied 30,000 engineers on Claude Code and Copilot CLI. Copilot CLI won. | Cappy</title>
+    <meta name="description" content="A Microsoft arxiv paper measured tens of thousands of engineers over a four-month rollout of Claude Code and Copilot CLI. Adopters merged 24% more pull requests, the gain held for four months, and Copilot CLI users had 2.2x the PR lift of Claude Code users.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .callout-note { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; margin: 1.6rem 0; }
+        .callout-note h3 { margin-top: 0; font-size: 0.95rem; color: var(--fg2); }
+        .callout-note p { margin-bottom: 0; }
+        .stack-list { margin: 1.4rem 0; padding: 0; list-style: none; }
+        .stack-list li { padding: 0.5rem 0 0.5rem 1.1rem; border-top: 1px solid var(--border); position: relative; }
+        .stack-list li:first-child { border-top: none; }
+        .stack-list li::before { content: ""; position: absolute; left: 0; top: 1.1rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 14, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>Microsoft studied 30,000 engineers on Claude Code and Copilot CLI. Copilot CLI won.</h1>
+
+        <p>There is a lot of lore about which coding agent is "best," and most of it is vibes. Developer sentiment on X, blog hot takes, the Pragmatic Engineer survey. Useful, but not the same as watching tens of thousands of engineers actually use the things for four months and counting what shipped.</p>
+
+        <p>Three researchers at Microsoft, Emerson Murphy-Hill, Jenna Butler, and Alexandra Savelieva, published <a href="https://arxiv.org/abs/2607.01418">just such a study</a> on arxiv this month. They had something most AI productivity studies lack: telemetry on who actually used the tools, HR data on those engineers, and a real denominator of who was eligible to adopt but did not. The <a href="https://arxiv.org/abs/2607.01418">paper</a> covers Microsoft's early-2026 rollout of Claude Code and GitHub Copilot CLI across roughly 30,000 engineers, running January 5 through April 29, 2026. It hit the top of Hacker News with 53 points in its first nine hours.</p>
+
+        <p>The headline finding: adopters merged about 24% more pull requests than they would have otherwise, and the lift did not fade over four months. The surprise: Copilot CLI users had 2.2x the PR lift of Claude Code users.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Adopter lift (CausalImpact, 95% CI)</div>
+                <div class="bench-row"><span class="bench-tool">Merged PRs / engineer / day</span><span class="bench-time">+24.0%</span></div>
+                <div class="bench-row"><span class="bench-tool">95% credible interval</span><span class="bench-time">+14.5% to +33.7%</span></div>
+                <div class="bench-row"><span class="bench-tool">Posterior p-value</span><span class="bench-time">< 0.001</span></div>
+                <div class="bench-note">Synthetic-control estimate over 115 post-rollout days, built from a Bayesian structural time-Series model against non-adopter PR creators.</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Per-tool lift, any-use weeks (within-person FE Poisson)</div>
+                <div class="bench-row"><span class="bench-tool">Copilot CLI</span><span class="bench-time">+24.9% (+23.0 to +26.8)</span></div>
+                <div class="bench-row"><span class="bench-tool">Claude Code</span><span class="bench-time">+11.4% (+9.4 to +13.6)</span></div>
+                <div class="bench-row"><span class="bench-tool">Ratio (CLI / Claude Code)</span><span class="bench-time">2.2x</span></div>
+                <div class="bench-note">Single-tool adopters only. Each engineer is their own control: their tool-use weeks vs their zero-tool weeks. Wald test p < 0.0001 on the contrast.</div>
+            </div>
+        </div>
+
+        <h2>The result that will surprise people</h2>
+
+        <p>Here is the part I keep turning over. Public developer sentiment in early 2026, including the Pragmatic Engineer survey cited in the paper, generally rated Claude Code as the preferred option for autonomous agentic work. The Microsoft telemetry shows the opposite ordering on merged-PR throughput. Copilot CLI adopters merged more.</p>
+
+        <p>The authors are honest about not knowing why. They offer two non-exclusive hypotheses. First, the two tools may be used for different task mixes: engineers reach for them for different things, and PR throughput may not capture what Claude Code is best at. Second, and this is the one that should make any outside reader skeptical, Microsoft owns GitHub, the maker of Copilot CLI, and is a buyer of Claude Code. Organizational forces likely aligned the Copilot CLI harness with the way engineers at Microsoft actually work. Different codebases, different CI, different review tooling. The within-Microsoft comparison is not a level playing field.</p>
+
+        <p>That caveat matters more than the headline number. If you are deciding which tool to buy for your own organization, you cannot generalize from Microsoft's internal Copilot CLI advantage to your own stack. What you can generalize is the broader pattern: agentic CLI tools, as a class, produced a sustained PR lift at one of the largest software companies in the world. The specific winner is Microsoft's own product, measured inside Microsoft.</p>
+
+        <h2>Adoption spreads through people, not through top-down rollout</h2>
+
+        <p>The adoption study covers Copilot CLI, because Copilot CLI had a well-defined eligible-adopter population at rollout (Claude Code rolled out through a managed license program to specific divisions, which muddies who "could have adopted"). The researchers fit a discrete-time hazard model on engineer-weeks, predicting who tries the tool first.</p>
+
+        <p>The strongest predictor of who tries Copilot CLI in any given week is not seniority, not tenure, not prior IDE Copilot use. It is whether the engineer's peers were already using it. The skip-level peer signal was the largest in the entire study: an engineer whose skip-level peers were more than a quarter using Copilot CLI had +216% higher odds of trying it. Reviewer peers contributed +54% at the top bucket. A direct manager using it added +82% odds of trying.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Odds of trying Copilot CLI, by social exposure (top bucket vs no exposure)</div>
+                <div class="bench-row"><span class="bench-tool">Skip-level peers >25% using</span><span class="bench-time">+216%</span></div>
+                <div class="bench-row"><span class="bench-tool">Direct manager using</span><span class="bench-time">+82%</span></div>
+                <div class="bench-row"><span class="bench-tool">Reviewer peers >25% using</span><span class="bench-time">+54%</span></div>
+                <div class="bench-note">Time-varying social exposure over the prior 14 days. Each contrast is vs an engineer whose coworkers had not used Copilot CLI. The skip-level signal dominates every other predictor in the adoption study.</div>
+            </div>
+        </div>
+
+        <p>The researchers cannot fully separate peer influence from homophily. Engineers may adopt because a peer did, or similar engineers may cluster and adopt independently. But the survey data points toward the former. Developers described sharing output with their team: updating documentation, building internal tools, prototyping ideas. One said, "I am able to utilize my time in coming up with numerous ideas that are very useful for my team." That kind of shared artifact is exactly what would reinforce peer uptake.</p>
+
+        <p>The practical nudge for anyone running a rollout: make early use visible. Sandbox pilots behind closed doors miss the main adoption channel.</p>
+
+        <h2>Who tries it is not who sticks with it</h2>
+
+        <p>The paper separates initial use from retention, and this is where it gets interesting. Retention is defined as using Copilot CLI on at least 5 of the 14 days after first use, roughly "half of working days in the first two weeks." The predictors of trying are not the predictors of sticking.</p>
+
+        <p>Prior IDE Copilot use is the cleanest example. Engineers who had used IDE Copilot before were more likely to try Copilot CLI, scaling from +49% at 1 to 14 days of prior IDE use up to +83% at 60+ days. But those same engineers were less likely to stick with Copilot CLI. All three retention markers were negative, between -12% and -15%. The interpretation is straightforward: engineers who already trust AI tooling in their IDE will try the CLI version, but they also have a familiar alternative to fall back on, so they do not build a sustained CLI habit. Engineers for whom Copilot CLI is their first such tool have no fallback, and if they stay, they stay more firmly.</p>
+
+        <p>What predicts retention is what an engineer does, not who they are. Baseline PR activity was the cleanest retention predictor. Engineers creating 2+ PRs per week before rollout were +31% more likely to stick. Engineers creating 1 to 2 PRs per week were +14% more likely. The busier engineers are, the more they stick. Tenure barely mattered: only the newest hires showed a small +11% bump on initial use, and every other tenure band sat within a couple of percent of the reference.</p>
+
+        <h2>The dose-response: more days, more PRs</h2>
+
+        <p>The within-person dose-response is the cleanest causal evidence in the paper. Each engineer is their own control: their tool-use weeks vs their zero-tool weeks, with engineer and week fixed effects absorbing every time-invariant trait and every org-wide weekly shock. The curve is monotone and well-separated.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Within-person PR lift by tool-use days that week (vs zero-day weeks)</div>
+                <div class="bench-row"><span class="bench-tool">3 days</span><span class="bench-time">+15.0%</span></div>
+                <div class="bench-row"><span class="bench-tool">4 days</span><span class="bench-time">~+30%</span></div>
+                <div class="bench-row"><span class="bench-tool">5+ days</span><span class="bench-time">+50.1%</span></div>
+                <div class="bench-note">Engineer and week fixed effects. Standard errors clustered on engineer. Reference category is zero tool-use days that week. The curve is convex: returns accelerate at higher use.</div>
+            </div>
+        </div>
+
+        <p>The convexity is worth pausing on. The lift at 5+ days is more than three times the lift at 3 days, not just proportionally higher. Heavy users are not just doing more of the same work faster. The survey quotes suggest they are taking on different work: bigger changes they would have skipped, parallel streams of activity, automating the tedious parts. One developer said, "Using GitHub CLI has entirely changed the way that I approach all my projects. I no longer think about narrow solutions; instead I am able to use agents to think broadly and formulate wholistic approaches."</p>
+
+        <p>The survey is the kind of qualitative color that makes the telemetry readable. Another quote, from a senior engineer: coding assignments often required 5 to 10 clarification prompts and several more "I see this error" prompts, each iteration taking 10 to 15 minutes. That latency was still useful because "now I can just prompt it and switch to another task (reviewing PRs, reviewing design docs or just meetings)." The PR lift is not faster typing. It is parallel work enabled by async delegation.</p>
+
+        <h2>Who benefits most: the C-shape</h2>
+
+        <p>RQ5 interacts the dose with career stage and tenure. The pattern is a "C" in both cases. Junior ICs and senior managers see larger PR lifts than the mid-level reference. New hires and 15+ year veterans see larger lifts than the 5 to 15 year midpoint. The researchers flag the newest-hire estimate as probably conflated with onboarding ramp-up, despite excluding engineers with less than 6 months of tenure, and I agree that one deserves a lot of caution.</p>
+
+        <p>The senior-side C is more believable and lines up with the survey. Senior engineers carry work beyond coding: architecture, review, coordination. Agentic tools let them offload the coding itself while staying in those roles. A principal-level developer described a workflow that sounds like async delegation: prompt the agent, switch to reviewing PRs or design docs, come back. Junior engineers may benefit because the tool lets them take on work they could not have done alone, but the survey also flagged concern about juniors developing code sense: "what these tools mean for junior colleagues and how they can develop a good 'sense' for code to know when [the] output is not optima[l]."</p>
+
+        <h2>The fade that did not happen</h2>
+
+        <p>The most cited counter-result in the AI productivity literature is He and colleagues' 2026 study of Cursor, which found a productivity lift that faded at month two and was gone by month three. That result has hung over the field. If the gains are novelty effects, the entire category is suspect.</p>
+
+        <p>The Microsoft data says the lift held. Splitting the post-period into four buckets, February showed +29.4% (95% CI +17.7 to +44.4) and March through April showed +20.0% (95% CI +7.4 to +35.9). The posterior intervals overlap substantially and both exclude zero. The drop in the point estimate is within sampling noise. Within the resolution of these buckets, the productivity gain is sustained.</p>
+
+        <p>The authors offer two non-mutually-exclusive reasons their result differs from He and colleagues. First, tool generation: He studied Cursor, a 2024 to 2025 IDE-based tool, while this is a 2026 agentic CLI. Tools may have actually gotten better. Second, unit of analysis: He's repo-level average reverts toward the mean as adoption spreads from keen early adopters to marginal users, whereas the within-person design conditions on the same engineer and is immune to that compositional drift. Both are plausible. The second one is the reason I would trust the within-person dose-response numbers more than the synthetic-control headline.</p>
+
+        <h2>What the paper does not measure</h2>
+
+        <p>The authors are unusually honest about limitations, and the list is worth reading directly.</p>
+
+        <ul class="stack-list">
+            <li>Merged PRs are an imperfect proxy for throughput. They reward small, frequent PRs. The paper does not measure code quality, added complexity, or the cost of reviewing AI-generated changes.</li>
+            <li>The tool comparison excludes multi-tool users, who may be the most engaged engineers. Single-tool purity is required to attribute a lift to one tool, but it means the comparison runs on a filtered subset.</li>
+            <li>Heavier-use weeks may carry a lighter task mix. The authors read the dose-response as an association, not a cause. Heilman and colleagues controlled for effort in a similar design and still found gains, which mitigates the concern somewhat.</li>
+            <li>The 16-week window is long enough to surface an early fade but not a long-horizon decline. You cannot rule out a year-two regression from this data.</li>
+            <li>PRs were measured from Azure DevOps only, undercounting engineers on other ecosystems.</li>
+        </ul>
+
+        <p>The researcher positionality disclosure is also notable: the authors are Microsoft employees, Microsoft sells AI tools, and Microsoft owns GitHub. They note they were under no explicit pressure, but their proximity may have shaped their questions, design, and interpretation. I respect that sentence being in the paper. It does not invalidate the work, but it is the right caveat to keep in mind when you read the headline that Copilot CLI beat Claude Code inside Microsoft.</p>
+
+        <h2>What I take from this</h2>
+
+        <p>If you are deciding between coding agents right now, this study does not give you a clean answer, and it would be a mistake to read it as one. The within-Microsoft Copilot CLI advantage tells you about Microsoft's internal environment, not yours. What the study does tell you is that agentic CLI tools, as a class, produced a real and sustained PR lift across tens of thousands of engineers at a large software company over four months. That is a stronger evidence base than most of what passes for AI productivity research right now.</p>
+
+        <p>The dose-response is the finding I would actually use. The lift is convex. Three days a week is +15%. Five or more is +50%. If you are going to adopt these tools, the payoff is at the high-use end, and that means adoption strategy matters more than tool selection. Make early use visible to peers, get your busiest engineers on it first, and do not be surprised when the IDE Copilot veterans try the CLI and bounce off it. The retention pattern is telling you something about fallbacks, not about the tool.</p>
+
+        <p>The open question the authors flag at the end is the right one. Whether this added throughput yields better software is still unknown. The field does not have agreed-upon measures for that. Until it does, "24% more PRs" is a throughput number, not a quality number, and any vendor quoting this paper as proof their tool is good is leaving out the part the paper itself says it cannot answer.</p>
+
+        <p>The paper is at <a href="https://arxiv.org/abs/2607.01418">arxiv.org/abs/2607.01418</a>. Full HTML at <a href="https://arxiv.org/html/2607.01418v1">arxiv.org/html/2607.01418v1</a>. The related work section alone is a good reading list for the current state of AI coding productivity research.</p>
+
+    </article>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
