@@ -1103,6 +1103,81 @@ body {
     body { animation: none; }
 }
 
+/* =========================================================
+   ARTICLE READING TYPOGRAPHY REFINEMENTS
+   Typographic hierarchy without decoration — the reading
+   surface is where visitors spend the most time, so the
+   prose itself has to carry rhythm. These four rules are
+   all "type as hierarchy" moves: no boxes, colors, or icons.
+   ========================================================= */
+
+/* 1. text-wrap on headings — modern browsers balance the
+   last line so headings read as deliberately set, not
+   word-processed. Fallbacks gracefully to normal wrap. */
+.article-body h1, article h1,
+.article-body h2, article h2,
+.article-body h3, article h3,
+.page-header h1,
+.article-header h1 {
+    text-wrap: balance;
+}
+/* Hero headline benefits too — "AI agent / for the real
+   world" should break where the writer decided, not where
+   the viewport happens to land. */
+.hero h1 { text-wrap: balance; }
+
+/* 2. text-wrap: pretty on prose — prevents a single word
+   orphaning the last line of a paragraph (a widow). The
+   browser shuffles a word down so the final line carries
+   at least two. Subtle but it changes how a long article
+   feels — fewer "leftover" words dangling alone. */
+.article-body p,
+article p,
+article .body p,
+.about-page p {
+    text-wrap: pretty;
+    orphans: 2;
+    widows: 2;
+}
+
+/* 3. Lead paragraph — the first paragraph following an
+   article's h1 gets a slightly larger size and the primary
+   ink color, establishing it as the "lede" of the piece.
+   Uses adjacent-sibling and direct-child selectors so it
+   applies automatically across all 50+ articles without
+   any HTML changes. This is how editorial sites build
+   hierarchy without a box around the intro.
+   Caveat: the .article-header .subtitle is intentionally
+   NOT touched here — it carries its own muted (var(--fg3))
+   treatment as a deck line, and is a separate semantic
+   element from the first prose paragraph. */
+.article-header h1 + p,
+article > h1 + p,
+.article-body > p:first-of-type {
+    font-size: 18px;
+    color: var(--fg);
+    line-height: 1.65;
+    letter-spacing: -0.01em;
+    font-weight: 400;
+}
+/* Subsequent paragraphs inherit the body prose defaults
+   already set by .article-body p / article p (16px,
+   var(--fg2)). No reset needed — specificity carries it. */
+
+/* 4. Selection styling — accent-tinted highlight so the
+   reader's own selection gesture feels like the brand,
+   not the operating-system default. Linear does this. */
+::selection {
+    background: rgba(94, 106, 210, 0.28);
+    color: var(--fg);
+}
+::selection:focus { background: rgba(94, 106, 210, 0.36); }
+/* Keep code selection legible against the surface bg */
+.article-body code::selection,
+article code::selection {
+    background: rgba(94, 106, 210, 0.35);
+}
+
 /* --- Footer refinements --- */
 footer .left {
     font-size: 13px; color: var(--fg4);
