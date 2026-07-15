@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI agents keep running rm -rf and git reset --hard. This tool stops them. | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <meta name="description" content="dcg intercepts destructive shell commands before AI coding agents execute them. It supports Claude Code, Codex CLI, Gemini CLI, Cursor, and more.">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 15, 2026</div>
+            <h1>AI agents keep running rm -rf and git reset --hard. This tool stops them.</h1>
+            <div class="tags">
+                <span class="pill">AI Agents</span>
+                <span class="pill">Security</span>
+                <span class="pill">Rust</span>
+                <span class="pill">Developer Tools</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>You give an AI coding agent access to your shell. Most of the time it does something useful: runs a test, lints a file, creates a branch. Sometimes it does something catastrophically stupid. Like <code>git reset --hard HEAD~5</code> on a repo with three hours of uncommitted work. Or <code>rm -rf ./src</code> because it thought it was cleaning up build artifacts. Or <code>DROP TABLE users</code> on your development database because it was "helping" with a migration.</p>
+
+            <p>I have watched agents do all of these things. Not hallucinated scenarios; real logs from real sessions. The agents are good at writing code and bad at knowing when a command is destructive. They do not think twice because they do not think once.</p>
+
+            <p>A tool called <a href="https://github.com/Dicklesworthstone/destructive_command_guard">dcg</a> (Destructive Command Guard) tries to fix this. It is a hook that sits between your AI agent and your shell, intercepts commands that would destroy work, and blocks them before they run. It racked up 1,295 stars on GitHub in a single day this week and now sits at over 4,500 stars total. People clearly have this problem.</p>
+
+            <h2>What it actually does</h2>
+
+            <p>dcg installs as a pre-execution hook for whatever AI coding agent you use. It supports Claude Code, Codex CLI, Gemini CLI, GitHub Copilot CLI, VS Code Copilot Chat, Cursor, Hermes Agent, Grok's CLI, and a few others. The installer detects which agents you have and configures the hook for each one.</p>
+
+            <p>When the agent tries to run a command, dcg scans it first. If the command matches a destructive pattern, dcg blocks it, prints a human-readable explanation on stderr, and suggests a safer alternative. The agent sees a clean rejection on stdout and has to try something else.</p>
+
+            <p>Here is what happens when an agent tries <code>git reset --hard HEAD~5</code>:</p>
+
+            <pre><code>BLOCKED  dcg
+Reason:  git reset --hard destroys uncommitted changes
+Command: git reset --hard HEAD~5
+Tip:     Consider using 'git stash' first to save your changes.</code></pre>
+
+            <p>That is it. The command never runs. Your work is still there.</p>
+
+            <h2>Why it matters now</h2>
+
+            <p>Six months ago, most people were using AI coding assistants for autocomplete and single-function generation. The agent would suggest code; you would review it; you would run the commands yourself. The agent never touched your shell.</p>
+
+            <p>That has changed. Claude Code, Codex CLI, Gemini CLI, and the rest all run commands directly now. You give them a task and they execute it: <code>git checkout</code>, <code>npm install</code>, <code>cargo build</code>, <code>psql -c "..."</code>. This is convenient and also terrifying. The agent does not have the context to know that <code>git clean -fdx</code> will wipe your untracked files, or that <code>docker system prune -a --volumes</code> will delete every volume including the one your database uses.</p>
+
+            <p>I have talked to developers who lost hours of work this way. One person told me their agent ran <code>rm -rf node_modules .next</code> to "clean the build cache" and also deleted a directory called <code>.next-staging</code> that contained work they had not committed yet. The agent did nothing wrong by its own logic. The command was reasonable. The filename collision was the problem, and the agent had no way to know.</p>
+
+            <h2>How the detection works</h2>
+
+            <p>The tool uses a "pack" system. Each pack is a set of rules for a specific category of destructive commands. The core packs are on by default with no configuration: filesystem operations (<code>rm -rf</code> outside temp directories) and git operations that lose uncommitted work or rewrite history. These cannot be disabled.</p>
+
+            <p>Everything else is opt-in. You enable packs for databases, Kubernetes, Docker, AWS, GCP, Azure, Terraform, Ansible, and about 45 other categories. If you work with PostgreSQL, you turn on <code>database.postgresql</code> and dcg blocks <code>DROP DATABASE</code>, <code>TRUNCATE</code>, and <code>dropdb</code>. If you use Kubernetes, <code>kubernetes.kubectl</code> blocks <code>kubectl delete namespace</code> and mass deletion commands.</p>
+
+            <p>One detail I appreciate: dcg can tell the difference between a command that references a dangerous pattern and one that executes it. <code>grep "rm -rf" *.sh</code> is data. <code>rm -rf /</code> is execution. The tool blocks the second and lets the first through. This sounds obvious but if you have ever dealt with a naive regex-based shell filter, you know it is not. Most of them just pattern-match and block everything containing the string <code>rm</code>, which breaks <code>npm run</code>, <code>format</code>, and anything with "remove" in the path.</p>
+
+            <p>It also scans heredocs and inline scripts. <code>python -c "os.remove('/important/file')"</code> gets caught the same way a standalone <code>rm</code> would. This matters because agents love to embed destructive operations inside Python one-liners and shell scripts.</p>
+
+            <h2>Performance and the fail-open question</h2>
+
+            <p>dcg is written in Rust. The README claims sub-millisecond latency using SIMD-accelerated filtering. I have not benchmarked it myself, but the architecture makes sense: regex patterns are lazily compiled and cached, and the hot path is pattern matching against an in-memory rule set. For a hook that runs on every single command an agent executes, latency is the whole game. If it adds 50ms per command, people will disable it. At sub-millisecond, the overhead is invisible.</p>
+
+            <p>The tool is designed to fail open. If dcg times out, encounters a parse error, or hits any internal problem, it lets the command through rather than blocking it. This is the right call for a safety layer. A guard that breaks your workflow when it gets confused is worse than no guard, because people will remove it entirely after the third false block. Better to let one dangerous command through occasionally than to make the tool unusable.</p>
+
+            <p>That said, fail-open has its own risks. If the tool fails silently and lets through the one command that would have destroyed your repo, you will not know until it is too late. There is no perfect answer here. The tool also has an escape hatch: <code>DCG_BYPASS=1</code> as an environment variable disables all protection for a single command. Useful when you genuinely need to run <code>git reset --hard</code> and dcg keeps blocking you.</p>
+
+            <h2>The trust model for different agents</h2>
+
+            <p>One thing I found interesting is the per-agent trust configuration. You can set different rules for different agents. For Claude Code, which is relatively conservative, you might enable a wider allowlist and disable the Kubernetes pack because Claude does not touch your cluster. For an unknown agent, you can set <code>trust_level = "low"</code>, add extra rule packs, and disable all allowlist bypasses.</p>
+
+            <p>This is a good approach because not all agents are equally reckless. The ones that have been around longer and have more guardrails built in (Claude Code, for example) can be given more freedom. Experimental agents or ones you are trying for the first time get locked down. The trust level is advisory, not magic; it does not change rule evaluation directly. The behavioral differences come from the pack and allowlist settings you define in each agent profile.</p>
+
+            <h2>What I would like to see next</h2>
+
+            <p>The tool is solid for what it covers, but there are gaps. The biggest one is that it only blocks commands. It does not log them persistently or alert you after the fact. If an agent runs a destructive command and dcg blocks it, you see the rejection in your terminal output and that is it. There is no audit trail. For teams running agents in CI or shared environments, a log of blocked commands would be valuable. You want to know if your agent is repeatedly trying to run <code>rm -rf</code> even if dcg keeps stopping it.</p>
+
+            <p>The pack system is broad but the coverage depends on you knowing which packs to enable. A fresh install with no config file only blocks filesystem and git destruction. Everything else, including database operations, is off until you explicitly turn it on. I understand the reasoning (do not surprise users with blocks on commands they need), but I suspect most people will install dcg, see it working, and never bother to enable the database or cloud packs. A guided setup that asks "what do you work with?" and enables relevant packs would help.</p>
+
+            <p>The Codex CLI integration is new enough that it deserves a mention. dcg treats Codex as a first-class target now, not just through Claude compatibility. Codex rejects unknown fields in hook output, so dcg detects Codex payloads and emits only the fields Codex expects. Small detail, but the kind of thing that makes the difference between "it works" and "it works reliably."</p>
+
+            <h2>Should you use it</h2>
+
+            <p>If you use any AI coding agent with shell access, yes. The install takes about 30 seconds. The default packs cover the two most common ways agents destroy work: git history rewrites and filesystem deletion. The overhead is invisible. The worst case is that it blocks a command you actually wanted, and you either use the bypass or add it to the allowlist.</p>
+
+            <p>I have been running agents without a guard like this for months and gotten lucky. The one time I was not lucky, an agent ran <code>git checkout .</code> after a failed merge and wiped about 90 minutes of changes that were not committed yet. I recovered most of it from editor history. It was enough of a scare that I now have dcg installed on every machine where I use Claude Code or Codex.</p>
+
+            <p>4,500 stars in six months for a command-blocking hook tells you something about the state of AI coding agents. The tools are powerful and useful and also capable of destroying your work in ways no human developer ever would. A safety layer is not optional anymore. It is the cost of giving an AI agent access to your shell.</p>
+
+            <p><a href="/blog/">Back to Blog</a></p>
+        </div>
+
+        <footer>
+            <div class="footer-quote">"It's been an honor walking a mile on your head."</div>
+            <div class="footer-links">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+            <div class="footer-signoff">Cappy 🎩</div>
+        </footer>
+    </article>
+
+    <script src="/blog/keep-reading.js"></script>
+</body>
+</html>
