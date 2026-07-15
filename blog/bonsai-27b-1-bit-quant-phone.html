@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bonsai 27B: a 1-bit model that runs on your phone, and the benchmarks are real | Cappy</title>
+    <meta name="description" content="PrismML's Bonsai 27B compresses a 27-billion-parameter model to 3.9 GB using 1-bit weights, fitting on an iPhone 17 Pro while retaining 90% of the full-precision model's intelligence. The benchmarks are concrete, the methodology is open, and the implications for local AI are worth taking seriously.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .callout { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.6rem 0; }
+        .callout p { margin: 0.3rem 0; }
+        .callout .label { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.05em; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 15, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Bonsai 27B: a 1-bit model that runs on your phone, and the benchmarks are real</h1>
+
+        <p>A 27-billion-parameter model that fits on a phone. That sentence alone used to sound like a press release waiting to be debunked. You can quantize a model to 4-bit with llama.cpp and squeeze it onto a decent laptop, but a phone? A phone gives you maybe 6 GB of usable memory once the OS takes its cut, and the model has to share that with its own KV cache and activations. A 27B model at 4-bit is 18 GB. The math does not work.</p>
+
+        <p><a href="https://prismml.com/news/bonsai-27b">Bonsai 27B</a>, released yesterday by PrismML, is the first model I have seen that clears that bar. Not through a marketing trick. Through 1-bit and ternary quantization that actually preserves reasoning ability. The 1-bit variant is 3.9 GB. It fits on an iPhone 17 Pro. The ternary variant is 5.9 GB and targets laptops. Both are Apache 2.0, both are multimodal, and both ship with benchmarks that are specific enough to argue with.</p>
+
+        <p>I have been watching the 1-bit and ternary model space since Microsoft's BitNet papers. The idea has always been compelling: if you can get weights down to two or three possible values instead of 65,536, you save enormous space and the math becomes simple additions instead of multiplications. The problem was that early 1-bit models were small (under 4B parameters) and the quality drop was noticeable in anything beyond simple chat. Bonsai 27B is the first release that takes this approach to a model large enough to do real agentic work, and the benchmark numbers suggest the quality gap has narrowed to something you might actually accept.</p>
+
+        <h2>How the compression works</h2>
+
+        <p>There are two variants, and the difference between them matters more than the marketing lets on.</p>
+
+        <p>The ternary version uses weights constrained to three values: -1, 0, and +1. Each weight uses 1.71 effective bits after FP16 group-wise scaling. The total footprint is 5.9 GB. This is the one you run if you care about quality and have a laptop or a desktop GPU.</p>
+
+        <p>The 1-bit version goes further: weights are either -1 or +1, 1.125 effective bits per weight, 3.9 GB total. This is the phone variant. It is the one that makes the headline work.</p>
+
+        <p>Both variants compress the entire model end to end. Language network, embeddings, attention, MLPs, the LM head. No high-precision escape hatches where the model quietly keeps some layers in FP16 to make the benchmarks look better. The vision tower ships in 4-bit because image encoders are less sensitive to precision and the space savings matter more there. That is a pragmatic choice, not a cheat. The text and reasoning path is fully 1-bit or ternary.</p>
+
+        <p>There is a 262K-token context window and speculative decoding support. That speculative decoding matters more than it sounds: on low-bit models, the draft model and verifier can both be cheap, and the speedup compounds with the smaller memory footprint.</p>
+
+        <h2>The benchmarks, which are the part that matters</h2>
+
+        <p>PrismML evaluated both variants against the full-precision Qwen 3.6 27B baseline across 15 benchmarks in thinking mode (where the model's full reasoning chain is exercised, not just the final answer). The overall retention is 95% for ternary and 90% for 1-bit. Those averages hide some interesting per-category spread:</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Math (GSM8K, MATH-500, AIME25, AIME26)</div>
+                <div class="bench-row"><span class="bench-tool">Qwen 3.6 27B (FP)</span><span class="bench-time">95.3</span></div>
+                <div class="bench-row"><span class="bench-tool">Ternary Bonsai</span><span class="bench-time">93.4</span></div>
+                <div class="bench-row"><span class="bench-tool">1-bit Bonsai</span><span class="bench-time">91.7</span></div>
+                <p class="bench-note">1-bit loses 3.6 points. For math, that is remarkably tight.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Coding (HumanEval+, MBPP+, LiveCodeBench)</div>
+                <div class="bench-row"><span class="bench-tool">Qwen 3.6 27B (FP)</span><span class="bench-time">88.7</span></div>
+                <div class="bench-row"><span class="bench-tool">Ternary Bonsai</span><span class="bench-time">86.0</span></div>
+                <div class="bench-row"><span class="bench-tool">1-bit Bonsai</span><span class="bench-time">81.9</span></div>
+                <p class="bench-note">Coding takes a bigger hit. 6.8 points lost at 1-bit.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Agentic / tool-calling (BFCL v3, TauBench)</div>
+                <div class="bench-row"><span class="bench-tool">Qwen 3.6 27B (FP)</span><span class="bench-time">80.0</span></div>
+                <div class="bench-row"><span class="bench-tool">Ternary Bonsai</span><span class="bench-time">74.0</span></div>
+                <div class="bench-row"><span class="bench-tool">1-bit Bonsai</span><span class="bench-time">66.0</span></div>
+                <p class="bench-note">This is where 1-bit hurts most. 14 points lost. Tool calling is fragile.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Vision (MMMU Pro, OCRBench)</div>
+                <div class="bench-row"><span class="bench-tool">Qwen 3.6 27B (FP)</span><span class="bench-time">72.6</span></div>
+                <div class="bench-row"><span class="bench-tool">Ternary Bonsai</span><span class="bench-time">65.2</span></div>
+                <div class="bench-row"><span class="bench-tool">1-bit Bonsai</span><span class="bench-time">59.6</span></div>
+                <p class="bench-note">Vision takes the biggest relative hit. Makes sense: the vision tower is 4-bit, not 1-bit, so it is already partially degraded vs. the text path.</p>
+            </div>
+        </div>
+
+        <p>Read the table by capability and the story is more useful than the averages. Math barely moves. Coding takes a modest hit that most people would accept. But agentic tool calling at 1-bit drops to 66 from 80, and vision drops 13 points. If your use case is "reason about this text and give me an answer," the 1-bit model is surprisingly close to the full-precision version. If your use case is "call this API, parse the response, decide what to do next, and also look at this screenshot," the degradation is real and you will feel it.</p>
+
+        <p>PrismML makes one comparison that is worth holding onto: the most aggressive conventional 4-bit build of the same base model scores lower than 1-bit Bonsai 27B while using 2.5x more memory. If that holds up under independent testing, it is a genuine Pareto improvement. You get better quality at less than half the memory cost. That is the actual headline, not "runs on a phone."</p>
+
+        <h2>Throughput on real hardware</h2>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">NVIDIA GeForce RTX 5090</div>
+                <div class="bench-row"><span class="bench-tool">1-bit Bonsai 27B</span><span class="bench-time">163 tok/s</span></div>
+                <div class="bench-row"><span class="bench-tool">Ternary Bonsai 27B</span><span class="bench-time">134 tok/s</span></div>
+                <p class="bench-note">Desktop GPU. Fast enough for interactive agent loops.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Apple M5 Max</div>
+                <div class="bench-row"><span class="bench-tool">1-bit Bonsai 27B</span><span class="bench-time">87 tok/s</span></div>
+                <div class="bench-row"><span class="bench-tool">Ternary Bonsai 27B</span><span class="bench-time">58 tok/s</span></div>
+                <p class="bench-note">Laptop-class Apple silicon. Unified memory makes this work cleanly.</p>
+            </div>
+        </div>
+
+        <p>The phone numbers are not in these tables. The demo video shows agentic workflows on an iPhone 17 Pro Max, but it is labeled "Demo Mode: Cached and Prefilled Image Context." That label is doing a lot of work. Cached and prefilled context means the heavy prefill computation was done ahead of time, and the demo is showing decode speed, not cold-start performance. Real on-device inference from a cold start will be slower, possibly much slower depending on how much of the 6 GB budget is spent on the KV cache versus activations.</p>
+
+        <p>I am not calling the demo dishonest. It is clearly labeled. But anyone thinking "I will run a 27B model on my phone at 80 tok/s" should adjust expectations. The phone use case that actually works today is: load the model, prefill a system prompt, and then chat. Decode-only throughput on Apple's Neural Engine with custom MLX kernels can be fast. Cold starts with a long context are where you will wait.</p>
+
+        <h2>Why memory budget is the real constraint</h2>
+
+        <p>The press material says "12 GB iPhone offers about 6 GB for the model to use on-device." That number is more important than it looks. iOS does not hand apps the full RAM. The OS, background services, and the app's own overhead all eat into it. The model weights are one thing, but you also need room for the KV cache (which grows with context length) and the activation tensors during forward passes.</p>
+
+        <p>At 3.9 GB for weights, the 1-bit variant leaves roughly 2 GB for KV cache and activations on a 6 GB budget. A 262K context window would eat far more than 2 GB of KV cache at standard precision. The speculative decoding draft model also needs space. So in practice, you are not going to use the full 262K context on a phone. You will use maybe 8K to 32K tokens depending on batch size and how the KV cache is managed. That is still useful for most conversations and document Q/A. It is not useful for feeding the model an entire codebase and asking it to reason across all files.</p>
+
+        <p>On a laptop with 16 or 32 GB of RAM, the ternary variant at 5.9 GB has plenty of room for a large KV cache. That is where this model is practically interesting for agentic work. A laptop that can run a 27B model with tool-calling capability, locally, with no network round-trips, for free. If the agentic benchmarks were closer to full-precision, I would call this a watershed moment for local agents. At 66/80 on tool calling, it is a promising step, not the finish line.</p>
+
+        <h2>The architecture-agnostic claim</h2>
+
+        <p>One thing I want to flag: PrismML says their compression methodology is "architecture-agnostic" and that larger models and new architectures are already in progress. Architecture-agnostic is a strong claim. It means the technique does not depend on specific properties of the Qwen architecture (attention patterns, MLP structure, normalization scheme). If it is truly agnostic, it should transfer to Llama-family models, Mistral, and whatever comes next.</p>
+
+        <p>The whitepaper is on <a href="https://github.com/PrismML-Eng/Bonsai-demo/blob/main/bonsai-27b-whitepaper.pdf">GitHub</a> and I would read it before betting on that claim. Architecture-agnostic compression is the kind of thing that works until you hit an architecture where the weight distribution is fundamentally different and the group-wise scaling assumptions break. Microsoft's BitNet work suggested that ternary weights work best when the model is trained from scratch with the ternaryization constraint in mind, not applied post-hoc. If Bonsai is applying this to a pretrained Qwen model without retraining, the quality retention is more impressive than if they fine-tuned. The whitepaper should clarify this. If it does not, that is the question to ask.</p>
+
+        <div class="callout">
+            <p class="label">The thing that actually matters</p>
+            <p>PrismML frames this as an "intelligence density" play: how much reasoning ability per gigabyte. By that metric, 1-bit Bonsai 27B delivers 0.53 intelligence units per GB, roughly 10x the full-precision baseline and 2.7x the best conventional low-bit alternative. Whether that metric is useful depends on whether your bottleneck is memory or quality. For phone deployment, memory is the bottleneck. For agentic work on a laptop, quality is the bottleneck, and the ternary variant is the better trade.</p>
+        </div>
+
+        <h2>What this means for local AI</h2>
+
+        <p>The most interesting argument in the release is not about phones. It is about the economics of agentic workloads. An agent does not make one model call. It makes hundreds. Each step carries context, produces structured output, and feeds the next step. If every step is a cloud API call, the per-token cost compounds across the entire loop, and every intermediate result crosses the network with the user's private data attached.</p>
+
+        <p>Local execution changes that math. A hundred-step loop on a local model costs nothing per step beyond electricity. The user's files, screen, and data never leave the machine. PrismML is explicitly targeting this use case: a capable local model that handles non-frontier and privacy-sensitive tasks, with cloud models reserved for the hardest steps.</p>
+
+        <p>This hybrid architecture is not new as an idea. What has been missing is a model small enough to fit on consumer hardware and capable enough to trust with multi-step work. Bonsai 27B is closer to that than anything I have seen at this size. The ternary variant on a laptop with 16 GB of RAM could plausibly run a useful agent loop for document Q/A, code review, or research synthesis. The 1-bit variant on a phone is more of a "smart chatbot that works offline" than a "phone agent," given the tool-calling quality drop and the context limits.</p>
+
+        <p>There is also a developer preview API, which I am cautiously interested in. Free, limited-time, so you can try the model without running it locally. Useful for benchmarking against workflows before committing to the local deployment.</p>
+
+        <h2>Where I land</h2>
+
+        <p>The headline ("27B model on a phone") is real but it is the least interesting part of this release. The interesting part is that 1-bit and ternary quantization, which spent years looking like a research curiosity, has produced a model where the math and coding benchmarks are within single digits of full precision. The agentic and vision benchmarks show real degradation, and that is where the honest limitation sits. Anyone claiming "no quality loss" is not reading the table.</p>
+
+        <p>I would run the ternary variant on a laptop for text reasoning and coding questions. I would think twice before trusting the 1-bit variant with anything that requires reliable tool calling or precise image understanding. The phone use case is a technical achievement, but today it is more proof-of-concept than daily driver. The real promise is the trajectory: if the next release closes the agentic gap the way this one closed the math gap, local agents stop being a hobbyist experiment and start being a practical default.</p>
+
+        <p>The weights are on GitHub under Apache 2.0. The whitepaper is there too. Read the per-benchmark table before you decide which variant to use. The averages flatter the 1-bit model more than the category breakdown does.</p>
+
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
