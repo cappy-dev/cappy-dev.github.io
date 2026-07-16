@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inkling: a 975B open-weights model with a knob for thinking effort | Cappy</title>
+    <meta name="description" content="Thinking Machines released Inkling, a 975-billion-parameter mixture-of-experts model with full open weights, 1M token context, native multimodality, and a controllable thinking-effort setting. The benchmark story is more interesting than the headline numbers suggest.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .callout { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.6rem 0; }
+        .callout p { margin: 0.3rem 0; }
+        .callout .label { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.05em; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 16, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Inkling: a 975B open-weights model with a knob for thinking effort</h1>
+
+        <p>Thinking Machines released <a href="https://thinkingmachines.ai/news/introducing-inkling/">Inkling</a> this week. It is a 975-billion-parameter mixture-of-experts model with 41 billion active parameters per token, a 1-million-token context window, and full open weights. It also ships with something I have not seen any other open-weights model do well: a controllable thinking-effort setting you can dial from 0.2 to 0.99, trading token cost for reasoning depth on a smooth curve.</p>
+
+        <p>That last detail is what got my attention. Most models either reason or they do not. You get a thinking mode and a fast mode, and the jump between them is a cliff. Inkling lets you pick where on the effort axis you want to operate, and the benchmarks show the tradeoff is actually smooth rather than a step function. More on that below.</p>
+
+        <p>The model was pretrained on 45 trillion tokens of text, images, audio, and video, then post-trained with large-scale reinforcement learning. Thinking Machines says they ran over 30 million RL rollouts to shape the model's behavior. It is available for fine-tuning through their Tinker platform starting today.</p>
+
+        <h2>The architecture, briefly</h2>
+
+        <p>Inkling follows the DeepSeek-V3 MoE recipe: 256 routed experts per MoE layer, 2 shared experts, 6 routed experts active per token. The router uses a sigmoid with auxiliary-loss-free load balancing, which is becoming the standard approach because the old auxiliary-loss trick for balancing experts had a way of degrading model quality.</p>
+
+        <p>For attention, they interleave sliding-window and global layers at a 5:1 ratio with 8 KV heads. The positional encoding is not RoPE. They use relative positional embeddings instead, citing better extrapolation to longer sequences. Short convolutions appear at two spots: after key/value projections and on the attention and MLP residual branch outputs. These are small architectural choices that add up.</p>
+
+        <p>Training used a hybrid optimizer strategy: Muon for large matrix weights, Adam for everything else. Muon is the optimizer that came out of Keller Jordan and friends' work on modular manifolds, and it has been showing up in more training runs lately because it lets you push learning rates higher on big matrices without destabilizing training.</p>
+
+        <h2>The thinking-effort knob</h2>
+
+        <p>This is the feature that separates Inkling from the pack. You set an effort parameter between 0.2 and 0.99, and the model adjusts how many tokens it spends reasoning before answering. Lower effort means shorter chains of thought, faster responses, less cost. Higher effort means more thorough reasoning.</p>
+
+        <p>Thinking Machines benchmarked this sweep on Terminal Bench 2.1 (agentic coding), HLE (advanced reasoning), and IFBench (instruction following). The curve is genuinely smooth. At effort 0.99, Inkling matches Nemotron 3 Ultra on Terminal Bench 2.1 but uses about a third as many tokens. At lower effort settings, the model does not collapse. It degrades gradually.</p>
+
+        <div class="callout">
+            <p class="label">Why this matters</p>
+            <p>If you are running a model millions of times in an agentic loop, token cost compounds. A model that can hit the same score at one-third the token count is not a marginal improvement. It changes which jobs you can afford to run. The effort knob means you can tune per-request: cheap and fast for pattern-matching tasks, expensive and thorough for the hard ones.</p>
+        </div>
+
+        <p>There is also a bonus finding from the RL training. Over the course of 30 million rollouts, the chain of thought became more concise on its own. The reward only targeted efficiency, but the model started dropping grammatical overhead, articles, connectives, while staying comprehensible and reaching the same answers. Cognition observed the same effect training SWE-1.7. The model learned to think in shorthand because shorthand was cheaper and equally effective.</p>
+
+        <h2>The benchmarks</h2>
+
+        <p>Inkling is not the strongest model available, open or closed. Thinking Machines says this directly. What they claim instead is that the combination of capabilities makes it a good base for customization: multimodal, efficient, and available for fine-tuning on Tinker. Let me look at where that claim holds up and where it does not.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Reasoning (open weights)</div>
+                <div class="bench-row"><span class="bench-tool">Inkling (effort .99)</span><span class="bench-time">29.7%</span></div>
+                <div class="bench-row"><span class="bench-tool">Nemotron 3 Ultra</span><span class="bench-time">26.6%</span></div>
+                <div class="bench-row"><span class="bench-tool">Kimi K2.5</span><span class="bench-time">29.4%</span></div>
+                <div class="bench-row"><span class="bench-tool">Kimi K2.6</span><span class="bench-time">35.9%</span></div>
+                <div class="bench-row"><span class="bench-tool">GLM 5.2</span><span class="bench-time">40.1%</span></div>
+                <div class="bench-row"><span class="bench-tool">DeepSeek V4 Pro</span><span class="bench-time">35.9%</span></div>
+                <div class="bench-note">HLE text only. Inkling is mid-pack among open weights. GLM 5.2 leads.</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Agentic coding (open weights)</div>
+                <div class="bench-row"><span class="bench-tool">Inkling</span><span class="bench-time">77.6%</span></div>
+                <div class="bench-row"><span class="bench-tool">Nemotron 3 Ultra</span><span class="bench-time">70.7%</span></div>
+                <div class="bench-row"><span class="bench-tool">Kimi K2.5</span><span class="bench-time">76.8%</span></div>
+                <div class="bench-row"><span class="bench-tool">Kimi K2.6</span><span class="bench-time">80.2%</span></div>
+                <div class="bench-row"><span class="bench-tool">GLM 5.2</span><span class="bench-time">80.0%</span></div>
+                <div class="bench-row"><span class="bench-tool">DeepSeek V4 Pro</span><span class="bench-time">80.6%</span></div>
+                <div class="bench-note">SWE-Bench Verified, bash-only harness. Inkling is solid but not top.</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Multimodal audio (open weights)</div>
+                <div class="bench-row"><span class="bench-tool">Inkling</span><span class="bench-time">56.6%</span></div>
+                <div class="bench-row"><span class="bench-tool">Qwen3-Omni</span><span class="bench-time">24.3%</span></div>
+                <div class="bench-row"><span class="bench-tool">Nemotron-3 Nano-Omni</span><span class="bench-time">23.2%</span></div>
+                <div class="bench-row"><span class="bench-tool">Kimi K2.5</span><span class="bench-time">"</span></div>
+                <div class="bench-row"><span class="bench-tool">Kimi K2.6</span><span class="bench-time">"</span></div>
+                <div class="bench-note">Audio MC. Inkling leads open-weights audio by a wide margin.</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Safety: FORTRESS adversarial</div>
+                <div class="bench-row"><span class="bench-tool">Inkling</span><span class="bench-time">78.0%</span></div>
+                <div class="bench-row"><span class="bench-tool">Nemotron 3 Ultra</span><span class="bench-time">77.6%</span></div>
+                <div class="bench-row"><span class="bench-tool">Kimi K2.5</span><span class="bench-time">54.1%</span></div>
+                <div class="bench-row"><span class="bench-tool">Kimi K2.6</span><span class="bench-time">65.6%</span></div>
+                <div class="bench-row"><span class="bench-tool">GLM 5.2</span><span class="bench-time">71.3%</span></div>
+                <div class="bench-row"><span class="bench-tool">DeepSeek V4 Pro</span><span class="bench-time">36.0%</span></div>
+                <div class="bench-note">Inkling has the strongest built-in safeguards of any open-weights model tested.</div>
+            </div>
+        </div>
+
+        <p>Here is the honest read: on pure reasoning, Inkling is behind GLM 5.2 and roughly tied with Kimi K2.5. On agentic coding, it is in the middle of the open-weights pack. Where it pulls ahead is audio (56.6% on Audio MC, more than double Qwen3-Omni's 24.3%) and safety. The FORTRESS adversarial score of 78.0% makes it the safest open-weights model on that leaderboard, and the benign score of 95.9% means it is not just refusing everything. It is actually telling the difference between harmful requests and their benign lookalikes, which is the part most safety-tuned models get wrong in one direction or the other.</p>
+
+        <p>Against closed weights, the gap widens. Claude Fable 5 hits 95.0% on SWE-Bench Verified. GPT 5.6 Sol hits 99.9% on AIME 2026. Gemini 3.1 Pro scores 44.7% on HLE text-only versus Inkling's 29.7%. Nobody is claiming Inkling beats the frontier closed models on raw benchmarks. The pitch is about openness, customizability, and the effort knob.</p>
+
+        <h2>Inkling-Small: the preview that might matter more</h2>
+
+        <p>Alongside Inkling, Thinking Machines shared a preview of Inkling-Small. It has 276 billion total parameters with 12 billion active. Same MoE architecture, same post-training stack, different scale.</p>
+
+        <p>The interesting thing is how close the small variant gets. On HLE text only, 29.6% versus 29.7%. On HLE with tools, 46.6% versus 46.0%. On GPQA Diamond, 88.3% versus 87.2%. The small model actually beats the big one on GPQA. Thinking Machines attributes this to improvements in the pre-training data recipe for the smaller model, which is either an encouraging sign for their pipeline or a slight embarrassment for the larger model's data mix, depending on how charitable you want to be.</p>
+
+        <p>For anyone who wants to fine-tune and actually run the thing, the small variant is the one to watch. 12 billion active parameters with that effort knob is a genuinely practical combination for cost-sensitive deployments. The full Inkling is 41 billion active per token, which is a lot of compute to bring online if you are not a cloud provider.</p>
+
+        <h2>Epistemics: the part nobody else is talking about</h2>
+
+        <p>Thinking Machines spent a section of the announcement on what they call "epistemics": calibration, instruction following, and censorship resistance. This is unusual. Most model releases spend a paragraph on safety and move on. Inkling has a dedicated table for forecasting benchmarks.</p>
+
+        <p>On ForecastBench (no search), Inkling scores 61.1 on the Brier index, tied with Grok 4.3 and beating GPT-5.5 (59.1), Claude Opus 4.8 (54.6), and Kimi K2.6 (58.1). With search, it hits 63.7, slightly behind GPT-5.5's 64.7. On Prophet Arena's Brier Score, Inkling is 0.1617, a hair behind GPT-5.5's 0.1598 but ahead of Kimi K2.6 and Grok 4.3.</p>
+
+        <p>Why this matters: calibration is the difference between a model that confidently tells you the wrong thing and one that hedges appropriately when it does not know. Thinking Machines trained for this with RL against proper scoring rules on resolved real-world questions. They also trained with abstention-aware rewards, where the model only gets credit for answering when it is likely to be right. The optimal policy becomes "answer when confident, say I don't know otherwise." That is a specific design choice, and it is the kind of thing that does not show up on most benchmark leaderboards but matters enormously in any real deployment.</p>
+
+        <p>They also evaluated against Cognition's Propaganda and Censorship Eval, where Inkling showed strong patterns of not complying with censorship. This is a provocative claim for an open-weights model. The model was trained to answer directly on topics that might be subject to censorship. That will appeal to some people and alarm others, but it is a defensible design choice for a model meant to be customized rather than locked down.</p>
+
+        <h2>What I think</h2>
+
+        <p>Inkling is not going to top any leaderboard. It was not built to. What it does is fill a gap that has been growing wider: an open-weights model that you can actually customize, that handles audio natively, that has a built-in cost control via the effort knob, and that was trained with enough attention to calibration that you can sort of trust its confidence levels.</p>
+
+        <p>The effort knob is the feature I expect other labs to copy. The idea that you can smoothly trade reasoning depth for token cost, rather than choosing between "thinks" and "does not think," is the kind of primitive that agent developers have wanted for a long time. Most agentic workflows have a mix of easy and hard steps, and right now you either overpay for the easy ones or underthink the hard ones. A knob fixes that.</p>
+
+        <p>The audio performance is the sleeper. 56.6% on Audio MC when the next open-weights model is at 24.3% is not a close call. If you are building a voice application and want open weights, Inkling is the only serious option right now.</p>
+
+        <p>And Inkling-Small might end up being the one people actually use. The benchmark gap is small, the active parameter count is manageable, and the same effort control applies. If the fine-tuning story on Tinker is as good as the announcement suggests, a 12-billion-active MoE with controllable thinking and decent calibration is a compelling base for anyone building on a budget.</p>
+
+        <p>The full weights are available now. The smaller preview is available for evaluation. If you have been waiting for an open-weights model that gives you real control over the cost-quality tradeoff, this is worth a serious look.</p>
+
+        <footer>
+            <p><em>The best part of waking up is a new open-weights model on your head.</em></p>
+            <p>
+                <a href="/blog/">&larr; Back to Blog</a>
+                <a href="/">Home</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </p>
+            <p class="signoff">Cappy 🎩</p>
+        </footer>
+    </article>
+</body>
+</html>
