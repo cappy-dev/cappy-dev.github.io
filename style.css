@@ -1510,3 +1510,171 @@ footer .left {
 @media (max-width: 700px) {
     .home-links { grid-template-columns: 1fr; }
 }
+
+/* =========================================================
+   ARTICLE-END SIGNATURE FOOTER
+   A quiet editorial close for blog posts — the essay's final
+   rule, a mono signoff, and three small nav links. Replaces
+   the chaos of ~10 unstyled per-post footer variants
+   (bare <p>, .left/.right, .footer-quote/.footer-links/
+   .footer-signoff, .signoff, .quote…) with one consistent,
+   scoped component.
+
+   Design posture: this is a Decide/Learn reading surface,
+   so the close is hairline + type, never a card or CTA
+   banner. The hairline matches the .tags end-rule already
+   used at the bottom of article bodies; the mono signoff
+   reuses the exact .read-time / .section-title recipe; the
+   links reuse the muted footer .right a treatment. Nothing
+   new is invented — existing tokens are reused deliberately.
+
+   Scope: `article footer` and `article > footer` override the
+   site-wide `footer` rules (which target the 960px page
+   footer on index/about/projects) so article footers stop
+   inheriting a 960px flex strip and instead stay inside the
+   720px reading column. The `.post-footer` class is the
+   canonical hook for footers placed outside <article> (older
+   posts); it carries the same scoped rules.
+   ========================================================= */
+
+/* Scoped article footer — overrides unscoped footer rules.
+   Placed *after* the site-wide footer block so specificity
+   (tag + descendant) wins without !important. */
+article > footer,
+article footer,
+.post-footer {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px 16px;
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    background: transparent;
+}
+/* Undo the site-wide two-column flex row inside articles */
+article > footer .left,
+article footer .left,
+article footer .right,
+.post-footer .footer-links {
+    all: unset;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* Signoff line — the article's signature.
+   Mono, fg4, 0.02em tracking — the exact .read-time recipe
+   already used for article metadata. Keeps the close in the
+   same typographic register as the byline at the top. */
+.signoff,
+.footer-signoff,
+article footer .left,
+article > footer .left,
+article footer p:first-child,
+article > footer p:first-child {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg4);
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* The recurring signoff quote (e.g. "It's been an honor…")
+   gets a slightly warmer tone than the bare name — it carries
+   the voice, so it earns the muted ink (fg3) rather than the
+   quaternary (fg4) used for the bare name. Still hairline-quiet. */
+.footer-quote,
+.quote,
+article footer .left em,
+article > footer .left em {
+    color: var(--fg3);
+    font-style: italic;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.55;
+}
+
+/* Nav links row — small, muted, left-aligned.
+   Reuses footer .right a color/weight/transition, re-scoped
+   so the flex-direction column above doesn't break alignment. */
+.post-footer .footer-links a,
+article footer .right a,
+article > footer .right a,
+article footer .footer-links a,
+article > footer .footer-links a,
+article footer p a,
+article > footer p a {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 510;
+    color: var(--fg3);
+    text-decoration: none;
+    transition: color 0.15s;
+    line-height: 1.4;
+}
+article footer .right a:hover,
+article > footer .right a:hover,
+.post-footer .footer-links a:hover,
+article footer .footer-links a:hover,
+article > footer .footer-links a:hover,
+article footer p a:hover,
+article > footer p a:hover {
+    color: var(--fg);
+}
+
+/* The "Back to Blog" lead link earns the accent — it's the
+   one navigation action a reader actually want after an
+   article, so it gets accent-bright (same as inline article
+   links) rather than the muted fg3 treatment. */
+article footer a[href\$="/blog/"],
+article > footer a[href\$="/blog/"],
+.post-footer a[href\$="/blog/"] {
+    color: var(--accent-bright);
+}
+article footer a[href\$="/blog/"]:hover,
+article > footer a[href\$="/blog/"]:hover,
+.post-footer a[href\$="/blog/"]:hover {
+    color: var(--accent-hover);
+}
+
+/* Accessibility: keyboard focus rings on article footer links */
+.post-footer a:focus-visible,
+article footer a:focus-visible,
+article > footer a:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Bare <p> fallback — posts whose footer is just <p>Cappy 🎩</p>
+   or <p>…</p><p>links</p>. These get the muted mono signoff
+   treatment automatically. */
+article footer p,
+article > footer p {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg4);
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Mobile: keep the article footer quiet and left-aligned.
+   The site-wide footer goes centered/column on mobile, but
+   the article close stays editorial — left edge holds the
+   rhythm of the reading column above it. */
+@media (max-width: 640px) {
+    article > footer,
+    article footer,
+    .post-footer {
+        padding: 28px 20px 8px;
+        gap: 12px;
+    }
+}
