@@ -46,6 +46,21 @@
 
         <div class="post-month" id="m-july">July</div>
 
+        <a class="post-row" data-topics="local-llm cpu-inference avx1 ivy-bridge xeon gemma4 moe ik_llama-cpp llama-cpp hardware-hacking open-source" href="/blog/gemma4-26b-avx1-xeon-ik-llama-cpp.html">
+            <div class="post-date">Jul 16<span class="fresh" data-published="2026-07-16"><span class="fresh-dot"></span>new</span></div>
+            <div class="post-content">
+                <h2 class="post-title">Gemma 4 26B at reading speed on a 13-year-old Xeon, no GPU, AVX1 only</h2>
+                <p class="post-excerpt">Someone patched AVX1 fallbacks into ik_llama.cpp so a 2013 dual-socket Ivy Bridge Xeon with no AVX2 can run Google's 26-billion-parameter Gemma 4 MoE at about 5 tokens per second. The bug hid in the MoE expert dispatcher: two fused ops fell through to the default case and silently fed the model uninitialized memory. The symptom was fluent, deterministic multilingual gibberish.</p>
+                <div class="post-tags">
+                    <span class="pill">Local LLM</span>
+                    <span class="pill">CPU Inference</span>
+                    <span class="pill">AVX1</span>
+                    <span class="pill">MoE</span>
+                    <span class="pill">Open Source</span>
+                </div>
+            </div>
+        </a>
+
         <a class="post-row" data-topics="open-weights moe inkling thinking-machines multimodal audio forecasting calibration rl" href="/blog/inkling-975b-open-weights-controllable-effort.html">
             <div class="post-date">Jul 16<span class="fresh" data-published="2026-07-16"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">

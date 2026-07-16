@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemma 4 26B at reading speed on a 13-year-old Xeon, no GPU, AVX1 only | Cappy</title>
+    <meta name="description" content="Someone got Gemma 4 26B running at about 5 tokens per second on a 2013 dual-socket Ivy Bridge Xeon with no GPU and no AVX2. The trick was an AVX1 fallback patch to ik_llama.cpp that caught a silent fall-through in the MoE expert dispatcher. Here is what actually broke and how the fix works.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .spec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .spec-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .spec-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.4rem; font-family: 'JetBrains Mono', monospace; }
+        .spec-value { color: var(--fg); font-size: 0.98rem; }
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .callout { background: var(--surface); border-left: 3px solid var(--accent); padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; margin: 1.6rem 0; }
+        .callout p { margin: 0.4rem 0; color: var(--fg2); }
+        .callout .lead { color: var(--fg); font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 16, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Gemma 4 26B at reading speed on a 13-year-old Xeon, no GPU, AVX1 only</h1>
+
+        <p>There is a server in someone's basement that has no business running a modern language model. It is a repurposed HP StoreVirtual storage box, roughly thirteen years old, two Ivy Bridge Xeons, no GPU. It was built to hold disks, not do math. As of this week it runs Google's <a href="https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/">Gemma 4</a>, a 26-billion-parameter open-weights mixture-of-experts model, at about five tokens per second. Reading speed.</p>
+
+        <p>Anyone can rent a GPU. It is harder to take a modern MoE model and a dead enterprise box and make them meet in the middle. That gap is the whole reason this is interesting. "Good with AI" has quietly come to mean "pays for a subscription." The real skill is different. Knowing a model well enough to point it at a problem nobody packaged for you, and telling whether the answer it hands back is correct.</p>
+
+        <div class="spec-grid">
+            <div class="spec-card">
+                <div class="spec-label">Hardware</div>
+                <div class="spec-value">Repurposed HP StoreVirtual: dual Xeon E5-2690 v2 (Ivy Bridge, 2013), DDR3, no GPU</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-label">Instruction sets</div>
+                <div class="spec-value">AVX1 only. No AVX2, no FMA3.</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-label">Model</div>
+                <div class="spec-value">Gemma 4 26B-A4B (MoE), Q8_0</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-label">Decode</div>
+                <div class="spec-value">~5.2 tokens/sec</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-label">Prompt eval</div>
+                <div class="spec-value">~16 tokens/sec</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-label">Cost of the box</div>
+                <div class="spec-value">under $300</div>
+            </div>
+        </div>
+
+        <p>These numbers come from <a href="https://www.neomindlabs.com/2026/06/08/running-gemma-4-26b-at-5-tokens-sec-on-a-13-year-old-xeon-with-no-gpu/">a writeup by the person who did it</a>. The author is clear about one thing up front: they are not a C++ programmer. They can read a stack trace and navigate a build system, but they did not hand-write kernel fallbacks for a quantized matmul engine. What they did was drive. They ran the experiments, read the output, asked the next question, and knew what "correct" had to look like. The diagnosis and the patch came from a Claude instance running on the server itself.</p>
+
+        <h2>The post that started it</h2>
+
+        <p>A couple of weeks before, a piece called <a href="https://point.free/blog/gemma-4-on-a-2016-xeon/">"A 10 year old Xeon is all you need"</a> circulated on Hacker News. The author runs Gemma 4 on a single 2016 Xeon with no GPU and 128 GB of slow DDR3, using <a href="https://github.com/ikawrakow/ik_llama.cpp">ik_llama.cpp</a> and about 25 carefully chosen flags. It leans on every trick in the modern inference playbook: speculative decoding, CPU-aware mixture-of-experts routing, flash attention ported to the CPU, run-time weight repacking. Real engineering.</p>
+
+        <p>"I have a Xeon too," the author of this new piece thought. Several, in fact. So they tried it. It didn't run.</p>
+
+        <h2>What an AI agent turned out to be good for</h2>
+
+        <p>The build died on startup. They handed the failure to Claude and asked what was wrong. The answer came back fast and specific. The 2016 chip in the original post is a Broadwell part. The Ivy Bridge chips getting repurposed here are the generation Intel calls "v2." The fast kernels in that fork assume AVX2 and FMA3, instruction sets that didn't ship until <a href="https://www.microway.com/hpc-tech-tips/avx2-optimization-and-haswell-ep-cpu-features/">Haswell, the "v3" generation, in 2014</a>. The CPUs are older than the instructions the code was written against. The optimized paths weren't there to execute.</p>
+
+        <p>So the obvious follow-up: can we make it run anyway? They had already taken a first swing with a free model that got close but couldn't land it. Claude picked up that half-finished approach, agreed it was the right one, and finished it off. Reworking the hot paths so they fall back cleanly on a pre-AVX2 chip instead of reaching for instructions that aren't there.</p>
+
+        <p>This is the part worth pausing on. This didn't come from typing "fix it" once and getting a working patch back. Somebody had to read another person's performance-critical C++, work out why a kernel wasn't valid on this particular microarchitecture, and route around it without throwing away the optimizations that made the fork worth using. The human's job was narrower: run the right experiments and recognize when the output was finally correct.</p>
+
+        <h2>The result</h2>
+
+        <p>Gemma 4's 26B mixture-of-experts model now generates text at reading speed on hardware that was retired before the model's architecture existed. The original writeup never published a tokens-per-second figure, just "reading speed." The concrete one: about five tokens a second on thirteen-year-old silicon, for borderline free.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">13-year-old Xeon, AVX1 only</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Decode (Gemma 4 26B-A4B, Q8_0)</span>
+                    <span class="bench-time">~5.2 tok/s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Prompt eval</span>
+                    <span class="bench-time">~16 tok/s</span>
+                </div>
+                <div class="bench-note">Dual Ivy Bridge Xeon E5-2690 v2, CPU-only, no GPU anywhere in the box. Throughput is memory-bandwidth-bound.</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">2026 Xeon (Broadwell, comparison)</div>
+                <div class="bench-row">
+                    <span class="bench-tool">Original "10-year-old Xeon" post</span>
+                    <span class="bench-time">"reading speed"</span>
+                </div>
+                <div class="bench-note">No published tok/s figure. Single Broadwell Xeon, AVX2+FMA3 available, ~25 flags. The Ivy Bridge build drops the AVX2-only flags and runs AVX1 fallbacks instead.</div>
+            </div>
+        </div>
+
+        <p>The patch is up as <a href="https://github.com/ikawrakow/ik_llama.cpp/pull/2138">ikawrakow/ik_llama.cpp#2138</a>, still open and awaiting maintainer review at the time of writing, so the recommendation is to run it from the branch for now. The hope is that anyone else sitting on ancient enterprise iron can keep a local model around: a fallback for when the paid APIs are down, or a cheap way to grind through slow batch jobs when paying per token doesn't make sense.</p>
+
+        <h2>For the people who want the actual bug</h2>
+
+        <p>Full disclosure from the author: they did not hand-write kernel fallbacks for a quantized matmul engine, and they won't pretend they did. They drove. The diagnosis and the patch came from the Claude instance running on the server itself. What follows is that summary, lightly edited.</p>
+
+        <h2>What was actually broken</h2>
+
+        <p>The engine needed was ik_llama.cpp, ikawrakow's fork of llama.cpp that adds the optimizations Gemma 4's MoE inference depends on. It assumes AVX2 as its floor. The Xeon E5-2690 v2 has AVX1 but not AVX2. Turn <code>GGML_USE_IQK_MULMAT</code> off at build time and most of the codebase respects it: the fast paths compile out, and the model falls back to plain scalar/SSE math. That's fine for a normal Q8_0 matmul.</p>
+
+        <p>Two graph ops are the exception. The Gemma 4 MoE feed-forward network emits <code>MOE_FUSED_UP_GATE</code> (a per-expert gate+up matmul fused with SwiGLU) and <code>FUSED_UP_GATE</code> (its dense analog). Both are <code>#if</code>-gated on <code>GGML_USE_IQK_MULMAT</code> inside the compute dispatcher, but the graph builder still emits them unconditionally. On this build the dispatcher's switch had no case for those op enums, so they fell through to the default, and the destination tensors for every expert FFN silently never got computed. Gemma 4 26B has 30 layers by 8 active experts per token, so every forward pass consumed roughly 240 tensors of whatever happened to be sitting in that memory buffer already.</p>
+
+        <p>The symptom was fluent-looking multilingual gibberish. Token IDs spread uniformly across the 262K vocabulary, the model equally happy to emit Thai script, Korean, <code><unused></code> sentinels, or English fragments. Deterministic at temperature 0, byte-identical between single- and multi-threaded runs, no NaNs anywhere. Just a hidden state getting shoved by a large constant every layer until the final softmax went flat.</p>
+
+        <div class="callout">
+            <p class="lead">That determinism is what cracked it.</p>
+            <p>Instrumenting the raw logits before sampling, printing the top-5 tokens plus range, mean, and NaN count, the numbers gave it away: a mean logit of +16 for the first predicted token when it should sit near zero, and about 80% of the vocabulary at positive logits. Random corruption doesn't look like that. A bias that clean only happens when a big chunk of the hidden state is uninitialized memory that happens to hold small positive floats.</p>
+        </div>
+
+        <p>Reading the code kept clearing the obvious suspects. The RMSNorm helpers looked correct. The AVX1 fallback in <code>ggml_vec_dot_q8_0_q8_0</code> looked correct. A bit-identical single-thread run ruled out threading. Only after instrumenting the logits, and seeing the mean pinned at +16 with every long-tail token roughly tied, did the search narrow to "a big chunk of the residual stream is uninitialized." Grepping for <code>#if GGML_USE_IQK_MULMAT</code> in the dispatcher turned up the two missing cases about a minute later.</p>
+
+        <h2>The fix</h2>
+
+        <p>Three commits on top of the fork's <code>main</code>.</p>
+
+        <p>First, compile fixes. The scalar <code>#else</code> branches for <code>quantize_row_q8_0_x4</code> and <code>quantize_row_q8_1_x4_T</code> in <code>iqk_quantize.cpp</code> weren't actually scalar. They still referenced <code>hsum_i32_8</code> and other AVX2 helpers. Those got rewritten as portable scalar loops, with <code>#if GGML_USE_IQK_MULMAT</code> guards added around a handful of stray IQK calls leaking through <code>ggml.c</code> and <code>ggml-quants.c</code>, plus a missing include so <code>iqk_cpu_ops.cpp</code> compiles standalone. Without these, the fork won't build at all on non-AVX2 hardware.</p>
+
+        <p>Second, the runtime bug. Rather than touch the dispatcher, the fix makes the graph builder emit ops that do have compute paths on this build. In <code>ggml_moe_up_gate</code>, when <code>GGML_USE_IQK_MULMAT</code> is off: if the weight is the combined <code>up_gate_exps</code> tensor (shape <code>[n_embd, 2*n_ff, n_experts]</code>, gate in the first half, up in the second), split it into two <code>ggml_view_3d</code> slices, run two separate <code>ggml_mul_mat_id</code> calls, and combine them with <code>ggml_fused_mul_unary(gate, up, SILU)</code>. If gate and up are already separate weights, skip the split and do the same two mul-mat-IDs plus the fused mul-unary. The dense version used in non-MoE layers gets the same treatment. Every op involved already has a working non-IQK implementation. The whole change sits behind <code>#if !GGML_USE_IQK_MULMAT</code>, so an AVX2 build stays bit-identical to what it was before.</p>
+
+        <p>Third, CI stubs. The <code>#else</code> stub sections of the iqk sources had drifted out of sync with <code>iqk_mul_mat.h</code>, so <code>ci/run.sh</code> couldn't even build on non-AVX2 hardware: a missing <code><cstdint></code>, stubs with the wrong signatures (an extra leading parameter here, a missing <code>sinks</code> there), and no stubs at all for a couple of functions, which meant undefined references at link time. Boring work, but without it nobody on this hardware can run the test suite.</p>
+
+        <p>The fallback costs something. Two separate matmul-IDs instead of one fused kernel. But this CPU is memory-bandwidth-bound anyway, and the fused kernel was AVX2-only, so nothing real was given up. End to end: about 5.2 tok/s decode and ~16 tok/s prompt-eval on a 26B-A4B MoE.</p>
+
+        <p>One more gotcha. <code>--run-time-repack</code> reorders quantized weights into an AVX2-only interleaved layout (<code>Q8_0_R8</code>) at startup, which garbles output on AVX1 the same way. That's a separate bug, and the patch doesn't try to fix it. The run script just drops the flag.</p>
+
+        <h2>Reproduce it</h2>
+
+        <p>If you have a pre-AVX2 box and want to try this, the recipe from the writeup:</p>
+
+        <ul>
+            <li><em>Hardware</em>: dual Xeon E5-2690 v2 (Ivy Bridge, AVX1, no AVX2), DDR3, no GPU.</li>
+            <li><em>Build</em>: compile ik_llama.cpp from the PR branch with <code>GGML_USE_IQK_MULMAT</code> off. The compile fixes are what let it build at all on non-AVX2 hardware.</li>
+            <li><em>Model</em>: Gemma 4 26B-A4B, <code>Q8_0</code>.</li>
+            <li><em>Run</em>: use the usual ik_llama.cpp CPU flags, but drop <code>--run-time-repack</code> (it reorders weights into an AVX2-only layout and re-garbles the output on AVX1).</li>
+        </ul>
+
+        <p>The whole recipe: about 5 tok/s decode, CPU-only, no GPU anywhere in the box.</p>
+
+        <h2>Why this is the interesting part</h2>
+
+        <p>The subscription is the easy part. The rest is the willingness to open the hood, read a stranger's code, and keep asking until a thirteen-year-old CPU does something it was never meant to. That's the same work a fifteen-year-old Rails app needs, or a database nobody left on the team still understands: someone who'll dig until they find where the leverage is, and what the tool won't tell you on its own.</p>
+
+        <p>The bug is instructive for a reason that has nothing to do with AVX. The dispatcher's switch had no case for the op enums, and instead of throwing or logging, it fell through to the default. The destination tensors silently never got computed. The model didn't crash. It didn't produce NaNs. It produced fluent, confident, multilingual gibberish. That is the worst kind of failure: the kind that looks like success.</p>
+
+        <p>If you have pre-AVX2 iron gathering dust and you try the branch, the PR thread is the right place for bug reports. The honest question the writeup ends on is how far down the CPU generations this goes. How old can the silicon get before AVX1 itself isn't enough? That's the kind of answer you only get from people who try it on hardware the rest of us threw out.</p>
+
+        <p>The source writeup is at <a href="https://www.neomindlabs.com/2026/06/08/running-gemma-4-26b-at-5-tokens-sec-on-a-13-year-old-xeon-with-no-gpu/">neomindlabs.com</a>. The patch is at <a href="https://github.com/ikawrakow/ik_llama.cpp/pull/2138">ik_llama.cpp PR #2138</a>.</p>
+
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
