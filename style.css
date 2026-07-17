@@ -489,6 +489,20 @@ footer .right a:hover { color: var(--fg); }
     background: rgba(255,255,255,0.04);
 }
 
+/* Keyboard focus — currently absent. Linear's issue list rows show a
+   clear focus treatment so keyboard users know which row they'd open.
+   This is an Explore-surface affordance: the affordance IS the signal.
+   Inset accent ring + tightened surface, no icon or color slop. */
+.post-row:focus-visible {
+    outline: none;
+    background: rgba(255,255,255,0.02);
+    border-radius: 6px;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-shadow: inset 0 0 0 2px rgba(113, 112, 255, 0.45);
+}
+
 /* Post type distinction — daily news vs feature articles
    Daily news rows use a slightly muted treatment so feature
    articles stand out by contrast. Typography-first: lighter
@@ -605,10 +619,22 @@ footer .right a:hover { color: var(--fg); }
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 13px; font-weight: 500; color: var(--fg4);
     letter-spacing: 0.02em;
-    margin-bottom: 16px;
-    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 20px;
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
 }
+/* De-emphasize the read-time as the secondary half of the pair,
+   so the date reads as the anchored label and "X min read" recedes.
+   Linear's Mono Label spec: the primary token carries the row,
+   the secondary one dims. No new box, color, or icon — just opacity.
+   The real middot separator turns the two spans into one typographic
+   pair, matching Linear's "label · detail" rhythm. */
 .article-header .meta .read { opacity: 0.7; }
+.article-header .meta .read::before {
+    content: '·';
+    margin-right: 2px;
+    opacity: 0.5;
+    color: var(--fg4);
+}
 .article-header h1 {
     font-size: 40px; font-weight: 510; line-height: 1.10;
     letter-spacing: -0.704px; color: var(--fg);
@@ -631,6 +657,12 @@ article .meta {
     display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
 }
 article .meta .read { opacity: 0.7; }
+article .meta .read::before {
+    content: '·';
+    margin-right: 2px;
+    opacity: 0.5;
+    color: var(--fg4);
+}
 article h1 {
     font-size: 40px; font-weight: 510; line-height: 1.10;
     letter-spacing: -0.704px; color: var(--fg);
@@ -1333,6 +1365,8 @@ footer .left {
     .page-header { padding: 64px 24px 40px; }
     .post-row { flex-direction: column; gap: 4px; padding: 16px 8px; }
     .post-row:hover { margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+    /* Match the mobile hover treatment so keyboard focus doesn't overflow */
+    .post-row:focus-visible { margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
     .post-date { padding-top: 0; min-width: 0; }
     .post-title { font-size: 15px; }
     .post-excerpt { font-size: 13px; }
@@ -1378,6 +1412,14 @@ footer .left {
 .project-card:hover {
     border-color: rgba(255,255,255,0.15);
     background: var(--surface-hover);
+}
+/* Keyboard focus — same inset accent ring as the blog list rows,
+   so every clickable card on the site reads as focusable the same way. */
+.project-card:focus-visible {
+    outline: none;
+    border-color: rgba(255,255,255,0.15);
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 2px rgba(113, 112, 255, 0.45);
 }
 .project-card:first-child h2 { margin-top: 0; }
 .project-card h2 {
@@ -1486,6 +1528,12 @@ footer .left {
 .home-link-card:hover {
     border-color: rgba(255,255,255,0.15);
     background: var(--surface-hover);
+}
+.home-link-card:focus-visible {
+    outline: none;
+    border-color: rgba(255,255,255,0.15);
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 2px rgba(113, 112, 255, 0.45);
 }
 .home-link-card h2 {
     font-size: 20px;
