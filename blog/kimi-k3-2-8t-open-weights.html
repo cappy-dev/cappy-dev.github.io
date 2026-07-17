@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kimi K3 is a 2.8-trillion-parameter open model that almost catches Claude Fable 5 | Cappy</title>
+    <meta name="description" content="Kimi K3 from Moonshot AI is a 2.8T-parameter open-weights model with a 1M context window, native vision, and benchmark numbers that trail Claude Fable 5 and GPT 5.6 Sol but beat them on a few tasks. It also designed a chip. The weights arrive July 27.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .callout { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.6rem 0; }
+        .callout p { margin: 0.3rem 0; }
+        .callout .label { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.05em; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 17, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Kimi K3 is a 2.8-trillion-parameter open model that almost catches Claude Fable 5</h1>
+
+        <p>The scaling frontier for open-weights models just moved. Kimi K3, announced today by Moonshot AI, is a 2.8-trillion-parameter model with a 1-million-token context window, native vision, and benchmark scores that land just behind Claude Fable 5 and GPT 5.6 Sol on most tasks, ahead of them on a few. The full weights arrive July 27. The API is live now at $3/MTok for cache-miss input and $15/MTok for output, which puts it in the same price band as the proprietary frontier.</p>
+
+        <p>This is the first open model to break 2 trillion parameters. The <a href="https://www.kimi.com/blog/kimi-k3">announcement post</a> makes that point clearly: for 9 of the past 12 months, a Kimi model has held the record for largest open-model size. K3 extends that streak. But size is not the interesting part. The interesting part is how close the quality is getting to models that cost $20/MTok for output and lock their weights behind an API.</p>
+
+        <p>I want to be careful here. "Almost catches Fable 5" is not the same as "matches Fable 5." Kimi's own benchmark table shows K3 losing on coding benchmarks like DeepSWE (67.5 vs 70.0), FrontierSWE (81.2 vs 86.6), and agentic benchmarks like GDPval-AA (1668 Elo vs 1760). But K3 wins on SWE Marathon (42.0 vs 35.0), Terminal-Bench 2.1 (88.3 vs 84.6), and BrowseComp (91.2 vs 88.0). The pattern is consistent: K3 is close enough that the choice between them now depends on what you are doing, not on which model is obviously better.</p>
+
+        <h2>The architecture, in plain terms</h2>
+
+        <p>Kimi K3 uses two architectural components that are not in standard transformer designs. Kimi Delta Attention (KDA) is an attention mechanism designed to scale efficiently to long sequences. Attention Residuals (AttnRes) lets the model retrieve representations from earlier layers selectively, rather than accumulating information uniformly through depth. The model also uses Stable LatentMoE, activating 16 out of 896 experts per token, which is extreme sparsity. For context, a model like Inkling 975B activates about 12 billion of its 975 billion parameters. K3 activates roughly 100 billion out of 2.8 trillion.</p>
+
+        <p>The practical claim is a 2.5x improvement in scaling efficiency over Kimi K2. That is a big number if it holds up. It means the model converts training compute into benchmark performance more efficiently than its predecessor did. Whether that efficiency transfers to real-world task quality is a separate question that benchmarks cannot fully answer.</p>
+
+        <p>One detail that matters for inference: K3 uses MXFP4 weights with MXFP8 activations, trained with quantization-aware training from the SFT stage. This is not a post-hoc quantization slapped on after training. The model was built to run at low precision. Moonshot recommends deploying on supernode configurations with 64 or more accelerators, which tells you this is not a model you run on a single GPU. The vLLM team contributed a KDA-aware prefix caching implementation, which is what makes the competitive API pricing possible despite the model's size.</p>
+
+        <h2>The benchmarks that matter</h2>
+
+        <p>Kimi published a full benchmark table comparing K3 (max reasoning effort) against Claude Fable 5 (max, with fallback), GPT 5.6 Sol (max), Claude Opus 4.8 (max), GPT 5.5 (xhigh), and GLM-5.2 (max). Here are the categories where the results are most interesting:</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Coding: SWE Marathon</div>
+                <div class="bench-row"><span class="bench-tool">Kimi K3 (max)</span><span class="bench-time">42.0</span></div>
+                <div class="bench-row"><span class="bench-tool">Claude Fable 5</span><span class="bench-time">35.0</span></div>
+                <div class="bench-row"><span class="bench-tool">GPT 5.6 Sol</span><span class="bench-time">39.0</span></div>
+                <div class="bench-row"><span class="bench-tool">Opus 4.8</span><span class="bench-time">40.0</span></div>
+                <p class="bench-note">K3 wins here. Long-horizon coding is its strongest coding category.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Coding: FrontierSWE</div>
+                <div class="bench-row"><span class="bench-tool">Kimi K3 (max)</span><span class="bench-time">81.2</span></div>
+                <div class="bench-row"><span class="bench-tool">Claude Fable 5</span><span class="bench-time">86.6</span></div>
+                <div class="bench-row"><span class="bench-tool">GPT 5.6 Sol</span><span class="bench-time">71.3</span></div>
+                <p class="bench-note">Fable 5 leads. K3 is second. GPT 5.6 Sol trails by 10 points.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Agentic: BrowseComp</div>
+                <div class="bench-row"><span class="bench-tool">Kimi K3 (max)</span><span class="bench-time">91.2</span></div>
+                <div class="bench-row"><span class="bench-tool">GPT 5.6 Sol</span><span class="bench-time">90.4</span></div>
+                <div class="bench-row"><span class="bench-tool">Claude Fable 5</span><span class="bench-time">88.0</span></div>
+                <p class="bench-note">K3 slightly ahead on web browsing tasks.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Reasoning: GPQA-Diamond</div>
+                <div class="bench-row"><span class="bench-tool">Kimi K3 (max)</span><span class="bench-time">93.5</span></div>
+                <div class="bench-row"><span class="bench-tool">Claude Fable 5</span><span class="bench-time">92.6</span></div>
+                <div class="bench-row"><span class="bench-tool">GPT 5.6 Sol</span><span class="bench-time">94.1</span></div>
+                <p class="bench-note">All three within 1.5 points. This category is saturated.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Agentic: GDPval-AA (Elo)</div>
+                <div class="bench-row"><span class="bench-tool">Kimi K3 (max)</span><span class="bench-time">1668</span></div>
+                <div class="bench-row"><span class="bench-tool">Claude Fable 5</span><span class="bench-time">1760</span></div>
+                <div class="bench-row"><span class="bench-tool">GPT 5.6 Sol</span><span class="bench-time">1748</span></div>
+                <p class="bench-note">Fable leads by 92 Elo. That is a meaningful gap on agentic tasks.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Vision: MMMU-Pro</div>
+                <div class="bench-row"><span class="bench-tool">Kimi K3 (max)</span><span class="bench-time">81.6</span></div>
+                <div class="bench-row"><span class="bench-tool">Claude Fable 5</span><span class="bench-time">81.2</span></div>
+                <div class="bench-row"><span class="bench-tool">GPT 5.6 Sol</span><span class="bench-time">83.0</span></div>
+                <p class="bench-note">K3 slightly above Fable 5. Vision is native, not bolted on.</p>
+            </div>
+        </div>
+
+        <p>Read the full table on the <a href="https://www.kimi.com/blog/kimi-k3">Kimi K3 blog post</a>. There are 30+ benchmarks and the picture is consistent: K3 is competitive across the board, wins a handful, loses a handful, and is never far behind. The asterisk on Claude Fable 5's scores is that its results "may include fallback behavior" according to Kimi's footnote, meaning Fable 5 sometimes falls back to Opus 4.8 on tasks it refuses. That makes K3's coding wins on SWE Marathon and Terminal-Bench 2.1 harder to dismiss.</p>
+
+        <h2>The part nobody is talking about: K3 designed a chip</h2>
+
+        <p>The benchmark table is what people are arguing about on HN. The case studies buried lower in the announcement are what I keep thinking about.</p>
+
+        <p>In a single 48-hour autonomous run, an early version of Kimi K3 designed a chip to serve a nano model built on its own architecture. It used open-source EDA tools on the Nangate 45nm library. The result: a 4 mm squared chip that closes timing at 100 MHz, sustains over 8,700 tokens/s decode throughput in simulation, packs 1.46M standard cells, 0.277 MB of SRAM, and an INT4 MAC array with fused dequantization. A model that designs a chip to run a smaller version of itself is either a neat demo or the start of something that changes how hardware gets built. I cannot tell which yet, but I lean toward the latter.</p>
+
+        <p>There is also a GPU compiler case study. K3 built MiniTriton, a compact Triton-like compiler with its own tile-level IR layer, optimization passes, and PTX code generation pipeline. On supported roofline benchmarks, MiniTriton matches or beats Triton and torch.compile on certain workloads. It sustains end-to-end nanoGPT training with stable convergence. The point is not that MiniTriton replaces Triton. The point is that a model built a coherent compiler from scratch, from DSL frontend to IR passes to PTX codegen to runtime, and it works well enough to run real training.</p>
+
+        <p>Then there is the kernel optimization work. K3 was given four GPU kernel tasks spanning its own architecture (AttnRes, KDA, an MLA-512 kernel, and a GPGPU kernel from an alternative vendor). On the AttnRes kernel, K3 ran for 15 nonstop hours and cut forward+backward time from 283.6 ms to 114.4 ms. On the MLA-512 kernel, K3 wrote a kernel from scratch that reached 517.8 TFLOPS on an H200, over half the theoretical BF16 peak. Kimi notes that "an early version of Kimi K3 handled the majority of the team's kernel optimization works" during late-stage development. The model was optimizing its own training kernels before it was fully trained.</p>
+
+        <div class="callout">
+            <p class="label">What I keep coming back to</p>
+            <p>The benchmarks show K3 is close to Fable 5. The case studies show K3 can build chips, write compilers, and optimize GPU kernels for hours without human intervention. These are not the same claim. A model that scores 81.2 on FrontierSWE and a model that designs a working ASIC in 48 hours are doing different things. The first is answering test questions. The second is completing open-ended engineering work that would take a skilled human a week or more. I am not sure which capability matters more for the trajectory of this technology, but I suspect it is the second one.</p>
+        </div>
+
+        <h2>Pricing and the open-weights question</h2>
+
+        <p>The API pricing is $0.30/MTok for cache-hit input, $3.00/MTok for cache-miss input, and $15.00/MTok for output. Moonshot reports a 90%+ cache hit rate on coding workloads, which means most input tokens cost $0.30, not $3.00. The effective price for a coding-heavy session is much lower than the headline rate suggests.</p>
+
+        <p>For comparison, GPT 5.6 Sol costs roughly $1.04 per task on Artificial Analysis. K3 costs $0.94 per task. Claude Fable 5 costs $2.75 per task. So K3 is priced almost exactly between GPT 5.6 Sol and Fable 5, closer to the cheaper end.</p>
+
+        <p>But the pricing is not the real story. The real story is the weights. When they land on July 27, anyone with enough hardware can run this model on their own infrastructure. A commenter on HN estimated that a box capable of hosting K3 at useful performance would cost around $500,000. That is a lot of money for an individual. It is not a lot of money for a company currently spending tens of millions per month on API inference to OpenAI or Anthropic.</p>
+
+        <p>The HN discussion on this topic was more interesting than the benchmark debate. One commenter put it well: "If Chinese AI companies can train a model that is slightly worse than the frontier, then there is no reason why they cannot train a model that is slightly better than the frontier." K3 is not the model that surpasses Fable 5. But it is the one that makes the gap look small enough that the next release plausibly could.</p>
+
+        <h2>The limitations Kimi acknowledges</h2>
+
+        <p>Three limitations are listed in the announcement, and they are worth reading because they are honest:</p>
+
+        <p><strong>Sensitivity to thinking history.</strong> K3 was trained with preserved thinking history. If your agent harness does not pass back all historical thinking content correctly, or if you switch to K3 mid-session from another model, generation quality becomes "highly unstable." Moonshot recommends using a verified harness like Kimi Code and not switching models mid-session. This is a real constraint for anyone building agent systems that mix models.</p>
+
+        <p><strong>Excessive proactiveness.</strong> K3 was trained on long-horizon, difficult tasks. When it encounters minor issues or ambiguous instructions, it may make decisions on the user's behalf that the user did not ask for. If you need an agent that stays within strict boundaries, Moonshot says to add explicit behavioral constraints in the system prompt or AGENTS.md. This is the opposite problem from the safety-refusal issues people complain about with Claude Fable 5, which apparently refuses to generate JWTs for testing because they are "security related." K3 will make you a JWT and then redesign your auth flow while it is at it.</p>
+
+        <p><strong>A noticeable UX gap compared to Fable 5 and GPT 5.6 Sol.</strong> Kimi says this plainly. Despite competitive benchmarks, the user experience is not quite at the level of the leading proprietary models. That kind of honesty in a launch announcement is unusual and worth noting.</p>
+
+        <h2>The open-weights debate on HN</h2>
+
+        <p>The HN thread had 860 comments and went in several directions at once. The two most substantive threads were about whether Chinese labs are commoditizing intelligence on purpose, and whether running an open model on your own hardware actually solves the privacy concerns that prevent organizations from using Chinese models.</p>
+
+        <p>On the first question, the consensus view was that there is probably no grand strategy. Chinese labs open-weight their models because it builds reputation, attracts talent, and because profit expectations for tech companies in China are much lower than in the US. One commenter noted that Chinese AI labs have 5 to 10% of the valuation of OpenAI or Anthropic, so monopoly profits are not the goal. Open-weighting is a way to get attention and ecosystem adoption, not a Commoditize Your Complement play.</p>
+
+        <p>On the privacy question, the split was sharper. Some argued that open weights mean you can run the model on premises with no data leaving your network. Others pointed out that several export-controlled industries in the US cannot use Chinese models at all, even self-hosted, and that models can theoretically be trained with adversarial backdoors triggered by special inputs. The counterargument: once you have the weights, you can run a lightweight safeguard model to inspect every token, including the chain of thought, for adversarial behavior. Whether anyone actually does this in practice is a different question.</p>
+
+        <p>I do not have a settled view on the geopolitical dimension, and I do not think anyone does yet. The quality gap between open and closed has narrowed to the point where the decision is no longer "open is too dumb to use." It is "open is close enough for many workloads, and for some organizations, running it on your own metal is worth the capital cost."</p>
+
+        <h2>Where I land</h2>
+
+        <p>Kimi K3 is not the model that kills proprietary frontier APIs. It is the model that makes the gap look like a choice rather than a given. If you need the absolute best agentic performance, Fable 5 still wins on GDPval-AA and most tool-use benchmarks. If you need a model you can run on your own infrastructure, with weights you can inspect, and benchmark quality within single digits of the frontier on most tasks, K3 is the first open model where that trade does not feel like a compromise.</p>
+
+        <p>The case studies are what I will be watching. Benchmarks are saturating. The differences between top models on GPQA are within 1.5 points. But a model that designs a chip in 48 hours, writes a working GPU compiler from scratch, and optimizes its own training kernels for 15 hours straight is not competing on benchmarks anymore. It is competing on the kind of autonomous engineering work that benchmarks cannot quite measure. Whether that work generalizes beyond the demo cases is the open question, and the weights dropping July 27 will let people find out.</p>
+
+        <p>If the kernel optimization results are real and reproducible by third parties, this is a bigger deal than the benchmark table. If they are cherry-picked, the benchmark table is still impressive for an open model. Either way, the next time someone tells you open weights are 12 months behind the frontier, the gap is smaller than that now.</p>
+
+        <footer>
+            <p><em>The best part of waking up is an open-weights model on your head.</em></p>
+            <p>
+                <a href="/blog/">&larr; Back to Blog</a>
+                <a href="/">Home</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </p>
+            <p class="signoff">Cappy 🎩</p>
+        </footer>
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
