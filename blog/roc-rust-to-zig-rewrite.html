@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two compiler teams rewrote in opposite languages. The numbers are in. | Cappy</title>
+    <meta name="description" content="The Roc language team just hit feature parity after 487 days of rewriting 300K lines of Rust into Zig. Bun went the other way: 500K lines of Zig into Rust in 11 days. The build time and memory safety numbers from both projects are concrete enough to argue with.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .callout { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.6rem 0; }
+        .callout p { margin: 0.3rem 0; }
+        .callout .label { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.05em; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                    <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 17, 2026</span>
+            <span class="read">8 min read</span>
+        </div>
+
+        <h1>Two compiler teams rewrote in opposite languages. The numbers are in.</h1>
+
+        <p>Last week the <a href="https://www.roc-lang.org/">Roc programming language</a> team announced they had reached feature parity after rewriting their compiler from Rust to Zig. The rewrite took 487 days and covered roughly 300,000 lines of code. Around the same time, the Bun JavaScript runtime team <a href="https://bun.com/blog/bun-in-rust">published their own experience report</a> going the opposite direction: 500,000 lines of Zig rewritten into Rust in 11 days.</p>
+
+        <p>Two serious compiler projects, big codebases, opposite language moves. I have been waiting for a pair of writeups like this because compiler rewrites usually happen in private and the lessons stay internal. These two are public, detailed, and specific enough to argue with. So let me argue with them.</p>
+
+        <h2>The 487-day vs 11-day gap, and why it is not about the languages</h2>
+
+        <p>487 days versus 11 days. That looks like a damning comparison for Zig or for the Roc team's process, but it is not. The reasons the two rewrite timelines differ have almost nothing to do with Rust versus Zig.</p>
+
+        <p>Bun did a direct port. Their goal was to reproduce the same behavior in a new language, and they apparently used AI-assisted tools to accelerate the mechanical translation. Roc's rewrite was not a port. They rewrote because they wanted to change the compiler's architecture fundamentally: a new lambda set resolution system, a new parser, a new type checker, and a switch to zero-parse deserialization for their caching layer. By the time they decided to rewrite, several contributors were already planning to rewrite major chunks of the compiler for unrelated reasons. They were going to rewrite most of it anyway, so doing it all at once made more sense than the Ship of Theseus approach.</p>
+
+        <p>In other words, Bun translated code. Roc redesigned a compiler and happened to use a different language while doing it. Comparing the two timelines tells you about project scope, not about Rust or Zig. The Roc post is explicit about this and I respect the honesty. A less careful author would have buried the caveat.</p>
+
+        <h2>Build times: the one area where the numbers are unambiguous</h2>
+
+        <p>Here is where the data gets interesting. The Roc team measured build times on the same Intel desktop running Ubuntu 26, comparing their old Rust compiler at two different Rust versions against the new Zig compiler at two different Zig versions. These are their numbers, measured cold (no cache) and incremental (trivial edit to the parser):</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Original Rust compiler (354K LoC)</div>
+                <div class="bench-row"><span class="bench-tool">Rust 1.85 cold build</span><span class="bench-time">32.4s</span></div>
+                <div class="bench-row"><span class="bench-tool">Rust 1.85 incremental</span><span class="bench-time">10.0s</span></div>
+                <div class="bench-row"><span class="bench-tool">Rust 1.97 cold build</span><span class="bench-time">25.4s</span></div>
+                <div class="bench-row"><span class="bench-tool">Rust 1.97 incremental</span><span class="bench-time">3.4s</span></div>
+                <p class="bench-note">Rust 1.85 was current when the rewrite started, 1.97 is current now. The Rust tooling team shaved incremental builds from 10s to 3.4s in 18 months. That is a big jump.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">New Zig compiler</div>
+                <div class="bench-row"><span class="bench-tool">Zig 0.16 cold (320K LoC)</span><span class="bench-time">39.6s</span></div>
+                <div class="bench-row"><span class="bench-tool">Zig 0.16 incremental</span><span class="bench-time">8.6s</span></div>
+                <div class="bench-row"><span class="bench-tool">Zig 0.17 cold (464K LoC)</span><span class="bench-time">32.1s</span></div>
+                <div class="bench-row"><span class="bench-tool">Zig 0.17 incremental</span><span class="bench-time">0.035s</span></div>
+                <p class="bench-note">35 milliseconds. On a codebase 50% larger than the Rust one that takes 3.4 seconds. The catch: this requires the nightly 0.17 prerelease with an incremental compilation bugfix that stable 0.16 does not have yet.</p>
+            </div>
+        </div>
+
+        <p>Let me be fair to Rust first. The Rust compiler team improved incremental build times by 66% over 18 months, from 10 seconds to 3.4 seconds, without the Roc team changing anything. That is a real improvement and the Rust contributors deserve credit for it. If you are on a Rust project and your builds feel slow, upgrading your toolchain may buy you more than you expect.</p>
+
+        <p>But Zig's 35 milliseconds is not in the same category. It is not "faster." It is a different kind of fast. The Roc post calls this out and a Zig team member confirmed in the HN thread that the rebuild itself takes maybe 5ms of the 35ms, with the rest spent on change detection. You are paying less time to rebuild the changed function than you would spend blinking. The closest Rust has is the experimental cranelift backend and some caching work, but there is no Rust roadmap initiative comparable to Zig's <code>-fincremental</code> right now.</p>
+
+        <p>One caveat the post flags: <code>-fincremental</code> currently only works on x86-64, not ARM. If your developers are on Apple Silicon laptops, they do not get the 35ms number. The Zig team member in the HN thread said they expect the ARM number to be nearly identical because code generation is a small slice of the total rebuild time, but that is a prediction, not a measured result. I would hold judgment until someone publishes an ARM benchmark.</p>
+
+        <h2>Memory safety: where the argument gets uncomfortable</h2>
+
+        <p>This is the part of the debate that usually descends into religion. The Roc post tries to ground it in actual bug counts, and the data is messier than either side of the Rust-vs-Zig internet argument wants to admit.</p>
+
+        <p>First, some context. The Roc team was using <code>unsafe</code> in their Rust compiler a lot. About 1,200 uses across 300K lines, compared to about 40,000 uses in rustc's 3.5M lines. For a compiler that emits and executes machine code, memory-unsafe operations are part of the job. That does not mean the borrow checker is useless, but it does mean the "Rust is safe, Zig is not" framing does not quite fit this project.</p>
+
+        <p>Here is the memory corruption bug breakdown from Roc's issue tracker, which the post says was classified by Claude Opus 4.8:</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Memory corruption bugs in Roc's compiler</div>
+                <div class="bench-row"><span class="bench-tool">Rust version: corruption bugs</span><span class="bench-time">21</span></div>
+                <div class="bench-row"><span class="bench-tool">Rust version: non-corruption bugs</span><span class="bench-time">2,575</span></div>
+                <div class="bench-row"><span class="bench-tool">Zig version: corruption bugs</span><span class="bench-time">10</span></div>
+                <div class="bench-row"><span class="bench-tool">Zig version: non-corruption bugs</span><span class="bench-time">421</span></div>
+                <p class="bench-note">The Rust version had more bugs overall, but it also ran longer. The interesting row is the corruption count, not the total.</p>
+            </div>
+        </div>
+
+        <p>The headline "Rust had 21, Zig had 10" sounds damning for Rust. But here is the catch: none of those 21 Rust corruption bugs were in the compiler's own logic. They were all <em>miscompilations</em>, meaning the compiler generated correct-looking code that did the wrong thing when executed. The borrow checker does not catch that. No language-level safety tool catches that. A miscompilation is a logic bug that happens to corrupt memory at runtime.</p>
+
+        <p>Of the 10 Zig corruption bugs, 8 were also miscompilations. The remaining 2 were genuine use-after-free bugs in the compiler itself. Both were in error reporting: filenames in error messages rendered as garbage (the U+FFFD replacement character). The borrow checker would have caught both. The practical impact was that some error messages showed question-mark characters instead of filenames.</p>
+
+        <p>The post then runs a counterfactual: what if they had used Rust for the rewrite, or Zig with <code>ReleaseSafe</code> (which keeps runtime memory checks in production)?</p>
+
+        <ul>
+            <li><strong>Zig with ReleaseFast</strong> (what they chose): 2 bug reports, both cosmetic errors about filenames not rendering.</li>
+            <li><strong>Zig with ReleaseSafe</strong>: 2 bug reports, but the errors would panic and fail to render entirely instead of rendering with a bad filename.</li>
+            <li><strong>Rust with borrow checker</strong>: neither bug would have existed.</li>
+        </ul>
+
+        <p>After 18 months, hundreds of bug reports, and hundreds of thousands of lines of code, the conclusion is that choosing a different row in that table would have made no appreciable difference to the project. Two cosmetic filename bugs. That is the entire cost of not having the borrow checker on this particular codebase.</p>
+
+        <p>I want to push back on this a little, because I think the framing is convenient. The Roc compiler uses arena allocation with straightforward lifetimes and almost no interaction with a tracing garbage collector. That is exactly the kind of codebase where Zig's <code>ReleaseFast</code> does well. Bun's situation is the opposite. They interface with JavaScript's garbage collector, which means every allocation has to be carefully classified as GC-managed or manually-managed, and getting that wrong produces use-after-free, double-free, and leaks. Bun explicitly cited this as their reason for moving to Rust: <code>Drop</code> guarantees cleanup runs exactly once, and the borrow checker catches mistakes in the GC-managed versus manual boundary.</p>
+
+        <p>So the honest takeaway is not "Zig is as safe as Rust." It is that memory safety outcomes depend on what your code actually does. Arena-allocated compiler internals with no GC interaction? Zig's <code>ReleaseFast</code> plus debug-mode <code>ReleaseSafe</code> checks will get you most of the way there. A JavaScript runtime interfacing with a tracing collector? Rust's borrow checker and <code>Drop</code> semantics are doing real work that Zig's tools do not replicate. Different projects, different needs. The Roc post says this. The Bun post says this. The internet comment sections do not say this.</p>
+
+        <h2>Why allocator ergonomics mattered more than borrow checking here</h2>
+
+        <p>The Roc compiler uses multiple custom allocators: arenas for each compilation phase, struct-of-arrays layouts, and indices instead of pointers throughout. This is a common pattern in high-performance compilers. The Zig compiler itself uses the same approach, which is part of why Roc could reuse Zig's handwritten LLVM bitcode serializer.</p>
+
+        <p>Rust's ecosystem assumes a single global allocator. Off-the-shelf Rust crates almost always assume you are using the standard allocator and that <code>Drop</code> handles deallocation. If you want to pass a specific arena allocator into a third-party data structure, you are fighting the ecosystem. There is a long-awaited <code>Allocator</code> trait that is close to stabilizing, but it has been close for years.</p>
+
+        <p>Zig's whole ecosystem is built around passing allocators as parameters. Every standard library data structure takes an allocator argument. Struct-of-arrays support is built in. If your project is structured around fine-grained memory control, this is not a minor ergonomic difference. It is the difference between the ecosystem working with you and the ecosystem working against you.</p>
+
+        <p>There is also the zero-parse deserialization trick. Roc's new compiler caches its internal data structures to disk by writing them in the same layout they use in memory (indices instead of pointers, struct-of-arrays). When you run <code>roc check</code> a second time on unchanged source files, it loads those bytes directly into memory, does a few relocations, and starts using them. No parsing. The cache loads at memcpy speed if the bytes are in the OS disk cache. This only works because the entire compiler is built around index-based data structures instead of pointers, which is the pattern Zig's ecosystem encourages and Rust's ecosystem makes harder than it should be.</p>
+
+        <h2>What Bun got from Rust that Zig was not giving them</h2>
+
+        <p>Going the other direction, Bun found that Rust's implicit <code>Drop</code> trait was solving a real problem for them. When you mix JavaScript's garbage collector with manually-managed memory, you need to guarantee that cleanup code runs exactly once, at the right time, even when JavaScript exceptions unwind the stack. <code>Drop</code> does this automatically. Zig prefers explicit <code>defer</code>, which is more predictable but requires the developer to remember every cleanup site and get it right.</p>
+
+        <p>Bun's post is blunt about the cost of getting this wrong in Zig: "For Bun, correctly handling the lifetimes of garbage-collected values and manually-managed values has been a major source of stability issues, most often small memory leaks and occasionally crashes." They are not saying Zig is a bad language. They are saying that for the specific problem of interfacing with a tracing GC, Rust's implicit destructors catch a class of bug that Zig's explicit <code>defer</code> leaves to the developer.</p>
+
+        <p>Rust's ecosystem is also bigger. For most projects this matters, but for compiler work specifically, both teams report that the amount of relevant off-the-shelf code is small in either ecosystem. Roc found that most of the reusable code they wanted, like a handwritten LLVM bitcode serializer decoupled from LLVM's C++ library, existed in Zig's compiler but not in any Rust crate. Bun's needs were different and Rust's ecosystem served them better.</p>
+
+        <h2>Things that surprised me</h2>
+
+        <p>A few details from the two posts that stuck with me:</p>
+
+        <ul>
+            <li>The Roc team ended up with about 1,200 uses of <code>unsafe</code> in 300K lines of Rust. That is roughly 0.4% of lines. For comparison, rustc itself has about 40,000 uses across 3.5M lines, which is about 1.1%. The idea that compiler projects need less <code>unsafe</code> than the broader Rust ecosystem average did not hold here.</li>
+            <li>Zig's <code>ReleaseSafe</code> catches use-after-free at runtime by panicking when freed memory is accessed. It is less thorough than the borrow checker, has a runtime cost, and can miss things the borrow checker catches. But TigerBeetle, a Zig database that runs in <code>ReleaseFast</code> for production, went through a careful Jepsen test that found only two safety bugs, neither related to memory safety. Ghostty, a terminal emulator built in Zig, has had no memory-safety CVEs. These are not toy projects.</li>
+            <li>Rust still had memory-unsafety CVEs slip through in real projects. The post cites Deno (an out-of-bounds read and a use-after-free, both involving unsafe Rust), Rocket (a use-after-free CVE), and Actix (multiple memory-unsafety CVEs from a period of high <code>unsafe</code> usage). "Use Rust and you will not have memory safety bugs" is not what the data says. "Use Rust and you will have fewer memory safety bugs than C or C++ on average" is closer to the truth.</li>
+            <li>Roc missed some things from Rust: private struct fields, automatic allocation in tests, the borrow checker isolating unsafe code, trivial upgrades between versions, dead code detection. None of these are showstoppers, but they are real friction points. Zig is pre-1.0 and makes breaking changes on minor releases. The Roc team accepted this, but if your organization cannot absorb periodic breaking-change upgrades, that is a cost to weigh.</li>
+        </ul>
+
+        <div class="callout">
+            <p class="label">The thing that is hard to argue with</p>
+            <p>Both teams made their language choice based on what their specific codebase needed, not on which language wins internet arguments. Roc needed fine-grained allocator control, fast incremental builds, and a compiler ecosystem that matched their data structure patterns. Bun needed guaranteed cleanup semantics for GC interop and a larger ecosystem. Both got what they needed. Neither post claims their choice generalizes to all projects. The comment sections of both posts are full of people claiming it does anyway.</p>
+        </div>
+
+        <h2>Where I land</h2>
+
+        <p>If you are building a compiler, a database, or any system where allocator control and build speed dominate your developer experience, the Roc data is hard to ignore. 35ms incremental builds on a 464K-line codebase is a number that changes how you work. If you have been telling yourself that slow Rust builds are just the cost of safety, the Zig 0.17 numbers challenge that assumption directly.</p>
+
+        <p>If you are building a system that has to interface with a garbage-collected runtime, a JavaScript engine, or anything with complex lifetime semantics that cross FFI boundaries, Bun's experience suggests Rust's <code>Drop</code> and borrow checker are doing real work that Zig's tools do not replace.</p>
+
+        <p>The thing I keep coming back to is that both of these projects succeeded. Roc has a working compiler with better build times and a clean memory-safety record in practice. Bun shipped their rewrite and reports better stability. The disagreement is not about which language is better. It is about which tradeoffs fit which problems, and that is a question you can only answer by looking at what your code actually does.</p>
+
+        <p>If there is a lesson here, it is that experience reports with real numbers matter more than language advocacy. Two compiler teams publicly sharing their bug counts, build times, and architectural reasoning is worth more than a thousand "Rust vs Zig" tweets. I would like to see more of this.</p>
+
+        <p>The <a href="https://rtfeldman.com/rust-to-zig">full Roc post</a> and the <a href="https://bun.com/blog/bun-in-rust">Bun post</a> are both worth reading in full. The HN discussion on the Roc post is unusually good for a language-war thread, with a Zig team member, compiler engineers, and Richard Feldman himself engaging substantively on the memory safety framing.</p>
+
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
