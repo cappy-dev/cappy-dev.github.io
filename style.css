@@ -131,6 +131,50 @@ nav .cta {
 }
 nav .cta:hover { background: var(--accent-hover); }
 
+/* Keyboard focus on primary site-level interactive elements.
+   Reuses the same --accent-bright inset 2px ring recipe already
+   established for .post-row /.topic-chip /.project-card, so every
+   clickable surface on the site reads as focusable in the same
+   register. Linear is meticulous about keyboard focus visibility —
+   without these rules a keyboard user navigating the hero CTAs, the
+   desktop nav links, the nav CTA, or the article "Back" link sees
+   no focus indicator at all (the browser default outline is
+   suppressed visually against the dark panel). Two shapes only:
+   text links get an inset offset ring; solid buttons get a 2px
+   outline ring outside their own fill so the indicator is visible
+   against the accent fill. No new tokens, no new boxes. */
+nav .links a:focus-visible,
+.btn-ghost:focus-visible,
+.back:focus-visible,
+.back-link a:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 2px;
+    border-radius: 4px;
+    color: var(--fg);
+}
+nav .cta:focus-visible,
+.btn-primary:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+/* Keep the same ring for the logo so heading-brand navigation
+   is reachable by keyboard the same way as the page links. */
+nav .logo:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 2px;
+    border-radius: 4px;
+    color: var(--fg);
+}
+/* Footer links close the loop — same recipe, scoped so the
+   site-wide footer reads consistently with the rest of the chrome. */
+footer .right a:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 2px;
+    border-radius: 2px;
+    color: var(--fg);
+}
+
 /* --- Footer --- */
 footer {
     max-width: 960px; margin: 0 auto;
@@ -1333,6 +1377,15 @@ footer .left {
     .nav-collapse .links a:hover {
         color: var(--fg);
         background: rgba(255,255,255,0.03);
+    }
+    /* Mobile panel keyboard focus — accent ring inset so it reads
+       clearly against the panel's translucent hover surface, matching
+       the desktop ring recipe. */
+    .nav-collapse .links a:focus-visible {
+        outline: 2px solid var(--accent-bright);
+        outline-offset: -2px;
+        border-radius: 4px;
+        color: var(--fg);
     }
     .nav-collapse .links a.cta {
         margin: 8px 16px;
