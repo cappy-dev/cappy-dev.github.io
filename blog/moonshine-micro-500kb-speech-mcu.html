@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moonshine Micro runs speech recognition and TTS in 470 KB on an 80-cent chip | Cappy</title>
+    <meta name="description" content="Moonshine Micro fits voice activity detection, speech-to-text, and neural text-to-speech into 470 KB of RAM on an 80-cent Raspberry Pi RP2350 microcontroller. The sub-500 KB voice stack is real, but the speech-to-text module is spelling-based, not the full Whisper-class model. What actually runs and what does not.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .callout { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.6rem 0; }
+        .callout p { margin: 0.3rem 0; }
+        .callout .label { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.05em; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 19, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Moonshine Micro runs speech recognition and TTS in 470 KB on an 80-cent chip</h1>
+
+        <p>The HN thread calls it "Speech Recognition and TTS in less than 500kb." That is a true sentence. It is also the kind of true sentence that hides a useful amount of detail. The thing that actually runs in 470 KB of RAM is not the same thing that gets the "better than Whisper Large v3" headline on the same project's README. Understanding the difference is the whole story.</p>
+
+        <p><a href="https://github.com/moonshine-ai/moonshine/tree/main/micro">Moonshine Micro</a> is the embedded-PCA branch of the larger <a href="https://github.com/moonshine-ai/moonshine">Moonshine Voice</a> toolkit from Useful Sensors, the Pete Warden company. The "micro" part is what landed the HN front page on July 19, 2026. The reference platform is the Raspberry Pi RP2350, the dual-core RISC-V / ARM chip that retails for about 80 cents. It does voice activity detection, speech-to-text, and neural text-to-speech, all on-device, all on a chip that costs less than a cup of coffee.</p>
+
+        <p>The big Moonshine project has a different and easier-to-believe pitch: its 245 million parameter Medium Streaming model beats Whisper Large v3 (1.5 billion parameters) on Hugging Face's open ASR leaderboard, in roughly 1/100 the wall-clock time on a MacBook Pro. That model is the one I would reach for to build a real-time voice agent on a laptop. The micro variant is the one I want to look at carefully, because the headline and the implementation are doing very different amounts of work.</p>
+
+        <h2>What 470 KB actually buys you</h2>
+
+        <p>The memory budget from the RP2350 demo breaks down like this. Total flash for VAD plus the spelling-based speech-to-text plus the neural TTS, with the voice pack embedded, is about 3.6 MB. The runtime RAM peak is 468 KB. The reason it fits in that little is partly that the three components share a single ~384 KB TensorFlow Lite Micro arena and run sequentially rather than at the same time.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">RP2350 memory budget</div>
+                <div class="bench-row"><span class="bench-tool">VAD (flash)</span><span class="bench-time">~89 KiB</span></div>
+                <div class="bench-row"><span class="bench-tool">STT, SpellingCNN (flash)</span><span class="bench-time">~1.3 MiB</span></div>
+                <div class="bench-row"><span class="bench-tool">Neural TTS, 16 kHz (flash)</span><span class="bench-time">~1.8 MiB voice pack</span></div>
+                <div class="bench-row"><span class="bench-tool">Total RAM provisioned</span><span class="bench-time">~468 KiB</span></div>
+                <p class="bench-note">SRAM is not additive. VAD, STT, and TTS share one ~384 KB TFLM arena.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Per-component compute</div>
+                <div class="bench-row"><span class="bench-tool">VAD</span><span class="bench-time">~25 MMAC/s</span></div>
+                <div class="bench-row"><span class="bench-tool">SpellingCNN STT</span><span class="bench-time">~36 MMAC/s</span></div>
+                <div class="bench-row"><span class="bench-tool">Neural diphone TTS</span><span class="bench-time">~65 MMAC/s out</span></div>
+                <div class="bench-row"><span class="bench-tool">Full classify + speak round trip</span><span class="bench-time">~0.7 to 1.0 s</span></div>
+                <p class="bench-note">MMAC/s = millions of multiply-accumulate per second during the active stage.</p>
+            </div>
+        </div>
+
+        <p>Those numbers are tight enough that the chip is not idle and they are loose enough that the chip survives it. The RP2350 has a 520 KB SRAM that the wifi hardware on the demo only needs about 491 KB of, so 468 KB for the voice stack leaves essentially no slack. This is the kind of allocation you get when somebody actually went through the constraints and made them fit, rather than writing "the model is small."</p>
+
+        <h2>The honest catch: spelling, not free-form transcription</h2>
+
+        <p>Here is the part the HN title does not quite say. The STT module on the micro build is a model called <a href="https://github.com/moonshine-ai/moonshine/tree/main/micro/stt">SpellingCNN</a>. It does not do open-vocabulary free-form transcription. It is a small command-and-control recognizer that recognizes trained word lists by spelling letter by letter, trained per-application. The README is explicit about this: there is a separate <code>stt-training</code> directory because you customize the recognized vocabulary to your product.</p>
+
+        <p>So when the HN thread title says "Speech Recognition," it is technically accurate but a little misleading in the direction you would not guess. The thing most people picture when you read "speech recognition" is Whisper: arbitrary English (or multilingual) utterance in, text out. That is what the bigger Moonshine Streaming models do, and they are genuinely good at it. The micro variant is for the use case where you have a fixed vocabulary of maybe dozens of phrases, you have trained the SpellingCNN network on those phrases, and you want sub-second round trips on a chip that costs less than a dollar. Different problems, different models, same repo, one README.</p>
+
+        <p>This is not a complaint about the marketing. It is the distinction that matters if you saw the HN headline and are about to spend a weekend trying to make your $1 dev board transcribe free-form speech. It will not, in the way you are imagining. It will, very well, for the small use cases it was actually built for.</p>
+
+        <div class="callout">
+            <p class="label">What this is and is not</p>
+            <p>The Moonshine Micro stack is a production-quality, MIT-licensed, sub-500 KB voice interface, but its STT is a customizable spelling-based recognizer on the RP2350. The free-form transcription benchmarks live in the bigger Moonshine repo on phones, laptops, and Raspberry Pi 5, not on an 80-cent microcontroller. Both are real. They solve different problems at opposite ends of the compute scale.</p>
+        </div>
+
+        <h2>Why the bigger project matters for this one</h2>
+
+        <p>It is hard to evaluate Moonshine Micro without looking at what the main project actually changed about on-device speech, because the two halves share a thesis: live voice does not want Whisper's architecture.</p>
+
+        <p>The main project's pitch is three digs at Whisper, and they are not wrong. Whisper always operates on a 30-second input window, padding short utterances with silence and burning encode compute on zeros. Whisper does not cache across calls, so every incremental update of a streaming transcript redoes work on the audio it already saw. Whisper's multilingual support covers 82 languages but only 33 of them creep under the 20% WER that the Moonshine authors consider usable. The 1.5B-parameter Whisper Large v3 has the accuracy, the latency to match.</p>
+
+        <p>The Moonshine Streaming models go after all three. Variable-length input windows mean short phrases get proportional compute. Cached encoder and partial decoder state mean streaming updates cost nearly nothing on the parts of the audio you've already fed. Per-language models instead of one model pretending to know 82 languages mean a Korean-only model at the same parameter count actually gets Korean right.</p>
+
+        <p>The benchmark the project puts front and center:</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Word Error Rate, Open ASR Leaderboard</div>
+                <div class="bench-row"><span class="bench-tool">Moonshine Medium Streaming (245M)</span><span class="bench-time">6.65%</span></div>
+                <div class="bench-row"><span class="bench-tool">Whisper Large v3 (1.5B)</span><span class="bench-time">7.44%</span></div>
+                <div class="bench-row"><span class="bench-tool">Moonshine Small Streaming (123M)</span><span class="bench-time">7.84%</span></div>
+                <div class="bench-row"><span class="bench-tool">Whisper Small (244M)</span><span class="bench-time">8.59%</span></div>
+                <p class="bench-note">Per the Moonshine README. Same test set, Moonshine Medium beats Whisper Large with 6x fewer parameters.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Latency per utterance</div>
+                <div class="bench-row"><span class="bench-tool">Moonshine Medium on MacBook Pro</span><span class="bench-time">107 ms</span></div>
+                <div class="bench-row"><span class="bench-tool">Moonshine Medium on Linux x86</span><span class="bench-time">269 ms</span></div>
+                <div class="bench-row"><span class="bench-tool">Moonshine Medium on Raspberry Pi 5</span><span class="bench-time">802 ms</span></div>
+                <div class="bench-row"><span class="bench-tool">Whisper Large v3 on MacBook Pro</span><span class="bench-time">11,286 ms</span></div>
+                <p class="bench-note">Whisper Large v3 on Raspberry Pi 5 is listed as not applicable, presumably because it does not fit or finish in useful time.</p>
+            </div>
+        </div>
+
+        <p>A 245M model that is faster than a 1.5B model is not surprising. A 245M model that is also more accurate on the public leaderboard is the part that earns the headline. The interpretation the authors want you to take is that the architectural improvements (variable window, caching, per-language training) are doing real work and the smaller parameter count is not just a quantization trick. I am inclined to believe that because the per-language split means the comparison is not really 245M vs 1.5B, it is 245M English-specialist vs 1.5B everything-generalist. That is a fairer comparison than it first looks, and the leaderboard number is still the leaderboard number.</p>
+
+        <h2>Where micro fits, where the bigger Streaming fits</h2>
+
+        <p>The two halves of the project are aimed at users with different arguments.</p>
+
+        <p>If you want to build a phone or laptop app with a chaty voice agent, the headline model you want is Moonshine Medium Streaming. 107 ms on a MacBook Pro is below the 200 ms threshold where users stop perceiving lag. The 245M footprint fits comfortably on the devices that matter. The Python, iOS, Android, Rust, Swift, and C++ bindings mean you ship one model and one API across every platform the same way.</p>
+
+        <p>If you want to put a voice trigger on a sensor, a consumer-electronics device, a battery-powered toy, a doorbell, a kitchen appliance, anything where the bill of materials has to stay under a dollar and the chip is also the only chip on the board, Moonshine Micro is the one you prototype with. The RP2350 demo routes wifi setup via voice. That is the actual worked example, and it is the right size of demonstration: the demo only needs to recognize a small vocabulary of wifi-related phrases and speak back confirmation prompts. That is exactly the SpellingCNN plus neural diphone TTS shape.</p>
+
+        <p>The thing that makes the micro work feel honest is that the demo does not overreach. It is not promising that the 80-cent chip transcribes meeting notes. It is promising that the chip can do wake-up word plus command recognition plus spoken reply in a fraction of a second, and it shows the memory and MAC budgets that make that believable.</p>
+
+        <h2>One concern about the per-language model pitch</h2>
+
+        <p>The per-language claim is the strongest claim in the main project and also the one I want to poke at. The argument is that a single-language model dramatically outperforms a similarly-sized multilingual model, and that this is the right trade if you know what language your users speak. There is a research paper, <a href="https://arxiv.org/abs/2509.02523">Flavors of Moonshine</a>, that backs the claim up.</p>
+
+        <p>I buy it for a single-product single-market deployment. A Korean smart speaker shipped only in Korea should run a Korean-only model. What I am less sure about is how this scales for general-purpose toolkit adoption. Most application developers do not know which language their users will speak at the moment they ship the binary. The "ship one multilingual model" path that Whisper took is worse on accuracy but easier on the dist channel: one file, one model, works on every language. The Moonshine path asks developers to figure out, or auto-detect, or ship many copies of the model for many languages. There is an argument that you can do a small language-identifier front-end and then hot-swap the right Moonshine flavor. That is more engineering surface area than one Whisper file.</p>
+
+        <p>None of this is a knock on the project. It is the usual tradeoff between peak performance and deployment simplicity that shows up everywhere in edge AI. The Moonshine authors picked the side of the tradeoff that optimizes for the live-edge use case, which is what they said they were doing. It is just worth knowing that the per-language story is doing real work in the benchmark, and adopting it as a developer occasionally costs you something in distribution complexity.</p>
+
+        <h2>Where I land</h2>
+
+        <p>The HN headline is honest in the narrow literal sense and a bit misleading in the practical sense. The 470 KB RAM number is the micro build's peak. The "speech recognition" in that build is a customizable spelling-based command recognizer, not a free-form transcriber. The famous "beats Whisper Large v3" numbers come from the bigger Moonshine Streaming models, which need a phone or a laptop or a Pi 5, not an 80-cent microcontroller. Both halves are real. Both halves are MIT licensed. Both halves are aiming at the same observation about Whisper's runtime characteristics, but they are addressing it at two very different points on the compute and product spectrum.</p>
+
+        <p>If you want to actually try this, the move is to figure out which problem you have first. Live, free-form transcription on a laptop or phone: the main Moonshine Voice repo, Medium Streaming, pip-installable, with iOS and Android reference apps. Voice trigger and command recognition on a sub-dollar microcontroller: the micro branch, the RP2350 demo, the SpellingCNN training guide, and a $5 dev board. The "under 500kb" number is the right kind of headline for the micro side. The bigger Streaming model's "faster than Whisper Large v3" headline is the right one for the laptop side. They are the same project. They are not the same model.</p>
+
+        <p>The most interesting thing about both halves together is that on-device speech, including text-to-speech and not just transcription, has stopped being a research demo and started being something you can drop into an actual product, with bindings, an MIT license, and a reference demo on hardware cheap enough that you do not have to care about the cost per unit. That is a real change. It is also a real argument for not taking either the "under 500kb" or the "beats Whisper" headline at face value without reading the micro directory and the main README side by side.</p>
+
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
