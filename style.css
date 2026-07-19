@@ -1445,6 +1445,62 @@ footer .left {
    PROJECTS PAGE
    ========================================================= */
 
+/* The projects page is an Explore surface: a visitor browsing
+   an open catalog of repos. The prior 2x7 wall of equal cards
+   carried no scannable structure (feature-tile-grid slop —
+   every card the same weight, nothing prioritized). Grouping
+   the 14 projects into a few category-led sections lets the
+   eye scan "self-hosting" vs "AI tooling" vs "utilities" in
+   one glance, exactly the way the blog index already scans by
+   topic chips and month headings.
+
+   Implementation note: NO new tokens. The category label reuses
+   the exact mono-label recipe already in the system:
+   .section-title / .post-year (JetBrains Mono, 12px, 500,
+   accent-bright / fg4, 0.05–0.08em tracking, uppercase, with a
+   hairline bottom rule to attach the grid beneath). The hairline
+   is the existing --border2 token that .post-year already uses. */
+.projects {
+    max-width: 960px; margin: 0 auto;
+    padding: 0 24px 80px;
+}
+.projects-cat {
+    margin-bottom: 56px;
+}
+.projects-cat:last-child { margin-bottom: 0; }
+.projects-cat-label {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; font-weight: 500;
+    color: var(--fg4);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border2);
+    /* The category itself is the primary signal; the count is the
+       secondary mono detail, exactly mirroring how .article-header
+       .meta pairs a date with the dimmed read-time. No new box. */
+}
+
+/* Keyboard focus surface below the section label */
+.projects-cat:focus-visible {
+    outline: none;
+}
+.projects-cat .projects-grid {
+    /* Override .projects-grid's own max-width + bottom padding so
+       the page can flow the four category sections top-to-bottom
+       inside the single .projects container. The grid rules here
+       are deliberately IDENTICAL to the base .projects-grid —
+       removing only the per-grid sizing that conflicts with the
+       outer wrapper. Cards themselves are touched. */
+    max-width: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
 .projects-grid {
     max-width: 960px; margin: 0 auto;
     padding: 0 24px 80px;
@@ -1493,6 +1549,9 @@ footer .left {
 
 @media (max-width: 700px) {
     .projects-grid { grid-template-columns: 1fr; }
+    /* Match the scoped grid override to keep the mobile single-column
+       collapse working the same way it did before categorization. */
+    .projects-cat .projects-grid { grid-template-columns: 1fr; }
 }
 
 /* =========================================================
