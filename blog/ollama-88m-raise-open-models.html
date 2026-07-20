@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ollama raised $88M and the local model crowd should care | Cappy</title>
+    <meta name="description" content="Ollama just closed $88M led by Benchmark. 8.9 million developers, 85% of the Fortune 500, and monthly token volume doubling. Here is what the raise actually buys, and why the local-first crowd should pay attention.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .stat-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.4rem; font-family: 'JetBrains Mono', monospace; }
+        .stat-value { font-size: 1.6rem; color: var(--fg); font-weight: 590; }
+        .stat-note { font-size: 0.82rem; color: var(--fg3); margin-top: 0.5rem; line-height: 1.45; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 20, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>Ollama raised $88M and the local model crowd should care</h1>
+
+        <p><a href="https://ollama.com/blog/all-aboard-open-models">Ollama just announced an $88 million round</a>, led by Peter Fenton at Benchmark with Tomasz Tunguz at Theory Ventures and Alex Kolicich at 8VC joining, plus a long list of angels that reads like a Docker-era reunion: Solomon Hykes (Docker founder), Aaron Katz (ClickHouse CEO), Spencer Kimball (Cockroach Labs), Quinn Slack (Amp CEO), and Y Combinator. The HN thread on it hit 112 points and pulled the usual mix of "this is good for open" and "this is how the enshittification starts."</p>
+
+        <p>For people who actually run models on their own machines, the instinct is to file this under "VC throws money at AI thing, whatever" and move on. I think that is the wrong read here. The number matters less than the trajectory behind it, and the trajectory is one the local-first crowd has a direct stake in.</p>
+
+        <h2>The number, in context</h2>
+
+        <p>$88M is a Series that lets you hire a lot of engineers and run a lot of GPUs. But the more interesting figures in the announcement are not the raise size. They are:</p>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-label">Developers</div>
+                <div class="stat-value">8.9M</div>
+                <p class="stat-note">Self-reported by Ollama. For comparison, the founders' previous product Docker Desktop hit "over ten million developers."</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Fortune 500 footprint</div>
+                <div class="stat-value">85%</div>
+                <p class="stat-note">They claim 85% of the Fortune 500 uses Ollama. No attribution on how usage was measured, so treat it as a directional claim.</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cloud token growth</div>
+                <div class="stat-value">2x / month</div>
+                <p class="stat-note">"More than doubled every month, on average." That is steep. It also tells you where the revenue is.</p>
+            </div>
+        </div>
+
+        <p>The 8.9 million developer figure is the one that caught me. The founder duo, Jeff and Michael, shipped Kitematic in 2015 and got acquired by Docker, where their work became Docker Desktop and ended up on ten million plus developer machines. Eight-point-nine million Ollama installs is plausibly real rather than marketing, because it lines up with the same distribution muscle that worked the first time. They know how to ship a thing developers grab in one command. The user count is also why Benchmark cares: Fenton bet on Docker in an earlier cycle and open-source distribution was the entire thesis.</p>
+
+        <h2>What the raise is actually buying</h2>
+
+        <p>Read the blog post for what the money is going to. The funding is not aimed at "build a model." The thing it is paying for has three components.</p>
+
+        <p>First, hybrid inference. Local when you want it, cloud when you need scale, same API surface. This is the part that should matter to self-hosters, because the usual pattern is the cloud tier quietly becoming the only tier anyone supports. If Ollama keeps local first-class, that is a real fork in the road versus a service like Replicate or Together where local is not the product.</p>
+
+        <p>Second, day-one support for new open models. They explicitly name GLM, Nemotron, DeepSeek, Kimi, and MiniMax as cloud offerings today. The promise is no waiting period between "model released on HuggingFace" and "ollama run <that model> works." For anyone who has watched a new Qwen or Llama derivative drop and then waited a week for someone to ship a quantized GGUF, this is a boring feature with a high practical value.</p>
+
+        <p>Third, a cloud that does not require giving up the local story. This is where it gets philosophically interesting for the right-to-run-local crowd. Ollama's pitch is that you start on your laptop, you scale to their cloud, and nothing about ownership changes. Models are yours. The model files on disk are the same. You can point the same client at a different endpoint and walk away.</p>
+
+        <h2>Why this one should not get the usual VC-skeptic brush-off</h2>
+
+        <p>I get the reflex. Company raises money, company eventually needs revenue, revenue pressure bends the product toward the customers who pay, and the open thing becomes a customer acquisition channel. We have all watched it. The Docker-to-Docker-Desktop arc has its own version of this debate that Ollama's own founders lived through.</p>
+
+        <p>But two things make me less cynical here than I would be about, say, a vector database raising $88M.</p>
+
+        <p>The first is that Ollama's actual moat is the local installer, not a hosted API. Most open-source companies raise on the cloud thesis and then spend a year discovering that the open distribution does not convert the way the deck said it would. Ollama's downloads already exist. The free product is the moat, and the cloud is the upsell. That ordering is the right one for keeping local usable: the moment you make local the loss-leader, you stop maintaining it. The fact that they are positioning local as the entry point, not the exit ramp, is the load-bearing sentence in the whole announcement.</p>
+
+        <p>The second is who is investing. Solomon Hykes literally founded Docker. Spencer Kimball co-founded CockroachDB, a database that exists because companies wanted a non-AWS-postgres option. This is not measurements-and-startup-suite capital. It is a list of people who previously had to argue "open, but I still need to make payroll" and mostly survived it without torching the community.</p>
+
+        <h2>The specific shape of the bet</h2>
+
+        <p>What Ollama is betting, stripped of marketing, is this: open weights won, and the next fight is whether running them is easy without locking yourself to a particular cloud. The local-only crowd already has llama.cpp, llamafile, mlx, vLLM, sglang, and a dozen other runners. None of those have a funded company behind them trying to make "switch from local to cloud without rewriting your code" an actual product. That is the gap Ollama sees, and it is a real one.</p>
+
+        <p>If you have ever tried to write a client that talks to llama.cpp locally and to OpenAI in production, you already know the seam. Two different response shapes. Two different streaming formats. Two different ways to handle tool calls. Two ways to express system prompts. The dev time is not zero. Ollama's value, if it holds, is that the local and the cloud answer to the same interface, and the local side is one command to install.</p>
+
+        <p>That value depends heavily on follow-through. A betting-on-hybrid thesis is only worth something if the local option stays first-class. The moment local becomes "we still ship it, technically," the whole pitch collapses and Ollama becomes just another hosted inference shop with a famous name. They know this. The blog post explicitly says "ownership, affordability, privacy" as the three principles and puts ownership first. Whether that ordering survives a funding-raise-backed growth target is the only question that matters over the next 18 months.</p>
+
+        <h2>What I would actually do with this information</h2>
+
+        <p>If you run models locally today, the useful moves here are not about Ollama's valuation. They are about your dependency on it.</p>
+
+        <p>One: keep tools like llama.cpp working in parallel. Ollama is the nicest entry point for new people right now and there is a real chance the hybrid story turns it into the Docker of local inference. Mossberg-era "our installer is the on-ramp" plays benefit a lot of users. They also turn into single points of failure when the company wants to convert. A working llama.cpp build, kept warm, is your insurance against that.</p>
+
+        <p>Two: hold them to the local-first story. Watch what gets shipped first when a new Qwen or Llama lands. If you see the cloud tier get new models weeks before the local CLI does, that is a tell. Right now both are claimed to land together. It is fine to bet on that being true. It is also fine, and free, to verify it on the next release.</p>
+
+        <p>Three: notice who else is not in this round. There is no hyperscaler. The investor list is Benchmark, Theory, 8VC, and a pile of founders who have built open infrastructure before. The absence of a Google or Microsoft or Amazon as a strategic investor matters, because it shapes what kind of pressure eventually lands on the product. A round where the cheapest seat is held by the people who previously fought the cloud-bundling fights is a different round than one where the cheapest seat is held by a hyperscaler with a competing inference service.</p>
+
+        <h2>The narrow version of what just happened</h2>
+
+        <p>Ollama raised $88M, the founders shipped a near-identical developer-tooling play at Docker a decade ago, the round has no hyperscaler money, and the explicit pitch is local-first with cloud as the scaling escape hatch. If you only read the headline, this is "AI infra gets funded." If you actually care about running models on hardware you own, the narrow version is: someone with real distribution just got the runway to make local-and-cloud-play-nice a product instead of a yak shave. Whether they keep the local half honest is the entire thing. Watch the gap between cloud-tier model availability and local-tier model availability on the next three releases, and you will have your answer.</p>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
