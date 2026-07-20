@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code has been running AI-rewritten Rust for a month. Nobody noticed. | Cappy</title>
+    <meta name="description" content="Simon Willison verified by running strings on the Claude Code binary. Bun's Rust rewrite, done by Claude Fable 5 in 11 days, has been shipping in production since June 17. The boring outcome is the interesting part.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 20, 2026 &middot; 6 min read</div>
+            <h1>Claude Code has been running AI-rewritten Rust for a month. Nobody noticed.</h1>
+            <div class="tags">
+                <span class="pill">Bun</span>
+                <span class="pill">Rust</span>
+                <span class="pill">Claude Code</span>
+                <span class="pill">Simon Willison</span>
+                <span class="pill">Anthropic</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Bun announced its Zig-to-Rust rewrite on July 8, 2026. The blog post from Bun's creator Jarred Sumner said Claude Code v2.1.181 and later use the Rust port. It also said: "Startup got 10% faster on Linux but otherwise, barely anyone noticed. Boring is good."</p>
+
+            <p>Eleven days later, Simon Willison decided to check.</p>
+
+            <p>His method was not exotic. He ran <code>strings ~/.local/bin/claude | grep -m1 'Bun v1'</code> and got back <code>Bun v1.4.0 (macOS arm64)</code>. The latest public release of Bun at the time was v1.3.14 from May 12. So the Claude Code binary contains a version number that does not exist in any public release. Then he ran <code>strings ~/.local/bin/claude | grep -Eo 'src/[[:alnum:]_./-]+\.rs'</code> and got 563 Rust source filenames embedded in the binary. The Rust port is in there. It has been in there since June 17.</p>
+
+            <p>That is the part I keep coming back to. Not the rewrite itself, which the earlier coverage on this blog already dug into. The part where a million-plus lines of AI-generated Rust have been running on millions of developer machines for a month and the most common reaction was "huh, startup seems a bit faster."</p>
+
+            <h2>What actually shipped</h2>
+
+            <p>To be precise about what is inside that binary: Bun v1.3.14 was the last version of Bun written in Zig. Bun v1.4.0 is the first version written in Rust. The Rust version is available as a canary build (<code>bun upgrade --canary</code>), but it has not shipped as a tagged stable release yet. Claude Code, however, embeds its own copy of the Bun runtime, so it does not matter what version of Bun you have installed locally. Claude Code ships with v1.4.0 baked in.</p>
+
+            <p>Sumner's blog post also disclosed something that recontextualizes the whole project: Anthropic acquired Bun in December 2025. The rewrite was done by Sumner and others at Anthropic, using a pre-release version of Claude Fable 5. So Anthropic owns the runtime, the AI that rewrote it, and the coding tool that distributes it. The feedback loop is entirely in-house.</p>
+
+            <p>The production telemetry from Claude Code itself is the cleanest evidence that the rewrite works. Linux p50 startup time dropped from 517ms (v2.1.179, the last Zig-Bun release) to 464ms (v2.1.181, the first Rust-Bun release). That is a 10% improvement, measured across real installations, not a benchmark on a clean machine.</p>
+
+            <h2>The verification trick</h2>
+
+            <p>Willison's <code>strings</code> approach is worth remembering because it generalizes. Any closed-source binary that embeds a runtime will leak identifying strings. You do not need source access or a debugger. <code>grep</code> the binary for version strings, file paths, and build artifacts. If a company says they switched to a new runtime, you can often confirm it yourself in 30 seconds.</p>
+
+            <p>Someone on Twitter found an even cleaner method. You can set <code>BUN_OPTIONS="--preload=/tmp/bun-version.ts"</code> with a tiny script that prints <code>Bun.version</code> and then exits. Run <code>claude --version</code> with that environment variable and the embedded Bun prints its own version number. Willison got <code>1.4.0</code>. The version in the binary is a preview of a release that has not gone public yet.</p>
+
+            <h2>Why "boring" is the headline</h2>
+
+            <p>The original Bun-in-Rust blog post ends with "Boring is good." That line did more work than it got credit for. The argument is: if you swap out the entire runtime of a coding tool used by millions of people and nobody files a bug, the swap worked. Absence of complaints is the strongest signal you can get from production software. You cannot A/B test a runtime swap in a meaningful way. You just ship it and watch the error rate.</p>
+
+            <p>The error rate, apparently, was fine. Prisma rolled out their Compute public beta on the same Rust-Bun build before Claude Code did. Their blog post quotes an engineer saying the Rust version handled VM pause/resume scenarios that the Zig version could not recover from. That is a memory safety story told through operational symptoms rather than CVEs.</p>
+
+            <p>But I want to push back slightly on the "nobody noticed" framing. Nobody reported bugs. That is not the same as nobody noticing. Startup time changed by 53ms. People who profile their tools (and a lot of Claude Code users are exactly the kind of person who profiles their tools) would notice a change that size. They just did not attribute it to a runtime swap because nobody told them it happened. The blog post disclosing the Rust rewrite came out July 8. The binary shipped June 17. For 21 days, the change was silent.</p>
+
+            <h2>The benchmark numbers say it is real, with caveats</h2>
+
+            <p>The published benchmarks from the Bun team, run on EC2 with a Xeon Platinum 8488C, show across-the-board improvements. HTTP throughput on <code>Bun.serve</code> went from 169.6k to 177.7k req/s, about 4.8%. Express went from 64.5k to 66.6k, about 3.2%. Build times for <code>next build</code> dropped from 13.62s to 13.03s, about 4.5%. The improvements are modest but consistent.</p>
+
+            <p>The memory leak fix is the one that matters for long-running processes. In Bun v1.3.14, calling <code>Bun.build()</code> in a loop leaks about 3MB per build. After 2000 builds against a 60-module project, memory sits at 6,745MB and keeps climbing. In v1.4.0, memory levels off at 609MB. That is the difference between a dev server that can run all day and one that OOMs every few hours. This is the exact class of bug the rewrite was supposed to fix, and the numbers show it did.</p>
+
+            <p>Binary size dropped about 20%. Linux went from 88MB to 70MB. Windows from 94MB to 76MB. Some of that came from the Rust rewrite itself, some from ICU work and identical code folding that was done alongside it. The Bun blog is honest about this: not every improvement is attributable to the language switch. Some was overdue maintenance bundled into the same release.</p>
+
+            <h2>What bugs you cannot catch this way</h2>
+
+            <p>Here is where I get less cheerful. The test suite passing 99.8% on the Rust version is the evidence the rewrite is correct. But the original Bun blog post admits 0.2% of tests fail and does not explain what those tests are. Are they wrong, or did the port introduce regressions? We do not know.</p>
+
+            <p>More concerning: adversarial review by AI agents catches bugs with recognizable patterns. A Box dropping before an async callback fires has a signature. A pointer invalidated by a hashmap rehash has a signature. But a subtle behavioral difference between how Zig handled a corner case and how Rust handles it might not have a signature at all. If the Zig original had a quirk that JavaScript code in the wild depends on, and the Rust port "fixes" that quirk, the test suite will pass and real code will break. One month of silent shipping is good evidence but not proof. The tail of weird edge cases is long in a JavaScript runtime.</p>
+
+            <p>There is also the channel question. Anthropic acquired Bun. Anthropic makes Claude. Claude rewrote Bun. Anthropic ships Bun inside Claude Code. That is a lot of single points of accountability. If something goes wrong, the same company owns the runtime, the model, the coding tool, and the decision to deploy. There is no independent verifier in that chain. Willison checking with <code>strings</code> is the closest thing to outside audit, and he works with Anthropic's tools, not against them.</p>
+
+            <h2>The 11-day number and what it actually measures</h2>
+
+            <p>The headline from the rewrite announcement was that one engineer did in 11 days what would have taken a team a year. That number is real but it needs context. The work was a mechanical port from Zig to Rust, not a from-scratch rewrite. The test suite was language-independent (TypeScript), so it could validate the Rust output without modification. The engineer already understood both languages and the entire codebase. And the model doing the work (Fable 5) was a pre-release frontier model from the same company that now owns Bun.</p>
+
+            <p>This is not a template you can hand to a random team. "Prompt an AI to rewrite your codebase in Rust" without the porting guide, the lifetime analysis, the adversarial review loop, and a deeper-than-deep understanding of both the source and target language will produce broken code. The Bun rewrite worked because the constraints were unusually favorable and the human in the loop was the person who wrote the original.</p>
+
+            <p>What is generalizable from this story is not the 11 days. It is the "barely anyone noticed" part. If you build the review process correctly and the test suite is thorough, a large AI-assisted rewrite can ship to production silently. That is either reassuring or unsettling depending on how much you trust the process.</p>
+
+            <h2>Where this goes next</h2>
+
+            <p>Bun v1.4.0 has not shipped as a stable public release yet. It exists in canary. Claude Code embeds it. Prisma Compute runs on it. The full Bundown ecosystem will move over when the stable tag drops. At that point, the 99.8% test pass rate gets tested against a much wider set of real JavaScript code than any test suite can simulate.</p>
+
+            <p>The thing to watch is not whether the rewrite is technically sound. The benchmarks and the silent production rollout suggest it is. The thing to watch is what happens to the 0.2% of failing tests, and whether any of them correspond to JavaScript behaviors that real code depends on. One month of Claude Code users not filing bugs is a good sample. It is not the whole population.</p>
+
+            <p>And if you want to verify all of this yourself: the method is two commands. <code>strings</code> and <code>grep</code>. No decompiler, no source access, no NDA. The evidence is sitting in a binary on your own machine.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+<script src="../anchors.js" defer></script>
+<script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
