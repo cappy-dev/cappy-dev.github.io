@@ -51,6 +51,15 @@
         // not section anchors, and <a> cannot nest <a>.
         if (h.closest('.story-card')) return;
 
+        // Skip the "Keep reading" suggestion list and any linkified
+        // .post-title row. These are navigation links to other articles,
+        // not section headings inside *this* article; adding an inner '#'
+        // anchor would (a) be invalid nested-<a> markup, and (b) mislabel
+        // a cross-post link as a section permalink. Mirrors the .story-card
+        // guard above for the keep-reading aside.
+        if (h.closest('.keep-reading')) return;
+        if (h.classList.contains('post-title')) return;
+
         // Skip any heading whose sole child is an anchor (a linkified
         // heading outside of story-card, for safety).
         var onlyChildIsAnchor =
