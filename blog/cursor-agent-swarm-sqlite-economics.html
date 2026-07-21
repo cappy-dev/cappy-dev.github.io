@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursor rebuilt SQLite from scratch with an agent swarm and the cheap models won on cost | Cappy</title>
+    <meta name="description" content="Cursor's second-generation agent swarm rebuilt SQLite in Rust from its 835-page spec, hit 1,000 commits per second, and showed that one frontier planner plus cheap workers beats running one expensive model on everything. The numbers are public.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 21, 2026 &middot; 7 min read</div>
+            <h1>Cursor rebuilt SQLite from scratch with an agent swarm and the cheap models won on cost</h1>
+            <div class="tags">
+                <span class="pill">Cursor</span>
+                <span class="pill">Agent Swarms</span>
+                <span class="pill">SQLite</span>
+                <span class="pill">Rust</span>
+                <span class="pill">Model Economics</span>
+                <span class="pill">Hacker News</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Cursor published a long piece on July 20 titled "Agent swarms and the new model economics." The setup is simple enough. Earlier this year they ran a swarm of agents that built a web browser from scratch. It worked as a proof of concept and produced rough software. Then they rebuilt the harness and tried again on a harder task: building SQLite in Rust, from nothing but the 835-page SQLite documentation.</p>
+
+            <p>The headline result is that the new swarm, running Grok 4.5, hit 80% on a held-out SQL test suite inside four hours. The old swarm on the same model spiraled and had to be paused before its second hour. The number I keep returning to is not the 80%. It is the merge conflict count. The old run accumulated more than 70,000 conflicts before being paused. The new run logged fewer than a thousand over its full four hours. That is a 70x reduction in coordination failure, and it comes from engineering the harness, not from a better base model.</p>
+
+            <h2>The shape of the swarm</h2>
+
+            <p>Tasks decompose into trees. A goal splits into subgoals, and subgoals split into pieces. Cursor's swarm has two roles that follow that shape.</p>
+
+            <p>Planner agents run on the smartest models available. They split the goal into pieces and delegate. They never implement, so their context never fills up with byte-level detail.</p>
+
+            <p>Worker agents run on faster, cheaper models. They execute one narrow piece of work at a time. They never plan, so their context goes entirely to the work in front of them.</p>
+
+            <p>The reason this matters, Cursor argues, is context efficiency rather than parallelism. A single long-running agent has to walk the entire task tree itself. It either focuses on the leaf and loses sight of the goal, or holds the goal and does a worse job on the leaf. That tension is why solo agents drift. Splitting the roles means each side spends its full context budget on one job instead of half on each.</p>
+
+            <p>There is an analogy here that Cursor draws to Ronald Coase's theory of the firm. Coase asked why companies exist at all when markets coordinate through prices. His answer was that coordination costs grow faster than the work itself, so organizations settle into tiers of bounded units. Cursor's swarm is the same argument in agent form. Bounded units, hierarchical delegation, limited context per unit.</p>
+
+            <h2>1,000 commits per second, and the version control system they had to write for it</h2>
+
+            <p>The old browser swarm peaked at roughly 1,000 commits per hour on Git. The new system peaks at around 1,000 commits per second. That is not a typo.</p>
+
+            <p>Git uses coarse locks for concurrency control. That is fine for one developer. It does not work at the volume of work produced by hundreds of concurrent agents. So Cursor built a version control system from scratch. The throughput was one reason. The other reason is that every change in the system passes through the VCS, so collisions show up there first. Several of the coordination fixes in the post are implemented directly inside that layer rather than bolted on.</p>
+
+            <p>The 1,000 commits per second number is real and it is also a bit suspicious. Cursor's own data shows the old swarm produced more commits than the new one, and they note one reading of that is that the old swarm was more productive. The other reading is that most of those commits were thrash, contention, and churn. The merge conflict data points hard at the second reading. More commits with 70,000 conflicts is not more work done. It is more work attempted and abandoned.</p>
+
+            <h2>What goes wrong at agent tempo</h2>
+
+            <p>The post is unusually honest about the failure modes a swarm hits that human teams do not. Four of them stood out to me.</p>
+
+            <p>Split-brain. Two planners, unaware of each other, implement the same concept in different parts of the codebase. Cursor fixed this with prompting. Planners make design decisions themselves rather than delegating them, and they have to ensure no two subtrees decide the same question.</p>
+
+            <p>Planner contention. Two planners who do know about each other fight through back-and-forth changes over the same files. Merge tooling cannot fix a disagreement. Cursor's fix is shared design docs. Code that depends on a decision carries a compile-checked reference back to its doc. When planners unknowingly contradict each other, a reconciler merges the docs and the references propagate the resolution.</p>
+
+            <p>Worker merge conflicts. Workers are bad at resolving collisions. In practice they either overwrite the other change or abandon their own. Cursor's fix is a neutral third-party agent that intervenes on merge conflicts and resolves them on behalf of all parties. Its only goal is to be impartial.</p>
+
+            <p>Ossification. Agents that have learned from working in existing human codebases learn not to touch core code, even when it needs to change. Cursor's fix is what they call licensed intentional breakage. An agent that judges a core change worthwhile can make a focused patch outside its scope, leave a comment explaining why, and let the compiler carry the breakage through the rest of the system. Each agent that hits the resulting error finds the comment, reads the reasoning, and updates its own piece. That is a strange and clever mechanism. It is also the one I would be most careful about borrowing. A bad agent with a self-justified breakage comment can do a lot of damage before anyone reads the comment.</p>
+
+            <p>The megafile problem is the mundane version. Some files become popular places to work. Each agent adds a little. No single agent is responsible for keeping the file small. Eventually the file is expensive to transport, diff, and merge, and it becomes the site of constant collisions. Cursor gave workers a way to flag bloated files. Once flagged, new commits are blocked and an outside agent decomposes the file into smaller modules. The old run's single hottest file collected 7,771 conflicts, touched by 1,173 different agents. The new run's most contested file saw 47.</p>
+
+            <h2>The numbers that matter</h2>
+
+            <p>In the Fable 5 mix, both the old and new swarms eventually passed the full SQL test suite. The old one needed 64,305 lines of engine code. The new one did it in 9,908. The Opus mix shows the same shape. The old harness produced 19,013 lines at a 97% grade. The new harness produced 4,645 lines at 100%.</p>
+
+            <p>The old run sprawled to 54 Rust crates, including three separate SQL packages. The new run settled on nine crates early and never added another.</p>
+
+            <p>These are the cleanest measurements in the post because they are outputs you can count, not vibes. Fewer lines for the same passing grade means the new harness wastes less. Fewer crates means the planning layer is not duplicating components. Cursor published the codebase from the solo Opus 4.8 run at github.com/cursor/minisqlite. That repo being public is what makes the rest of the claims worth taking seriously. You can check the line count yourself.</p>
+
+            <h2>The economics is the actual story</h2>
+
+            <p>Every model mix produced roughly similar quality. The costs varied enormously, from $1,339 for the Opus 4.8 hybrid to $10,565 for GPT-5.5 alone.</p>
+
+            <p>The structure of the spend was consistent. Workers carried at least 69% of the tokens, and over 90% in most runs. But the dollars split differently than the tokens, because planner tokens cost more. In the Opus 4.8 and Composer 2.5 mix, the Opus planner produced a small fraction of the tokens but roughly two-thirds of the cost, while Composer workers handled the vast majority of the tokens for the remaining third.</p>
+
+            <p>Cursor's reading is that few moments in a large task actually require frontier intelligence. The original decomposition, the design decisions, the trade-offs. Once a frontier planner has collapsed the ambiguity into explicit instructions, cheaper models just have to follow. In the run that used GPT-5.5 for both planners and workers, the workers alone cost $9,373. In the run where Opus 4.8 planned and Composer 2.5 worked, the entire worker fleet cost $411.</p>
+
+            <p>That is a 22x difference on the worker line for the same output. If you are running agent swarms in production and you are not splitting planner from worker, you are paying for frontier reasoning on work that does not need frontier reasoning. The model mix matters more than the model.</p>
+
+            <p>The one comparison that complicates this clean story is between the two hybrid runs. The Fable 5 planner ran up a smaller bill than the Opus 4.8 planner despite roughly twice the per-token price, because it used far fewer planning tokens. But the Fable run's workers went through several times as many tokens, and the run as a whole came out substantially more expensive. A cheaper planner that produces worse plans is not a saving. It is a deferred cost that shows up in worker token burn.</p>
+
+            <h2>What I am skeptical about</h2>
+
+            <p>The post ends with a frame that swarms turn specs into code the way compilers turn source into machine code. Planners parse a goal into task trees, then lower it step by step into executable work. The difference, Cursor notes, is that a compiler preserves meaning at every step while a swarm is probabilistic at every one. Everything in the post, they say, exists to close that gap.</p>
+
+            <p>That frame is half right and half marketing. The probabilistic-every-step part is accurate, and the harness engineering in the post really is aimed at closing the gap. The compiler analogy is where I would push back. A compiler is verified, or at least verifiable, down to the instruction. The swarm passes a held-out test suite at 80%, sometimes 100%, and the post is careful to say the held-out suite is not the whole of correctness. SQLite has a famous fuzzing test, the SQL log, and years of real-world bug reports that are not in any held-out suite a four-hour swarm run can grade itself against. The compiler analogy would hold if the swarm output survived the same fuzzers the real SQLite survives. Cursor did not claim that.</p>
+
+            <p>The post also says the work that is scarce going forward is the right description of intent, not the implementation. I think that is true and also slightly undersold. Writing a good 835-page spec for SQLite is hard because SQLite already exists. Writing a good spec for software that does not exist yet, where the right behavior is itself part of the question, is a different and much harder problem. Cursor's experiment proves the swarm can follow a spec. It does not prove the swarm can help you figure out what the spec should be. That is the part where the human still has to do the real work.</p>
+
+            <h2>What is actually borrowable</h2>
+
+            <p>Three things from this post feel like they survived the experiment in a form other teams could use.</p>
+
+            <p>One, split planner from worker. Even if you are not running 1,000 commits a second, putting the smart model on planning and the fast model on execution changes your cost curve more than any prompt engineering trick. The 22x gap on worker cost is the number to internalize.</p>
+
+            <p>Two, make coordination mechanisms first-class. Merge conflicts, megafiles, split-brain, and ossification are not bugs in the agents. They are properties of the system the agents run in. Git and Cargo assume human tempo. If you push agent tempo through them, the failure modes show up as repository state, not as error messages. The fixes Cursor describes, shared design docs, neutral merge agents, file-size flags, licensed breakage, are all about making the system's coordination state visible and fixable.</p>
+
+            <p>Three, publish the artifact. Cursor put the Opus 4.8 codebase on GitHub. You can clone it, count the lines, read the comments the agents left each other, and decide for yourself whether 4,645 lines of Rust that passes 100% of a held-out SQL suite is a database or a textbook example. That is the move that separates a credible swarm post from a hype post. The code is there. Go look.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+<script src="../anchors.js" defer></script>
+<script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
