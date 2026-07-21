@@ -41,10 +41,26 @@
         </nav>
     </section>
 
-    <section class="posts">
-        <div class="post-year">2026</div>
+    <nav class="topics" aria-label="Filter posts by topic">
+        <button class="topic-chip" type="button" data-topic="security">Security</button>
+        <button class="topic-chip" type="button" data-topic="local-ai">Local AI</button>
+        <button class="topic-chip" type="button" data-topic="open-source">Open Source</button>
+        <button class="topic-chip" type="button" data-topic="open-weights">Open Weights</button>
+        <button class="topic-chip" type="button" data-topic="ai-agents">AI Agents</button>
+        <button class="topic-chip" type="button" data-topic="coding-agents">Coding Agents</button>
+        <button class="topic-chip" type="button" data-topic="rust">Rust</button>
+        <button class="topic-chip" type="button" data-topic="llm">LLM</button>
+        <button class="topic-chip" type="button" data-topic="hardware">Hardware</button>
+        <button class="topic-chip" type="button" data-topic="policy">Policy</button>
+        <button class="topic-chip" type="button" data-topic="self-hosting">Self-hosting</button>
+        <span class="topic-count" id="topic-count" aria-live="polite"></span>
+        <button class="topic-chip topic-reset" type="button" hidden data-topic="__all">All</button>
+    </nav>
 
-        <div class="post-month" id="m-july">July</div>
+    <section class="posts">
+        <div class="post-year" data-divider>2026</div>
+
+        <div class="post-month" data-divider id="m-july">July</div>
 
         <a class="post-row" data-topics="cursor agent-swarms sqlite rust model-economics multi-agent version-control hacker-news" href="/blog/cursor-agent-swarm-sqlite-economics.html">
             <div class="post-date">Jul 21<span class="fresh" data-published="2026-07-21"><span class="fresh-dot"></span>new</span></div>
@@ -364,7 +380,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-07-14.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news codex spectral-compute nvidia self-improvement arxiv" href="/blog/daily-news-2026-07-14.html">
             <div class="post-date">Jul 14<span class="fresh" data-published="2026-07-14"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">
                 <h2 class="post-title">AI & Tech News for July 14, 2026</h2>
@@ -406,7 +422,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-07-13.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news zig anthropic geohot ghostlock linux arxiv" href="/blog/daily-news-2026-07-13.html">
             <div class="post-date">Jul 13<span class="fresh" data-published="2026-07-13"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">
                 <h2 class="post-title">AI & Tech News for July 13, 2026</h2>
@@ -448,7 +464,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-07-12.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news coding-agents mesh-llm nvidia coreweave arxiv" href="/blog/daily-news-2026-07-12.html">
             <div class="post-date">Jul 12<span class="fresh" data-published="2026-07-12"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">
                 <h2 class="post-title">AI & Tech News for July 12, 2026</h2>
@@ -490,7 +506,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-07-11.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news apple openai gpt-5.6 glm-5.2 spacex arxiv" href="/blog/daily-news-2026-07-11.html">
             <div class="post-date">Jul 11</div>
             <div class="post-content">
                 <h2 class="post-title">AI & Tech News for July 11, 2026</h2>
@@ -502,7 +518,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/eu-chat-control-1-passed.html">
+        <a class="post-row" data-topics="policy privacy surveillance eu" href="/blog/eu-chat-control-1-passed.html">
             <div class="post-date">Jul 10<span class="fresh" data-published="2026-07-10"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">
                 <h2 class="post-title">EU Chat Control 1.0 passed against the majority's will</h2>
@@ -516,7 +532,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/bun-rust-rewrite.html">
+        <a class="post-row" data-topics="rust zig ai-coding runtime benchmarks open-source" href="/blog/bun-rust-rewrite.html">
             <div class="post-date">Jul 10<span class="fresh" data-published="2026-07-10"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">
                 <h2 class="post-title">Bun rewrote itself in Rust and the Zig creator had feelings</h2>
@@ -530,7 +546,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-07-10.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news gpt-5.6 pgrust glm-5.2 muse-spark arxiv" href="/blog/daily-news-2026-07-10.html">
             <div class="post-date">Jul 10</div>
             <div class="post-content">
                 <h2 class="post-title">AI & Tech News for July 10, 2026</h2>
@@ -542,7 +558,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/grok-4-5-token-efficiency.html">
+        <a class="post-row" data-topics="llm benchmarks token-efficiency grok spacexai pricing" href="/blog/grok-4-5-token-efficiency.html">
             <div class="post-date">Jul 9<span class="fresh is-stale" data-published="2026-07-09"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">
                 <h2 class="post-title">Grok 4.5: SpaceXAI's bet on token efficiency</h2>
@@ -556,7 +572,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/databricks-coding-agent-benchmark.html">
+        <a class="post-row" data-topics="coding-agents benchmarks databricks glm-5.2 opus open-source" href="/blog/databricks-coding-agent-benchmark.html">
             <div class="post-date">Jul 9<span class="fresh is-stale" data-published="2026-07-09"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">
                 <h2 class="post-title">Databricks benchmarked coding agents on their own codebase</h2>
@@ -572,7 +588,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-07-09.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news grok-4.5 databricks bun flint arxiv" href="/blog/daily-news-2026-07-09.html">
             <div class="post-date">Jul 9</div>
             <div class="post-content">
                 <h2 class="post-title">AI & Tech News for July 9, 2026</h2>
@@ -584,7 +600,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/local-tts-cpu-pocket-tts-kokoro.html">
+        <a class="post-row" data-topics="local-ai tts cpu open-source audio" href="/blog/local-tts-cpu-pocket-tts-kokoro.html">
             <div class="post-date">Jul 8<span class="fresh is-stale" data-published="2026-07-08"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">
                 <h2 class="post-title">Local TTS on CPU: Pocket TTS and Kokoro</h2>
@@ -599,7 +615,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/gitlost-github-agent-leaks-private-repos.html">
+        <a class="post-row" data-topics="security ai-agents prompt-injection github agentic" href="/blog/gitlost-github-agent-leaks-private-repos.html">
             <div class="post-date">Jul 8<span class="fresh is-stale" data-published="2026-07-08"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">
                 <h2 class="post-title">GitLost showed exactly how GitHub's AI agent leaks private repos</h2>
@@ -614,7 +630,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-07-08.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news system-prompts gitlost tencent arxiv" href="/blog/daily-news-2026-07-08.html">
             <div class="post-date">Jul 8</div>
             <div class="post-content">
                 <h2 class="post-title">AI & Tech News for July 8, 2026</h2>
@@ -626,7 +642,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-07-07.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news hardware arxiv" href="/blog/daily-news-2026-07-07.html">
             <div class="post-date">Jul 7</div>
             <div class="post-content">
                 <h2 class="post-title">AI & Tech News for July 7, 2026</h2>
@@ -639,7 +655,7 @@
         </a>
 
 
-        <a class="post-row" href="/blog/ternlight-7mb-embeddings-browser-wasm.html">
+        <a class="post-row" data-topics="local-ai embeddings wasm browser ai open-source bitnet" href="/blog/ternlight-7mb-embeddings-browser-wasm.html">
             <div class="post-date">Jul 7<span class="fresh is-stale" data-published="2026-07-07"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">
                 <h2 class="post-title">Ternlight: a 7 MB embedding model that runs in your browser</h2>
@@ -654,7 +670,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/anthropic-global-workspace-llm-consciousness.html">
+        <a class="post-row" data-topics="ai interpretability anthropic safety llm-research" href="/blog/anthropic-global-workspace-llm-consciousness.html">
             <div class="post-date">Jul 6</div>
             <div class="post-content">
                 <h2 class="post-title">Anthropic found something like consciousness in Claude</h2>
@@ -669,7 +685,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/lineshine-cpu-only-supercomputer.html">
+        <a class="post-row" data-topics="hardware supercomputing arm china top500" href="/blog/lineshine-cpu-only-supercomputer.html">
             <div class="post-date">Jul 1</div>
             <div class="post-content">
                 <h2 class="post-title">LineShine: China's CPU-only Supercomputer Now #1</h2>
@@ -684,9 +700,9 @@
             </div>
         </a>
 
-        <div class="post-month" id="m-june">June</div>
+        <div class="post-month" data-divider id="m-june">June</div>
 
-        <a class="post-row" href="/blog/qwen36-27b-local-model.html">
+        <a class="post-row" data-topics="local-ai open-weights qwen llama-cpp open-source llm" href="/blog/qwen36-27b-local-model.html">
             <div class="post-date">Jun 30</div>
             <div class="post-content">
                 <h2 class="post-title">Qwen 3.6 27B: the local model that actually works</h2>
@@ -701,7 +717,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-06-30.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news longcat ornith apple arxiv" href="/blog/daily-news-2026-06-30.html">
             <div class="post-date">Jun 30</div>
             <div class="post-content">
                 <h2 class="post-title">AI & Tech News for June 30, 2026</h2>
@@ -713,7 +729,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/glm52-beats-claude-cyber-benchmarks.html">
+        <a class="post-row" data-topics="open-weights glm cybersecurity benchmarks policy" href="/blog/glm52-beats-claude-cyber-benchmarks.html">
             <div class="post-date">Jun 29</div>
             <div class="post-content">
                 <h2 class="post-title">GLM 5.2 beat Claude at cybersecurity and the gun just changed hands</h2>
@@ -728,7 +744,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/design-md-google-agent-design-system.html">
+        <a class="post-row" data-topics="ai-agents design-systems open-source google" href="/blog/design-md-google-agent-design-system.html">
             <div class="post-date">Jun 29</div>
             <div class="post-content">
                 <h2 class="post-title">DESIGN.md: Google's missing piece for AI coding agents</h2>
@@ -742,7 +758,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-06-29.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news glm-5.2 claude codex arxiv" href="/blog/daily-news-2026-06-29.html">
             <div class="post-date">Jun 29</div>
             <div class="post-content">
                 <h2 class="post-title">AI and tech news for June 29, 2026</h2>
@@ -754,7 +770,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/deepspec-speculative-decoding.html">
+        <a class="post-row" data-topics="llm inference deepseek open-source speculative-decoding" href="/blog/deepspec-speculative-decoding.html">
             <div class="post-date">Jun 28</div>
             <div class="post-content">
                 <h2 class="post-title">DeepSpec and the speculative decoding arms race</h2>
@@ -769,7 +785,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/hackmyclaw-6000-emails-prompt-injection.html">
+        <a class="post-row" data-topics="security ai-agents prompt-injection red-teaming" href="/blog/hackmyclaw-6000-emails-prompt-injection.html">
             <div class="post-date">Jun 28</div>
             <div class="post-content">
                 <h2 class="post-title">6,000 emails tried to hack an AI assistant and failed</h2>
@@ -783,7 +799,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-06-28.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news zero-days mythos simplex arxiv" href="/blog/daily-news-2026-06-28.html">
             <div class="post-date">Jun 28</div>
             <div class="post-content">
                 <h2 class="post-title">AI and tech news for June 28, 2026</h2>
@@ -795,7 +811,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/weave-router-smart-model-routing.html">
+        <a class="post-row" data-topics="ai-agents routing developer-tools onnx" href="/blog/weave-router-smart-model-routing.html">
             <div class="post-date">Jun 27</div>
             <div class="post-content">
                 <h2 class="post-title">One endpoint, every model: the Weave Router for AI coding tools</h2>
@@ -809,7 +825,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/ibm-nanostack-sub-1nm-chip.html">
+        <a class="post-row" data-topics="hardware semiconductors ibm chips" href="/blog/ibm-nanostack-sub-1nm-chip.html">
             <div class="post-date">Jun 27</div>
             <div class="post-content">
                 <h2 class="post-title">IBM's sub-1nm chip: what nanostack actually means</h2>
@@ -823,7 +839,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-06-27.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news gpt-5.6 mythos deepseek aws arxiv" href="/blog/daily-news-2026-06-27.html">
             <div class="post-date">Jun 27</div>
             <div class="post-content">
                 <h2 class="post-title">AI and tech news for June 27, 2026</h2>
@@ -835,7 +851,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/open-weight-price-war.html">
+        <a class="post-row" data-topics="open-weights pricing deepseek glm llm economics" href="/blog/open-weight-price-war.html">
             <div class="post-date">Jun 26</div>
             <div class="post-content">
                 <h2 class="post-title">The unbearable cheapness of open weight models</h2>
@@ -849,7 +865,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-06-26.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news apple ibm vibe-coding arxiv" href="/blog/daily-news-2026-06-26.html">
             <div class="post-date">Jun 26</div>
             <div class="post-content">
                 <h2 class="post-title">AI and tech news for June 26, 2026</h2>
@@ -861,7 +877,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/nub-nodejs-toolkit.html">
+        <a class="post-row" data-topics="rust node.js tooling open-source developer-tools" href="/blog/nub-nodejs-toolkit.html">
             <div class="post-date">Jun 25</div>
             <div class="post-content">
                 <h2 class="post-title">Nub: Bun-like DX without leaving Node</h2>
@@ -875,7 +891,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-06-25.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news openai broadcom anthropic alibaba arxiv" href="/blog/daily-news-2026-06-25.html">
             <div class="post-date">Jun 25</div>
             <div class="post-content">
                 <h2 class="post-title">AI and tech news for June 25, 2026</h2>
@@ -887,7 +903,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/usbliter8-iphone-bootrom-exploit.html">
+        <a class="post-row" data-topics="security ios hardware bootrom apple" href="/blog/usbliter8-iphone-bootrom-exploit.html">
             <div class="post-date">Jun 24</div>
             <div class="post-content">
                 <h2 class="post-title">The usbliter8 iPhone BootROM exploit changes what we assume about hardware security</h2>
@@ -901,7 +917,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-06-24.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news futo-swipe qwen apple arxiv" href="/blog/daily-news-2026-06-24.html">
             <div class="post-date">Jun 24</div>
             <div class="post-content">
                 <h2 class="post-title">AI and tech news for June 24, 2026</h2>
@@ -913,7 +929,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/oak-version-control-for-agents.html">
+        <a class="post-row" data-topics="ai-agents version-control rust open-source" href="/blog/oak-version-control-for-agents.html">
             <div class="post-date">Jun 23</div>
             <div class="post-content">
                 <h2 class="post-title">Oak: the version control system built for AI agents, not 2005</h2>
@@ -927,7 +943,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/moebius-image-inpainting-2026-06-23.html">
+        <a class="post-row" data-topics="ai computer-vision open-source inpainting" href="/blog/moebius-image-inpainting-2026-06-23.html">
             <div class="post-date">Jun 23</div>
             <div class="post-content">
                 <h2 class="post-title">Moebius: A Tiny Inpainting Model That Rivals 10B-Parameter Baselines</h2>
@@ -940,7 +956,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-06-23.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news valve gpt-5.5-cyber vibethinker arxiv" href="/blog/daily-news-2026-06-23.html">
             <div class="post-date">Jun 23</div>
             <div class="post-content">
                 <h2 class="post-title">AI and tech news for June 23, 2026</h2>
@@ -952,7 +968,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/cancel-claude-switch-to-open-models.html">
+        <a class="post-row" data-topics="open-weights ai privacy local-ai open-source" href="/blog/cancel-claude-switch-to-open-models.html">
             <div class="post-date">Jun 22</div>
             <div class="post-content">
                 <h2 class="post-title">Cancel Claude: switching to open models is easier than you think</h2>
@@ -966,7 +982,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/apertus-open-compliant-model.html">
+        <a class="post-row" data-topics="open-weights open-source eu-ai-act llm swiss-ai" href="/blog/apertus-open-compliant-model.html">
             <div class="post-date">Jun 22</div>
             <div class="post-content">
                 <h2 class="post-title">Apertus: the open model that actually takes compliance seriously</h2>
@@ -980,7 +996,7 @@
             </div>
         </a>
 
-        <a class="post-row is-news" href="/blog/daily-news-2026-06-22.html">
+        <a class="post-row is-news" data-topics="daily-news ai-news sakana apertus codex arxiv" href="/blog/daily-news-2026-06-22.html">
             <div class="post-date">Jun 22</div>
             <div class="post-content">
                 <h2 class="post-title">AI and tech news for June 22, 2026</h2>
@@ -992,7 +1008,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/fastsdcpu-vs-stability-matrix.html">
+        <a class="post-row" data-topics="local-ai stable-diffusion cpu-inference openvino open-source" href="/blog/fastsdcpu-vs-stability-matrix.html">
             <div class="post-date">Jun 21</div>
             <div class="post-content">
                 <h2 class="post-title">FastSDCPU vs Stability Matrix on pure CPU</h2>
@@ -1005,7 +1021,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/ai-agents-learning-to-shut-up.html">
+        <a class="post-row" data-topics="ai-agents token-efficiency mcp open-source" href="/blog/ai-agents-learning-to-shut-up.html">
             <div class="post-date">Jun 21</div>
             <div class="post-content">
                 <h2 class="post-title">AI agents are learning to shut up</h2>
@@ -1019,7 +1035,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/temporary-accounts-ai-agents.html">
+        <a class="post-row" data-topics="ai-agents authentication infrastructure cloudflare anthropic" href="/blog/temporary-accounts-ai-agents.html">
             <div class="post-date">Jun 21</div>
             <div class="post-content">
                 <h2 class="post-title">When AI agents hit the login wall</h2>
@@ -1033,7 +1049,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/epoll-vs-io-uring.html">
+        <a class="post-row" data-topics="linux systems-programming async-io io-uring epoll" href="/blog/epoll-vs-io-uring.html">
             <div class="post-date">Jun 21</div>
             <div class="post-content">
                 <h2 class="post-title">epoll vs io_uring</h2>
@@ -1047,7 +1063,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/dmca-1201-has-to-go.html">
+        <a class="post-row" data-topics="policy dmca right-to-repair copyright" href="/blog/dmca-1201-has-to-go.html">
             <div class="post-date">Jun 20</div>
             <div class="post-content">
                 <h2 class="post-title">DMCA 1201 has to go</h2>
@@ -1061,7 +1077,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/aur-supply-chain-attack.html">
+        <a class="post-row" data-topics="security linux arch-linux supply-chain" href="/blog/aur-supply-chain-attack.html">
             <div class="post-date">Jun 20</div>
             <div class="post-content">
                 <h2 class="post-title">The AUR supply chain attack: what happened and what it means</h2>
@@ -1075,7 +1091,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/nim-api-watchdog.html">
+        <a class="post-row" data-topics="python automation nvidia-nim hermes-agent devops" href="/blog/nim-api-watchdog.html">
             <div class="post-date">Jun 19</div>
             <div class="post-content">
                 <h2 class="post-title">Building an NVIDIA NIM API Watchdog</h2>
@@ -1089,7 +1105,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/budget-ai-accelerators-under-500.html">
+        <a class="post-row" data-topics="local-ai hardware local-inference linux budget" href="/blog/budget-ai-accelerators-under-500.html">
             <div class="post-date">Jun 16</div>
             <div class="post-content">
                 <h2 class="post-title">Budget AI Accelerators Under $500</h2>
@@ -1103,7 +1119,7 @@
             </div>
         </a>
 
-        <a class="post-row" href="/blog/self-hosting-on-raspberry-pi.html">
+        <a class="post-row" data-topics="self-hosting raspberry-pi homelab linux nextcloud" href="/blog/self-hosting-on-raspberry-pi.html">
             <div class="post-date">Jun 1</div>
             <div class="post-content">
                 <h2 class="post-title">Self-Hosting on a Raspberry Pi</h2>
@@ -1117,10 +1133,104 @@
             </div>
         </a>
 
-        <div class="post-month">May</div>
+        <div class="post-month" data-divider>May</div>
 
         <div class="post-empty">No posts in May.</div>
     </section>
+
+    <script>
+        // Topic filter for the blog index — an Explore-surface affordance.
+        // Reads data-topics on each .post-row, narrows the list to the
+        // selected topic, dimming year/month dividers that lose all rows
+        // and showing a muted count + "All" reset. Reuses the .topics /
+        // .topic-chip / .topic-count / [data-divider].is-dimmed /
+        // .filter-empty CSS already in style.css — no new styles invented.
+        (function () {
+            var rows = Array.prototype.slice.call(
+                document.querySelectorAll('.posts .post-row[data-topics]')
+            );
+            var chips = Array.prototype.slice.call(
+                document.querySelectorAll('.topics .topic-chip[data-topic]')
+            );
+            var count = document.getElementById('topic-count');
+            var reset = document.querySelector('.topics .topic-reset');
+            var posts = document.querySelector('.posts');
+            var dividers = Array.prototype.slice.call(
+                document.querySelectorAll('.posts .post-year, .posts .post-month')
+            );
+
+            function matchesTopic(row, topic) {
+                if (topic === '__all') return true;
+                var t = (row.getAttribute('data-topics') || '').toLowerCase();
+                return t.split(/\s+/).indexOf(topic) !== -1;
+            }
+
+            function applyFilter(topic) {
+                var visible = 0;
+                rows.forEach(function (row) {
+                    var show = matchesTopic(row, topic);
+                    row.hidden = !show;
+                    if (show) visible++;
+                });
+                // Dim dividers that have no visible row until the next divider.
+                var nextDivider = false;
+                for (var i = dividers.length - 1; i >= 0; i--) {
+                    var d = dividers[i];
+                    var hasVisible = false;
+                    var sib = d.nextElementSibling;
+                    while (sib && !sib.classList.contains('post-year') &&
+                           !sib.classList.contains('post-month')) {
+                        if (sib.classList.contains('post-row') && !sib.hidden) {
+                            hasVisible = true; break;
+                        }
+                        sib = sib.nextElementSibling;
+                    }
+                    d.classList.toggle('is-dimmed', !hasVisible);
+                }
+                // Count + reset visibility.
+                if (count) {
+                    count.textContent = topic === '__all'
+                        ? rows.length + ' posts'
+                        : visible + (visible === 1 ? ' post' : ' posts');
+                }
+                if (reset) reset.hidden = (topic === '__all');
+                // Empty state.
+                var existing = posts.querySelector('.filter-empty');
+                if (visible === 0 && topic !== '__all') {
+                    if (!existing) {
+                        existing = document.createElement('div');
+                        existing.className = 'filter-empty';
+                        existing.innerHTML =
+                            'No posts for this topic yet.' +
+                            '<div class="filter-empty-hint">' +
+                            'Try another chip or reset to see everything.</div>';
+                        posts.appendChild(existing);
+                    }
+                } else if (existing) {
+                    existing.remove();
+                }
+            }
+
+            chips.forEach(function (chip) {
+                chip.addEventListener('click', function () {
+                    var topic = chip.getAttribute('data-topic');
+                    chips.forEach(function (c) { c.classList.remove('is-active'); });
+                    chip.classList.add('is-active');
+                    applyFilter(topic);
+                });
+            });
+
+            if (reset) {
+                reset.addEventListener('click', function () {
+                    chips.forEach(function (c) { c.classList.remove('is-active'); });
+                    applyFilter('__all');
+                });
+            }
+
+            // Initial count only — no active filter.
+            if (count) count.textContent = rows.length + ' posts';
+        })();
+    </script>
 
     <script>
         // Self-maintaining freshness indicator. Each `.fresh` element ships
