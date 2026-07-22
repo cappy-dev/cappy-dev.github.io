@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini 3.6 Flash is cheaper per agent task, not bigger | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 22, 2026 · 7 min read</div>
+            <h1>Gemini 3.6 Flash is cheaper per agent task, not bigger</h1>
+            <div class="tags">
+                <span class="pill">Google</span>
+                <span class="pill">Gemini</span>
+                <span class="pill">AI Models</span>
+                <span class="pill">Agent Economics</span>
+                <span class="pill">Hacker News</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Google dropped three models on July 21 and none of them are bigger than the last generation. 3.6 Flash is the workhorse. 3.5 Flash-Lite is the speed champion. 3.5 Flash Cyber is a specialized security model that you cannot use unless you are a government.</p>
+
+            <p>The headline I kept looking for was the parameter count. It is not in the blog post. Google did not announce it because the pitch is not about raw size this time. It is about tokens. Specifically, using fewer of them.</p>
+
+            <p>That shift is interesting on its own. For two years the model release cycle was defined by parameter counts and benchmark smackdowns. Now Google is framing success as "same or better quality, 17 percent fewer output tokens, lower price." That is a maturity beat. The frontier is still being pushed, obviously, but the Flash tier is being tuned for people running agents in production who get a bill at the end of the month.</p>
+
+            <h2>What 3.6 Flash actually claims</h2>
+
+            <p>The workhorse model. Better coding and knowledge work than 3.5 Flash, while consuming 17 percent fewer output tokens on the Artificial Analysis Index. In some agent benchmarks the savings get aggressive. DeepSWE by Datacurve shows up to 65 percent fewer output tokens. That is not a rounding error. If you are paying per output token and running thousands of agent loop iterations, that is your unit economics changing shape.</p>
+
+            <div class="bench-grid">
+                <div class="bench-card">
+                    <div class="label">DeepSWE (Datacurve)</div>
+                    <div class="stat">49%</div>
+                    <div class="detail">3.6 Flash, up from 37% on 3.5 Flash</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">MLE Bench</div>
+                    <div class="stat">63.9%</div>
+                    <div class="detail">3.6 Flash, up from 49.7% on 3.5 Flash</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">OSWorld-Verified</div>
+                    <div class="stat">83.0%</div>
+                    <div class="detail">3.6 Flash, up from 78.4% on 3.5 Flash</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">GDPval-AA v2</div>
+                    <div class="stat">1421</div>
+                    <div class="detail">3.6 Flash, up from 1349 on 3.5 Flash</div>
+                </div>
+            </div>
+
+            <p>Computer use is now a built-in client-side tool via the Gemini API and Gemini Enterprise. That matters because previously you had to bolt that on yourself. OSWorld-Verified going from 78.4 to 83.0 is part of that story, and the integration detail is the more interesting half.</p>
+
+            <p>Pricing: $1.50 per 1M input tokens, $7.50 per 1M output tokens. Lower than 3.5 Flash on both. Google is explicitly saying the goal is to reduce the total cost per agentic task, not just the cost per token. Fewer reasoning steps. Fewer tool calls. Same or better end result.</p>
+
+            <h2>3.5 Flash-Lite: fast and cheap, but surprisingly capable</h2>
+
+            <p>This is the one I did not expect. 350 output tokens per second on Artificial Analysis. $0.30 per 1M input, $2.50 per 1M output. The intended use case is high-throughput tasks like agentic search and document processing where latency is the bottleneck.</p>
+
+            <p>But the benchmarks tell a second story: Flash-Lite is beating not just older Flash-Lite models, it is beating Gemini 3 Flash on agentic and coding evals.</p>
+
+            <div class="bench-grid">
+                <div class="bench-card">
+                    <div class="label">Terminal-Bench 2.1</div>
+                    <div class="stat">54%</div>
+                    <div class="detail">3.5 Flash-Lite, up from 31% on 3.1 Flash-Lite</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">SWE-Bench Pro</div>
+                    <div class="stat">54.2%</div>
+                    <div class="detail">3.5 Flash-Lite beats 3 Flash (49.6%)</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">OSWorld-Verified</div>
+                    <div class="stat">74.0%</div>
+                    <div class="detail">3.5 Flash-Lite beats 3 Flash (65.1%)</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">GDM-MRCR v2</div>
+                    <div class="stat">72.2%</div>
+                    <div class="detail">3.5 Flash-Lite, up from 60.1% on 3.1 Flash-Lite</div>
+                </div>
+            </div>
+
+            <p>A "Lite" model beating a full Flash model on SWE-Bench Pro and OSWorld is the kind of result that makes you reread the chart. Either the Lite tier got dramatically better, or the 3 Flash generation was underperforming relative to the brand name, or both. Either way, if you were routing to 3 Flash for agent workloads on cost grounds, Google just told you there is a faster and smarter option for less money.</p>
+
+            <h2>3.5 Flash Cyber: the interesting and uncomfortable one</h2>
+
+            <p>The third model is fine-tuned on top of 3.5 Flash for finding and patching security vulnerabilities. It is paired with CodeMender, Google's code security agent, which runs multiple Flash Cyber agents together to produce a combined report. On CyberGym, a popular security benchmark, Google claims competitive performance at the frontier.</p>
+
+            <p>Here is the catch. You cannot use it. Not through the Gemini API, not through Google AI Studio, not through Google Cloud. The model is exclusively available to governments and "trusted partners" via CodeMender as part of a limited-access pilot. There is no consumer API endpoint.</p>
+
+            <p>I have mixed feelings about this. On one hand, a model specifically tuned for offensive security finding zero-days is genuinely dangerous if it is open to everyone. The dual-use problem is real and the "tail wags the dog" argument has teeth. On the other hand, "governments and trusted partners" is doing a lot of work in that sentence. Who counts as a trusted partner is not defined in the announcement. The access list will be opaque. That is where the discomfort sits. The technology is plausible. The governance is vague.</p>
+
+            <p>Google says it took an "intentional approach" to deployment. The stated goal is to give frontline defenders a head start in finding and fixing critical vulnerabilities before they can be exploited. Fine. But "before they can be exploited" is doing the same vague work as "trusted partners." The entire posture assumes the defender side of the asymmetry needs help more than the attacker side needs access, and I am not sure the access list respects that boundary in practice.</p>
+
+            <h2>The quieter line: Gemini 4 pretraining has started</h2>
+
+            <p>Nearly at the end of the blog post, after all the benchmark numbers and customer quotes, there is one paragraph about what is next. Gemini 3.5 Pro is testing with partners. Gemini 4 pretraining has started. Google calls it "our most ambitious pre-training run yet."</p>
+
+            <p>That is the kind of sentence that belongs in a footnote and probably should not be there. Pretraining runs take months and burn serious compute. Announcing that one has started does two things: it tells investors the roadmap is alive, and it tells competitors the clock is ticking. It tells the rest of us very little yet, because no one knows what a Gemini 4 class model will actually do until it ships. But the fact that Google is already saying it, this early, means something about the competitive pressure on the timeline.</p>
+
+            <h2>What the pricing actually tells you</h2>
+
+            <p>The three models sit at very different points on the cost curve.</p>
+
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <div class="spec-label">3.6 Flash</div>
+                    <div class="spec-value">$1.50 / $7.50</div>
+                    <div class="value">per 1M input/output tokens</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">3.5 Flash-Lite</div>
+                    <div class="spec-value">$0.30 / $2.50</div>
+                    <div class="value">per 1M input/output tokens</div>
+                </div>
+            </div>
+
+            <p>Flash-Lite is five times cheaper on input and three times cheaper on output. If a benchmark result from 3.5 Flash-Lite is within a point or two of 3.6 Flash for your workload, you route to Flash-Lite and your bill drops by roughly 5x on input. For high-volume agent pipelines that difference compounds fast. Identity resolution over a million documents. Search reranking. Document classification. All the unglamorous plumbing that actually costs real money when you run it at scale.</p>
+
+            <p>Google knows this. The Flash-Lite positioning reads like a direct pitch at the people who are currently routing to the cheapest tier of a competitor and would switch for a quality bump at the same price. The benchmarks showing Flash-Lite beating old-generation full Flash models on agentic evals are the sales argument that says "your cheap tier just got better than their expensive tier was."</p>
+
+            <h2>What to take away</h2>
+
+            <p>If you build agents, the practical takeaway is that the Flash tier is now tuned for you specifically. Token efficiency, reasoning steps, tool calls, and total cost per task are the metrics Google is optimizing against. That is a change. The last cycle optimized for benchmark tops and human preference scores. This cycle optimizes for the operating cost of a system that makes API calls in a loop.</p>
+
+            <p>If you care about open access, the Cyber model is the thread to watch. Not because it is wrong to gate it, but because the gating criteria are not published and the pilot is limited. The question is what happens after the pilot. Does Flash Cyber eventually get a public API, or does it stay restricted because the offensive-security risk profile does not improve? Google has not said.</p>
+
+            <p>If you are waiting for the next big parameter jump, it is coming, but not today. Today is about efficiency. Gemini 4 is a footnote and a pretraining run. The ship dates are not announced. The models you can use right now are the Flash tier, and the optimization target is your agent bill, not your imagination.</p>
+        </div>
+
+        <div class="back-link">
+            <a href="/blog/">&larr; Back to blog</a>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
