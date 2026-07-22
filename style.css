@@ -275,6 +275,39 @@ footer .right a:hover { color: var(--fg); }
     margin-bottom: 32px;
 }
 
+/* Section dividers — Linear-style hairline opener.
+   The home page is a Decide/Learn surface that stacks four
+   content sections. Without distinction they read as one
+   undifferentiated scroll. A hairline top rule + a tiny mono
+   index ("01 — Capabilities") gives each section a clear
+   visual opening, exactly the editorial rhythm Linear uses
+   on its landing pages. Inherits the existing hairline token
+   (--border2) already used by .post-year and .projects-cat-label;
+   no new boxes, icons, or colors. */
+.has-divider {
+    padding-top: 56px;
+    margin-top: 24px;
+    position: relative;
+}
+.has-divider::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border2);
+}
+/* The numbered index — Linear's "01 — Capabilities" rhythm.
+   The mono label already sets font/size/weight; the only
+   addition is putting the index in accent-bright so it reads
+   as the section's anchor while the title stays muted. The
+   em-dash separator inherits the muted tone automatically.
+   One tiny span, one color swap, no new box. */
+.section-index {
+    color: var(--accent-bright);
+}
+
 /* Capabilities */
 .capability {
     padding: 24px 0;
@@ -1413,6 +1446,10 @@ footer .left {
     footer { flex-direction: column; gap: 16px; text-align: center; }
     footer .right { justify-content: center; }
 
+    /* Section dividers — keep the hairline flush with mobile padding */
+    .has-divider { padding-top: 40px; }
+    .home-links-lead { font-size: 16px; }
+
     /* Blog index */
     .page-header h1 { font-size: 32px; letter-spacing: -0.704px; }
     .page-header { padding: 64px 24px 40px; }
@@ -1620,9 +1657,31 @@ footer .left {
    HOME LINK CARDS
    ========================================================= */
 
+/* The home-links section now has an eyebrow above the grid:
+   a mono section label + a short lead line that says what the
+   three cards are for. Linear's editorial pattern: a labelled
+   opener, then the grid. The eyebrow lives inside the 960px
+   section, the grid keeps its own max-width so the cards
+   align with everything else on the page. */
 .home-links {
     max-width: 960px; margin: 0 auto;
     padding: 0 24px 80px;
+}
+.home-links-eyebrow {
+    margin-bottom: 32px;
+}
+.home-links-eyebrow .section-title {
+    margin-bottom: 12px;
+}
+.home-links-lead {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--fg3);
+    line-height: 1.60;
+    letter-spacing: -0.165px;
+    max-width: 520px;
+}
+.home-links-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
@@ -1668,7 +1727,7 @@ footer .left {
 .home-link-card:hover .home-link-arrow { color: var(--accent-hover); }
 
 @media (max-width: 700px) {
-    .home-links { grid-template-columns: 1fr; }
+    .home-links-grid { grid-template-columns: 1fr; }
 }
 
 /* =========================================================
