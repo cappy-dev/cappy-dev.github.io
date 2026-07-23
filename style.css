@@ -544,9 +544,28 @@ footer .right a:hover { color: var(--fg); }
     max-width: 720px; margin: 0 auto;
     padding: 0 24px 80px;
 }
+/* Keep Reading section — the "where next" moment after an article.
+   This is the only section heading on the site that previously broke
+   the established Linear mono-label + hairline rhythm used by the home
+   page ("01 — Capabilities"), the blog index (.post-year), and the
+   projects page (.projects-cat-label). Promoting it to the same recipe
+   means a reader finishing any of the 50+ articles sees a consistent
+   section-opening cue across the whole site, with no HTML changes —
+   the <h2 class="keep-reading-title"> already exists, injected by
+   keep-reading.js. The "Keep reading" label in JetBrains Mono caps +
+   accent-bright, sitting above a hairline, reads as the start of a new
+   surface rather than a heading floating in the middle of one. */
+.keep-reading {
+    padding-top: 24px;
+}
 .keep-reading .keep-reading-title {
-    font-size: 24px; font-weight: 590; color: var(--fg);
-    margin-bottom: 24px;
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; font-weight: 500;
+    color: var(--accent-bright);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 28px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border2);
 }
 .keep-reading .post-row {
     /* reuse existing post-row styling for consistency */
