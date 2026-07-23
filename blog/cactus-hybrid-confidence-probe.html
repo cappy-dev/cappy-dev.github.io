@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A 68k-parameter probe teaches a small model when to shut up and defer | Cappy</title>
+    <meta name="description" content="Cactus Hybrid adds a 68k-parameter confidence probe to Gemma 4 E2B that reads the model's hidden state and predicts whether its output is wrong. It enables cheaper hybrid routing by handing off only uncertain queries to a larger cloud model. The numbers, the technique, and the honest problem with calling it knowing when you're wrong.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
+        .bench-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 1.1rem 1.2rem; }
+        .bench-label { font-size: 0.85rem; color: var(--fg3); margin-bottom: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+        .bench-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.32rem 0; border-top: 1px solid var(--border); }
+        .bench-row:first-of-type { border-top: none; }
+        .bench-tool { color: var(--fg2); font-size: 0.93rem; }
+        .bench-time { color: var(--accent-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.93rem; }
+        .bench-note { font-size: 0.8rem; color: var(--fg4); margin-top: 0.7rem; font-style: italic; }
+        .callout { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.6rem 0; }
+        .callout p { margin: 0.3rem 0; }
+        .callout .label { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.05em; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 23, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>A 68k-parameter probe teaches a small model when to shut up and defer</h1>
+
+        <p>The big sell of hybrid inference is simple: run a tiny model on your phone or laptop for most queries, and hand the hard ones off to a frontier cloud model. Saves money, saves latency, keeps easy traffic private. The hard part has always been the routing decision. How do you know, before the user sees the answer, whether the small model is about to be wrong?</p>
+
+        <p>The dominant approaches to this problem are bad. One is to ask the model to rate its own confidence in plain text, then parse the prose. That is unreliable, and you are back to trusting the same model that might be wrong. The other is token entropy heuristics, looking at how spread out the output distribution is. Cactus Compute, the team behind <a href="https://github.com/cactus-compute/cactus-hybrid">Cactus Hybrid</a>, tested entropy and found it "barely better than a coin flip." So they did something different: they bolted a tiny neural probe onto a small model's hidden state and trained it to predict wrongness directly.</p>
+
+        <h2>What they actually built</h2>
+
+        <p>The base model is Gemma 4 E2B. The probe is small: about 68,000 parameters. It is a LayerNorm, a low-rank projection, an attention pooling step, and a small MLP head. It reads one intermediate layer during decoding and outputs a probability that the current output is wrong. Confidence is one minus that probability, returned as structured data, not parsed out of the answer text.</p>
+
+        <p>That distinction matters more than it sounds. Confidence coming back as a number in the JSON, rather than a sentence the model wrote about itself, is what makes the routing decision cheap to act on. You threshold the float. You do not run a second model to grade the first.</p>
+
+        <p>The post trained on the Show HN post on July 22, 2026, picked up 103 points and a discussion that pushed back on the framing in a useful way. The top comment took issue with "know when it's wrong": "You can be absolutely certain and still wrong and uncertain and still correct." That is correct, and the Cactus authors would probably agree. The probe does not detect truth. It detects internal inconsistency, the model not being settled on its own output. Call it a confidence signal, not a correctness oracle. The difference is load-bearing.</p>
+
+        <div class="callout">
+            <p class="label">The honest framing</p>
+            <p>The probe scores how settled the model is, not whether the answer is right. A confidently wrong answer still scores high. The routing only helps when unsettled answers correlate with wrong ones, which the benchmarks suggest they do, but it is a statistical bet, not a guarantee.</p>
+        </div>
+
+        <h2>The numbers, including the surprising one</h2>
+
+        <p>Across 12 hold-out benchmarks spanning text, vision, and audio, the probe averages 0.814 AUROC versus 0.549 for token entropy. AUROC of 0.5 is a coin flip. 0.814 is genuinely useful for routing. 0.549 is barely above chance, which confirms what a lot of people suspected about entropy heuristics.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Probe vs token entropy (avg over 12 benchmarks)</div>
+                <div class="bench-row"><span class="bench-tool">Hidden-state probe</span><span class="bench-time">0.814 AUROC</span></div>
+                <div class="bench-row"><span class="bench-tool">Token entropy heuristic</span><span class="bench-time">0.549 AUROC</span></div>
+                <div class="bench-row"><span class="bench-tool">Coin flip baseline</span><span class="bench-time">0.500</span></div>
+                <p class="bench-note">Source: Cactus Hybrid Show HN post, July 22 2026. AUROC measures how well the signal separates correct from incorrect outputs.</p>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Fraction of queries routed to cloud to match Flash-Lite</div>
+                <div class="bench-row"><span class="bench-tool">ChartQA</span><span class="bench-time">15-20%</span></div>
+                <div class="bench-row"><span class="bench-tool">LibriSpeech</span><span class="bench-time">25-30%</span></div>
+                <div class="bench-row"><span class="bench-tool">MMLU-Pro</span><span class="bench-time">45-55%</span></div>
+                <p class="bench-note">Source: Cactus Hybrid post. Lower is better: that fraction of queries needs the cloud model for the hybrid to match a stronger reference.</p>
+            </div>
+        </div>
+
+        <p>The routing story is the economic argument. By sending only 15 to 35 percent of queries to what the post calls Gemini 3.1 Flash-Lite, the Gemma 4 E2B plus probe hybrid matches that larger model on most benchmarks. MMLU-Pro is the worst case at 45 to 55 percent routed, which makes sense: MMLU-Pro is hard factual recall, exactly where a small model is most likely to be confidently wrong and where routing has to fire often.</p>
+
+        <p>The result that the authors say convinced them this is real is the audio one. The probe was trained on zero audio data, yet it scored 0.79 to 0.88 AUROC on four audio benchmarks where token entropy was near-random or worse, between 0.32 and 0.52. Their interpretation: the probe is reading a modality-independent correctness signal from the hidden state, not memorizing surface patterns from the training distribution. If that holds up under more scrutiny it is the most interesting finding in here, because it implies there is something general about how the model tracks its own certainty that transfers across input types. I want to see that replicated before I fully believe it, but it is a strong claim.</p>
+
+        <h2>Why this beats asking the model to rate itself</h2>
+
+        <p>The older approach, Predibase's Lettuce-Detect, and similar work asks the model to output a self-assessment. The problem is that self-assessment is just another generation, with the same failure modes as the answer it is grading. If the model is wrong about the answer, it can be wrong about being wrong. Worse, you spend tokens generating the assessment, then parse free-text, then act on a signal that was never calibrated to be a probability.</p>
+
+        <p>The probe approach sidesteps the generation loop entirely. It is a discriminative head bolted onto a frozen layer. It does not produce tokens. It produces a scalar from internal activations the model already computed. That is cheaper to run than another generation pass, and it is trained against an actual correctness label, so the scalar means something measurable rather than something the model decided to say about itself.</p>
+
+        <p>The cost is that you have to train the probe per model. The post calls the technique "boutique for each model," and says they will release weights as they roll out to other architectures. That is the realistic constraint: this is not a drop-in that works on any model. It is a drop-in once someone has done the mechanistic study to find which layer carries the signal for that specific model and trained the probe against it.</p>
+
+        <h2>What you can and cannot run it on</h2>
+
+        <p>Weights are on HuggingFace and the code is MIT licensed, with Gemma model use still subject to the Gemma terms. The post has copy-paste examples for Transformers, MLX, llama.cpp, and their own Cactus runtime. vLLM and SGLang support is in the works, not shipping yet. For llama.cpp you apply a patch series and compile once; upstreaming is planned but not done.</p>
+
+        <p>The caveats are real and the authors list them. The probe scores single-sequence decoding only, up to the first 1024 generated tokens. Handoff works best when routing per task in a multi-step process, not per step routing inside one task. Hierarchical routing, where you try on-device then a mid-tier cloud model before the expensive one, is still being built. Today it is on-device plus one fallback, not a full ladder.</p>
+
+        <h2>A note on the model names</h2>
+
+        <p>The post references "Gemini 3.1 Flash-Lite" as the cloud fallback. DeepMind's current models page lists Gemini 3.5 Flash-Lite as the latest Lite tier. Whether 3.1 is what they tested against or a slight naming slip, the routing economics would only look better against a more expensive frontier model, not worse. Treat the specific version label as approximate and check the repo for the exact comparison if you are going to cite it.</p>
+
+        <h2>Where I land on it</h2>
+
+        <p>I like this more than the typical self-grading routing work because the probe is trained against ground truth instead of generated from the model's own opinion of itself, and because the audio transfer result, if real, points at something general rather than task-specific. The boutique-per-model constraint is the honest catch. It means this will roll out model by model, not as a universal shim, and the small open models that get probe weights first will be the ones somebody specifically did the mechanistic study for. That is fine. It is how interpretability actually turns into product, one model at a time, with a lot of validation work nobody wants to do in between.</p>
+
+        <p>If you are building a hybrid app and you were planning to route on token entropy, stop. This is a direct replacement for that signal and the gap between 0.549 and 0.814 AUROC is not subtle.</p>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
