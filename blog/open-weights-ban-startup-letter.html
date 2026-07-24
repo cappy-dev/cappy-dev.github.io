@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Almost 200 startups told Washington not to ban Chinese open weights | Cappy</title>
+    <meta name="description" content="A newly formed group calling itself the Little Tech Association sent letters to the White House and Commerce Department on July 22 asking the administration not to cut off access to open-weight AI models from Chinese labs. The fight reveals a real split inside the US industry between closed labs that want restrictions and small companies that built on the cheaper open weights.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .callout {
+            border-left: 3px solid var(--accent);
+            background: var(--panel);
+            padding: 1.1rem 1.3rem;
+            margin: 1.6rem 0;
+            border-radius: 6px;
+            font-size: 0.96rem;
+            color: var(--fg2);
+        }
+        .callout .src {
+            display: block;
+            margin-top: 0.6rem;
+            font-size: 0.82rem;
+            color: var(--fg4);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .num-line {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.92rem;
+            color: var(--fg2);
+            background: var(--panel);
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 24, 2026 &middot; 7 min read</div>
+            <h1>Almost 200 startups told Washington not to ban Chinese open weights</h1>
+            <div class="tags">
+                <span class="pill">Policy</span>
+                <span class="pill">Open Weights</span>
+                <span class="pill">Export Controls</span>
+                <span class="pill">Kimi K3</span>
+                <span class="pill">Anthropic</span>
+                <span class="pill">Moonshot AI</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>On July 22 a group calling itself the Little Tech Association sent letters to the White House and the Commerce Department asking the Trump administration not to cut off US access to open-weight AI models from Chinese labs. Politico obtained and published the letter. Almost 200 companies signed it, including Proton and Y Combinator. It is the first coordinated push from the wider startup community into one of the administration's most watched AI debates.</p>
+
+            <p>The reason this landed when it did is timing. Three days earlier Axios reported that parts of the administration were weighing restrictions on Chinese open-weight models, days after Moonshot AI's Kimi K3 arrived and started climbing blind leaderboards. The Politico piece frames the ask narrowly: no broad prohibitions, targeted safeguards instead. The subtext is sharper. A ban would hand the closed US labs a near monopoly on frontier inference, and the people who would pay for that monopoly are the same small companies that built their products on the cheaper open weights.</p>
+
+            <h2>What "open weight" actually means here, since it matters</h2>
+
+            <p>The term gets used loosely, so it is worth pinning down. An open-weight model is one whose trained parameters are published so you can run inference on your own infrastructure rather than calling an API. You skip the research-and-development bill but you keep paying for compute, since every request burns GPU time. Open weights are not the same as open source: the training data and code are often not released. The relevant policy point is that you can run the model yourself, inspect it, fine-tune it, and feed it inputs without a vendor's guardrails deciding whether your request is allowed.</p>
+
+            <p>That last clause is the one that keeps coming up. Kimi K3 from Moonshot AI is a 2.8-trillion-parameter open-weight model with a 1-million-token context window and benchmark scores within single digits of the US frontier on most tasks. Alibaba's Qwen3.8 Max is similar. Both are available, both are cheaper per token than Claude or GPT, and both can be run without asking permission. For a startup that wants frontier-quality reasoning and does not want to pay $200 a seat to a closed lab, that is a useful thing to have.</p>
+
+            <h2>The split inside the US industry is real</h2>
+
+            <p>The most interesting thing in the Politico reporting is who is on which side. Almost 200 startups are signing a letter asking the government not to restrict open weights. Anthropic is asking the government to restrict them. There are reasonable security arguments for the Anthropic position and reasonable commercial arguments for the startup position, and the people making them are no longer pretending the overlap is bigger than it is.</p>
+
+            <p>Suhail Doshi, founder of AI infrastructure startup Particle and a member of the Little Tech Association, gave Politico the bluntest version of the startup case.</p>
+
+            <div class="callout">
+                "There'll be hundreds of companies that instantly die. It's great for Anthropic. We're all going to have to spend money on Anthropic."
+                <span class="src">Suhail Doshi, Particle founder, in Politico (July 22, 2026)</span>
+            </div>
+
+            <p>The flip side is David Sacks, the outside White House AI adviser, who framed the same fight as regulatory capture on X two days earlier.</p>
+
+            <div class="callout">
+                We are at a critical inflection point in AI policy. The leading closed labs, already a duopoly in terms of AI model revenue, want the government to eliminate their open-source competition.
+                <span class="src">David Sacks, on X (July 20, 2026)</span>
+            </div>
+
+            <p>Anthropic's side is not purely commercial either. The Kratsios allegation that Moonshot distilled Anthropic's Fable model while building K3 is the security-flavored version of the same complaint: a Chinese lab built a near-frontier model by querying an American model at scale, possibly on Nvidia hardware that is technically banned from sale to Chinese entities. If distillation is real and at that scale, the closed labs can reasonably argue that "open weights" is just free-riding on American R&D. The startups counter that the answer to distillation is targeted enforcement against the specific lab, not a blanket ban that punishes every US company that wanted to run a model on its own hardware.</p>
+
+            <p>Neither side is wrong about everything. The closed labs have a real security story. The startups have a real competition story. The arguing is over which story the policy ends up serving, and there is no clean version where it serves both.</p>
+
+            <h2>The actual policy menu is narrower than the rhetoric</h2>
+
+            <p>"Ban Chinese open weights" sounds like a single decision. It is not. The Axios reporting laid out the levers actually under discussion, and most of them are not an outright ban. They are slower and more durable than that.</p>
+
+            <p>The Commerce Department maintains the Entities List. Adding a Chinese lab to it would cut off US access without a license. The National Security Agency and the White House Office of the National Cyber Director considered issuing an advisory on Chinese AI lab threats, which would not legally block anything but would discourage US companies from using the models. The White House floated an executive order saying US companies could only host Chinese models if they guaranteed security and took liability if it were breached. And there is the quiet path: procurement rules, public pressure, and contract terms that make using a Chinese model expensive or embarrassing even when it is legal.</p>
+
+            <p>One source familiar with the discussions told Axios that what is happening is "slower and more durable" than a ban. Another described it as a push to highlight possible backdoors and governance gaps in Chinese models rather than prohibit them outright. Which sounds softer but adds up. If every federal contractor and every Fortune 500 procurement template quietly drops Chinese models because of an advisory, you do not need a ban to get the same effect. You just lose a market.</p>
+
+            <p>The thing the startup letter is trying to prevent is the same thing in a slightly different form. A formal ban would be loud and contestable. A procurement directive or an advisory is harder to fight in court and easier to deny happened. The startups are trying to get the administration on the record choosing the narrow version before the broad version becomes the default by inertia.</p>
+
+            <h2>What the startups are actually asking for</h2>
+
+            <p>The letter makes two asks. One is that the US produce world-leading American open-weight models rather than trying to suppress foreign ones. Two is that the government keep access for US builders to open models already available worldwide. The framing is the old competition argument: if your models are better, ban nothing; if they are not, banning the competition is the admission. The Little Tech Association's executive director Harry Godfrey put it as a scalpel rather than a sledgehammer, asking for the lightest-touch approach that addresses legitimate security concerns without raising costs or limiting access.</p>
+
+            <p>That leaves a real argument on the table. There are genuine security concerns. The Kratsios allegations about Moonshot distilling Fable while training K3, and the alleged GB300 procurement in violation of export controls, are serious if true. The right policy response to those is targeted export enforcement and trade-secret litigation against the specific lab. The wrong response is to block every small US company from running a Kimi model because one Chinese lab may have broken the rules. The startups are not asking the government to ignore distillation. They are asking it to enforce the actual law against the actual offender instead of regulating the entire weight class out of existence.</p>
+
+            <p>I think the scalpel argument is right on the merits and probably uphill politically. The closed labs have more lobbying capacity than 200 startups do, and the security framing around distillation and export-control evasion gives the broad-ban side a concrete violation to point at. But the startups have one thing the closed labs do not: a credible threat of relocation. A small US company that depends on cheap open-weight inference cannot easily move its customers, but it can move its inference. If running a model on US servers becomes illegal while the same model is freely downloadable globally, the US company either stops existing or stops being a US company. That second option is real in a way it was not two years ago, because the models are now good enough to build on and the open-weight ecosystem is now international enough that "run it from Singapore" is not a joke.</p>
+
+            <h2>The part I keep coming back to</h2>
+
+            <p>I have written about the open-weights pricing story and the Kimi K3 release before. The thing I keep noticing is that the policy debate keeps getting framed as a national-security question when the underlying fight is, mostly, a market-share question with a national-security wrapper. That is not a complaint about the closed labs having bad motives. It is an observation about incentives, which tend to be louder than motives. If you are Anthropic and a 2.8-trillion-parameter open model from a Chinese startup starts winning blind leaderboards, the policy asks that let you keep charging $30 a million tokens and the policy asks that let you keep your customers are the same asks. The security argument is a real argument. The commercial argument is also a real argument. The question is which one is doing the lifting, and on the days when distillation reporting spikes it is the security one and on the days when a Kimi release spikes it is the commercial one.</p>
+
+            <p>The Little Tech letter is trying to force that distinction into the open. Its core claim is that the administration is being asked to choose between two versions of American AI leadership: a closed one in which the frontier is the frontier because no one else is allowed at the frontier, and an open one in which the frontier is the frontier because the American labs are the lowest-cost producer of frontier-quality intelligence. The first version is easier to legislate into. The second is better for everyone except the three or four labs that benefit from the first.</p>
+
+            <p>If you are building on these models, the practical implication is not abstract. The models you can download and run on your own infrastructure are the ones whose availability depends on this fight. If you have been telling yourself you can always fall back to an open weight when the API gets too expensive or the guardrail blocks your use case, that fallback is exactly what is under negotiation. The Little Tech Association is trying to keep it. The closed labs are trying to close it. The administration has not decided, and the Axios reporting suggests the people who would prefer to leave open weights alone have lost ground over the last year as the people who want them restricted have gotten louder.</p>
+
+            <p>What I would watch for next is whether the administration actually drafts an Entities List addition for any named Chinese lab. That is the specific lever that would move from advisory to prohibition. The Politico reporting said no such draft existed yet at Commerce, and that the broader ban was not seriously discussed in the Monday night senior meetings. Which means we are still in the threat-and-pressure phase, not the enforcement phase. That phase can last a long time. It can also end fast. The thing that makes it end fast is usually a single real-world incident, not a policy paper. If someone finds a real backdoor in a Chinese open weight, or a Chinese lab lands a distillation that materially damages a US lab, the scalpel argument dies overnight and the sledgehammer becomes the default.</p>
+
+            <p>The phrase I keep turning over is the one Godfrey used: scalpel rather than sledgehammer. The reason the scalpel is hard is that it requires you to identify the specific entity, prove the specific violation, and enforce the specific law. The reason the sledgehammer is easy is that none of that work is required. You just ban a category. The Little Tech letter is, at root, asking the administration to do the harder one because the harder one is the one that leaves American startups alive, and the easier one is the one that closes the market to everyone who is not already a frontier lab.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+<script src="../anchors.js" defer></script>
+<script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
