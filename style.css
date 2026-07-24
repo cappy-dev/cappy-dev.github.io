@@ -803,6 +803,28 @@ article h3 {
     transition: padding-left 0.15s ease;
 }
 
+/* H4 — the missing fourth tier of the article reading ladder.
+   h1/h2/h3 each step down deliberately (40 → 24 → 17px, --fg → --fg2,
+   weight 590 holding to 17px, then hierarchy handed to scale + ink).
+   h4 had no rule at all, so any article using <h4> fell through to
+   the browser default — a bold black 16-ish px block that broke the
+   rhythm the three tiers above it had established. This closes the
+   gap with one more tier in the same register: smaller than h3, ink
+   one step dimmer (fg3), the same weight discipline (510, matching
+   nav/section-label weight), tighter leading to read as a compact
+   sub-heading rather than a new section. No box, no icon, no color —
+   scale and ink carry the hierarchy, exactly the way h2 and h3 do.
+   Margin is compressed versus h3 (28px top / 10px bottom) so a run
+   of h4s under one h2/h3 reads as a list of sub-points, not a fresh
+   section each. */
+.article-body h4,
+article h4 {
+    font-size: 15px; font-weight: 510; color: var(--fg3);
+    letter-spacing: -0.18px; line-height: 1.40;
+    margin: 28px 0 10px;
+    scroll-margin-top: 72px;
+}
+
 /* The permalink glyph — rendered via ::before on a JS-inserted <a>
    wrapper so it is keyboard-focusable and copies a real anchor URL.
    Lives outside the heading text flow as an absolutely-positioned
@@ -1489,6 +1511,13 @@ footer .left {
     article h1 { font-size: 28px; letter-spacing: -0.528px; }
     .article-body { font-size: 15px; }
     .article-body h2, article h2 { font-size: 20px; }
+    /* h3 holds at 17px on mobile; h4 at 15px would otherwise collide
+       with the 15px body text and lose its sub-heading distinction.
+       Pinning h4 to 15px with weight 510 (vs body 400) keeps the
+       tier readable even when the scale gap to body closes to zero —
+       the weight is what carries the hierarchy at that point. No
+       explicit override needed: the default-rule values already do
+       this, so no mobile block is added. */
 
     /* Components */
     .bench-grid { grid-template-columns: 1fr; }
