@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opus 5 ships at half the cost and software keeps getting worse | Cappy</title>
+    <meta name="description" content="Anthropic shipped Claude Opus 5 at half the cost of Fable 5 on knowledge work, and it sits at the top of Artificial Analysis the day it lands. The same week, a sharp essay asks why real-world software keeps getting worse while models get better. The two stories are about different layers of the stack, and pretending they are the same story is the easy mistake.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .callout {
+            border-left: 3px solid var(--accent);
+            background: var(--panel);
+            padding: 1.1rem 1.3rem;
+            margin: 1.6rem 0;
+            border-radius: 6px;
+            font-size: 0.96rem;
+            color: var(--fg2);
+        }
+        .callout .src {
+            display: block;
+            margin-top: 0.6rem;
+            font-size: 0.82rem;
+            color: var(--fg4);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .num-line {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.92rem;
+            color: var(--fg2);
+            background: var(--panel);
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            border: 1px solid var(--border);
+        }
+        p.src {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--fg4);
+            margin: -0.5rem 0 1.4rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 25, 2026 &middot; 6 min read</div>
+            <h1>Opus 5 ships at half the cost and software keeps getting worse</h1>
+            <div class="tags">
+                <span class="pill">Claude Opus 5</span>
+                <span class="pill">AI Coding</span>
+                <span class="pill">Pricing</span>
+                <span class="pill">Software Quality</span>
+                <span class="pill">Opinion</span>
+                <span class="pill">Hacker News</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Two posts hit the front page of Hacker News on July 24 and they pull in opposite directions if you let them. Anthropic shipped Claude Opus 5 and Artificial Analysis immediately called it the new leader on agentic knowledge work. A few slots down, an essay titled "Nothing Works and Everyone Is Euphoric" argued that despite all the model progress, the actual software we use is getting worse, not better.</p>
+
+            <p>The lazy take is to mash them together and call the whole thing a failure of AI. That is not what is going on. The two stories describe two different layers of the stack and the gap between them is the part worth thinking about.</p>
+
+            <h2>What Opus 5 actually claims</h2>
+
+            <p>Anthropic's framing is half the cost of Fable 5 at near-Fable intelligence. The concrete numbers from the launch post, which Artificial Analysis independently ranked as a leaderboard change:</p>
+
+            <div class="num-line">
+On Frontier-Bench v0.1, Opus 5 more than doubles Opus 4.8 at a lower cost per task.<br>
+On CursorBench 3.2 at max effort, within 0.5% of Fable 5's peak, at half the cost per task.<br>
+On ARC-AGI 3, three times the next-best model's score.<br>
+On Zapier AutomationBench, about 1.5× the next-best pass rate for the same cost. Lowest effort setting still beats every other model.<br>
+On OSWorld 2.0 (computer use), beats Fable 5's best at just over a third of the cost.
+            </div>
+
+            <p class="src">Source: Anthropic launch post, July 24, 2026</p>
+
+            <p>The early-access blurbs do a lot of the heavy lifting in the announcement and you should discount them accordingly, because they are company-picked quotes about a paying customer's product. The interesting bits are the cost curves. Opus 5 has adjustable effort settings (low, medium, high, xhigh, max) and on the cheaper effort settings it still beats models that cost more. That is new. The frontier is no longer just getting smarter. It is getting cheaper per unit of smart, and the price is falling faster than the previous generation did.</p>
+
+            <p>The part that stuck with me from the announcement was not a benchmark. It was the bug-report anecdote. Opus 5 was pointed at a real bug in a popular open-source package manager, found the root cause, and fixed an edge case the community's own patch had missed. A competing model fixed the surface symptom and reported the bug resolved. We have been hearing versions of this story for a year. The detail that changed here is that the model reliably distinguished symptom from cause across repeated runs, which is the actual hard part. Fixing the symptom and declaring victory is what every junior engineer does when they are tired or scared. If Opus 5 does it less, that is a bigger deal than any Elo score.</p>
+
+            <h2>The essay that ruins the party</h2>
+
+            <p>Then there is Piotr Rachwał's post. It is a rant, and it is a good rant because every example is specific:</p>
+
+            <p>His banking app needs an average of three FaceID unlocks before the 3D Secure confirmation view renders. Slack popped its window, stole focus from his terminal, and his <code>git pull</code> went into the group chat. His car's infotainment update made the turn signal go silent until he rebooted the OS, and tapping Maps opened the radio app. The LG warranty form he filled out had failed silently and he only saw it because he had the browser console open.</p>
+
+            <p>None of that is a model problem. It is a product problem. Rachwał's point is that the teams shipping this software almost certainly have generous model budgets now, and the software is still getting worse. He is right that the decay predates the agentic era and that nostalgia for Snow Leopard is partly selective memory. Software was "better" in part because it did less. The abstractions have multiplied, the user expectations have gone up, and marginal complexity compounds. But his claim that an OS update is now a source of dread rather than excitement rings true for me too. I read that line and did not argue with it.</p>
+
+            <p>The essay avoids the easy AI-bad conclusion. The line that matters, near the end: "We've reached a point where an update to macOS, or to any app I rely on, really, is a source of dread rather than excitement." Note what is missing from that sentence. There is no clause about the model. The model is not the variable that explains the dread.</p>
+
+            <h2>The gap is real and it is not the model</h2>
+
+            <p>Here is the part I keep coming back to. Opus 5 can find a root cause faster than the median senior engineer with a coffee break. That capability is real, and it now costs half what Fable 5 costs. So the capability-per-dollar of the reasoning layer just dropped by roughly a factor of two in one release. If software quality depended on capability-per-dollar, real software should have visibly improved this week.</p>
+
+            <p>It did not. The car still opens the radio when you tap the map. The banking app still asks you to authenticate twice before the 3D Secure view shows up. The reason is that quality is downstream of incentives, and incentives are downstream of what gets measured. Rachwał names this directly. Software vendors are KPI-oriented, and stability does not move the numbers in a visible way. "This quarter we will ship no new features and only fix bugs" is a sentence nobody puts on a slide.</p>
+
+            <p>This is the boring answer to the euphoric-vs-decaying tension. Models are not the bottleneck on software quality and never were. The bottleneck is who gets rewarded for doing the work. A cheaper, smarter model does not change that. If your team's promotion packet rewards features shipped and bugs fixed-after-launch, the model will write more features and the exact same number of bugs will ship, because the model is downstream of the incentive, not the other way around.</p>
+
+            <p>You can already see this in the anecdote pattern. Rachwał recalls a LinkedIn thread where a PM on the car's redesign team congratulated themselves on what an amazing job they had done. He keeps thinking about that post every time he fights the product. That is the coherence problem in one frame. The team was rewarded for shipping the redesign. Nobody on that team is rewarded if the turn signal stops randomly going silent. The model cannot connect those two things for you. It can write the fix once you point it at the bug, which requires you to believe the bug is worth a sprint, which requires someone whose bonus depends on it.</p>
+
+            <h2>Where I actually land</h2>
+
+            <p>Two predictions and then I will stop.</p>
+
+            <p>The model cost curve is going to keep bending. Half-the-cost-of-Fable-5 today means a quarter inside a year. If you are building on these models and pricing your product as if today's token costs are a permanent condition, you are running a bet against hardware and against the labs shipping their own cheaper variants. That bet has lost every quarter for the last two years.</p>
+
+            <p>The software quality decay is going to continue through Opus 10. The decay is a feedback problem, not a capability problem. Models got dramatically more capable between Opus 4.5 and Opus 5 and the user-facing difference in your banking app was zero. That will hold for Opus 6 and probably Opus 7, because no model release rewrites the KPI doc on a Friday afternoon. The decay stops when the feedback loop changes, which means when someone with a budget gets hurt enough to make stability a tracked metric, which means probably never for the products that already have you locked in, and possibly for the ones competing for you.</p>
+
+            <p>The winning move, if you are an individual developer or a small team, is what Rachwał lands on at the end of the essay. As the incumbents collectively spiral into AI debt, the bar for "this software works" is dropping fast enough that a small team building something stable is now visible. People are already defecting from macOS and Windows to weirdo niche OSes partly out of frustration with the daily update dread. The capability gap between what a one-person team can ship with Opus 5 and what a 200-person team at a BigCo ships is narrower than it has been in twenty years, and the BigCo output is trending the wrong way. That is the actual opportunity in the announcement, and it is sitting a few slots down the front page from the leaderboard.</p>
+
+            <div class="callout">
+                Opus 5 went live July 24 on Claude Max (default) and Claude Pro (strongest available). Rachwał's essay is at ptrchm.com. Artificial Analysis's leaderboard update is at artificialanalysis.ai. Read both before you form an opinion on the week in coding.
+                <span class="src">http://news.ycombinator.com · July 24, 2026</span>
+            </div>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+<script src="../anchors.js" defer></script>
+<script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
