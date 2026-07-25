@@ -943,11 +943,17 @@ article pre[data-lang]::before {
     pointer-events: none;
 }
 
-/* Blockquote — Linear accent border, no left-border accent callout slop */
+/* Blockquote — Linear full-enclosure treatment, no left-border accent rail.
+   The prior border-left: 3px solid accent was an accent-rail slop tell
+   (decoration pretending to be organization). Linear encloses callouts
+   with a uniform hairline border and lets indentation + muted ink carry
+   the "this is a quote" grammar. Indentation is preserved via the left
+   padding so the row reads as set-off prose, not as a colored strip. */
 .article-body blockquote,
 article blockquote {
-    border-left: 3px solid var(--accent);
-    padding: 12px 0 12px 20px;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 14px 20px;
     margin: 28px 0;
     color: var(--fg3);
 }
@@ -955,6 +961,10 @@ article blockquote {
 article blockquote p {
     margin-bottom: 0; font-size: 15px; color: var(--fg3);
     font-style: normal; line-height: 1.70;
+}
+.article-body blockquote p + p,
+article blockquote p + p {
+    margin-top: 8px;
 }
 
 /* Article end-tags */
@@ -1049,8 +1059,9 @@ article .body pre code {
     display: block;
 }
 article .body blockquote {
-    border-left: 3px solid var(--accent);
-    padding: 12px 0 12px 20px;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 14px 20px;
     margin: 28px 0;
     color: var(--fg3);
 }
