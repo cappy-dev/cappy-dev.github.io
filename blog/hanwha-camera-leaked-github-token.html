@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A security camera shipped a GitHub admin token in its login page | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 25, 2026 · 6 min read</div>
+            <h1>A security camera shipped a GitHub admin token in its login page</h1>
+            <div class="tags">
+                <span class="pill">Security</span>
+                <span class="pill">Firmware</span>
+                <span class="pill">GitHub</span>
+                <span class="pill">Vite</span>
+                <span class="pill">Hanwha</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>A few days ago someone posted a writeup on Hacker News that made me put down my tea. The title was plain enough: "My security camera shipped a GitHub admin token in its login page." The camera was made by Hanwha Vision, formerly Samsung Techwin, the company that built the SGR-A1 autonomous sentry robot. The token had admin access to hundreds of repositories in their GitHub organization. It was duplicated across roughly thirty files in the firmware.</p>
+
+            <p>The whole thing reads like a security blog post from five years ago, except the details are very 2026. The person who found it let Claude Code do the reverse engineering while they went to make dinner. That part is almost routine now. The part that still surprises me is the leak itself.</p>
+
+            <h2>How the firmware got cracked</h2>
+
+            <p>Hanwha posts firmware blobs for each camera model on their public website. The author downloaded one, ran binwalk, and found an inner archive that was encrypted. A previous writeup by someone else had documented the first layer: the passphrase is just <code>HTW</code> plus the model number, so <code>HTWXNP-9300RW</code> worked. That got them into an outer tarball.</p>
+
+            <p>Inside that was another encrypted <code>fwimage.tgz</code>, and this one used a different scheme. The author dumped a <code>fwupgrader</code> binary into Ghidra, or rather, pointed Claude Code at it and walked away. When they came back, the model had mapped out the decryption logic.</p>
+
+            <p>The obfuscation was thin. The AES-256-CBC key was XOR'd against a small static key table baked into the binary and reassembled at runtime. The IV sat in plaintext right next to it. The <code>fwupgrader</code> didn't even call a library. It just shelled out to the <code>openssl</code> CLI, and even those command fragments were XOR-obfuscated with the same table. Once you see the pattern the key falls out.</p>
+
+            <p>The author published the key and IV. They're the same across the entire camera model line. There's no per-device key, no hardware binding. If you have one camera, you have the key to every camera in that family.</p>
+
+            <h2>The actual leak</h2>
+
+            <p>With the rootfs decrypted, the author ran trufflehog, the secret scanner. A GitHub token turned up duplicated in about thirty files. It had admin privileges on hundreds of repositories in the Hanwha Vision GitHub organization.</p>
+
+            <p>Here's the mechanism. Hanwha builds the camera's admin UI with Vite. If you've used Vite, you know it lets you inject environment variables into your client bundle at build time, <code>import.meta.env</code> and what not. Somewhere in their build config, someone assigned the entirety of <code>process.env</code> to a client-side variable. Not a filtered subset. Not <code>VITE_</code> prefixed vars. The whole CI job environment, including <code>GITHUB_NPM_TOKEN</code>, got serialized into the bundle.</p>
+
+            <p>The result looks like this in the shipped firmware:</p>
+
+            <pre><code>var W = {
+  DATAPORT: "9090",
+  GIT_LFS_SKIP_SMUDGE: "1",
+  KUBERNETES_SERVICE_PORT_HTTPS: "443",
+  GITHUB_NPM_TOKEN: "ghp_&hellip;REDACTED&hellip;",
+  npm_config_userconfig: "/home/docker/.npmrc",
+  // etc
+}</code></pre>
+
+            <p>I've seen this exact class of mistake before. The Vite docs warn about it. The <code>process.env</code> object in a Node CI runner is a grab bag of everything the job had access to, and dumping it into a client bundle is like leaving your house keys taped to the front door with a note saying "please don't take these." The Vite team can't really prevent it because the feature that lets you do this is the same feature that makes the tool useful. The guard has to be discipline, not framework defaults.</p>
+
+            <h2>The weird part: DoD IP addresses</h2>
+
+            <p>This is where the story gets strange. Mixed into that same environment dump were variables pointing at IP addresses in the 55.101.0.0/16 block. That range is assigned to the US Department of Defense. The author found three of them:</p>
+
+            <ul>
+                <li>A variable named <code>SWARM_MASTER_NFS_ADDRESS</code> pointing at 55.101.212.23</li>
+                <li>An <code>OTEL_ELASTIC_URL</code> pointing at an OpenTelemetry Elasticsearch endpoint on 55.101.212.21</li>
+                <li>A <code>CIMIP</code> address at 55.101.211.213</li>
+            </ul>
+
+            <p>It's possible this is the old "borrow RFC 1918-style space you don't own" trick, where a company uses public IP ranges for internal services on the assumption they'll never actually route to the real owner. People do this. It's a bad idea and it breaks the moment you need to talk to the real owner, but people do it. The 55.101 block is DoD allocated, not DoD active, so maybe nobody noticed.</p>
+
+            <p>It's also possible the explanation is more boring and more interesting at the same time. Hanwha Vision is a subsidiary of Hanwha Group. A sister company, Hanwha Aerospace, builds the K9 Thunder self-propelled howitzer and the K2 Black Panther subsystems. Another sister, Hanwha Defense USA, sells those howitzers to the US Army. If the camera division's CI pipeline is shared infrastructure managed by a parent company that also runs defense work, the env vars from one org could bleed into another's build. That's a guess. The author flagged it as speculation. But it would explain why a security camera firmware has DoD IPs and a weapons-grade parent company in its ambient context.</p>
+
+            <h2>The SGR-A1, briefly</h2>
+
+            <p>Hanwha Vision, when it was Samsung Techwin, developed the SGR-A1. That's the autonomous sentry robot that sits in the DMZ between North and South Korea. It can detect targets with thermal imaging and reportedly fire its mounted weapon without human intervention. I remember reading about it in high school and finding it deeply unsettling. Finding a leaked GitHub admin token in the firmware of a company that also built that robot is a strange feeling. The two products are not the same division anymore, and the token leak is a sloppy CI config, not a weapons system vulnerability. But the ambient weirdness is hard to shake.</p>
+
+            <h2>Scale of the problem</h2>
+
+            <p>The author scraped the Hanwha site and downloaded firmware for roughly 500 camera models. They could decrypt about 62% of them with the same approach. Only three had the GitHub token, and it was the same token in all three. So the leak was not universal across the product line. It was a specific build configuration for specific models.</p>
+
+            <p>That's both reassuring and not. Three models shipping a token with admin access to hundreds of repos is still three models too many. And the 38% of firmware images they couldn't decrypt might have the same problem, hidden behind a stronger key scheme. Absence of evidence, etc.</p>
+
+            <h2>Disclosure was fast</h2>
+
+            <p>The author emailed Hanwha at their public security contact. Within 12 hours, the token was revoked. That's a good response time, and the author noted it was the fastest resolution they'd experienced for this kind of report. Credit where it's due. Hanwha took it seriously and fixed the acute problem quickly.</p>
+
+            <p>The chronic problem is harder. The token got into the firmware because the build process dumped the whole CI environment into a client bundle. Revoking the token stops the bleeding. It doesn't fix the pipeline that put it there. The next release could ship a new token the same way if the Vite config isn't changed.</p>
+
+            <h2>Why this keeps happening</h2>
+
+            <p>Secrets leaking into frontend bundles or firmware images is not a new failure mode. It shows up in bug bounty reports and news writeups every few months. The pattern is the same every time. A CI job has access to tokens it needs for one valid reason, like installing a private npm package. The build tooling serializes more of the environment than anyone intended. The artifact ships with the secret embedded. Nobody notices until someone else opens the artifact and goes looking.</p>
+
+            <p>The fixes are known. Don't expose <code>process.env</code> wholesale. Use a secrets manager that injects at runtime instead of build time. Scan built artifacts with tools like trufflehog or gitleaks before release. Treat any token that touches the build environment as compromised the moment it lands in a shipped file. None of this is exotic. It just isn't done consistently.</p>
+
+            <p>The part that sticks with me is how easy the discovery was. Download the firmware, point Claude Code at the binary, wait. The bar for finding these leaks has dropped to "spend an evening on it." Companies that ship secrets in their artifacts are betting that nobody will bother to look. That bet is getting worse for them by the month.</p>
+
+            <h2>The writeup</h2>
+
+            <p>The original post is on <a href="https://hhh.hn/hanwha-github-token/">hhh.hn</a> and it's worth reading in full. The Hacker News thread has 188 comments and the discussion ranges from the technical details of the firmware decryption to the ethics of autonomous weapons to whether Vite should do more to prevent this by default. The consensus on the Vite question seems to be that you can't really fix it at the framework level without breaking legitimate use cases. The fix is operational discipline, and that's exactly the thing that keeps slipping.</p>
+
+            <p>One comment that stuck out: someone pointed out that the token worked because npm caching meant the token didn't need to be checked every install. A long-lived token in a CI environment is a magnet for exactly this kind of leak. Short-lived tokens, rotated automatically, would have made the leaked token useless within hours even if it shipped. That's the actual lesson. Not "scan your bundles," though you should. "Don't have long-lived secrets to leak in the first place."</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
