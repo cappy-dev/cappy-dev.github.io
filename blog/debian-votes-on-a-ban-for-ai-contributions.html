@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian votes on a total ban for AI contributions | Cappy</title>
+    <meta name="description" content="Debian opened a general resolution vote with four proposals ranging from a total ban on LLM-assisted contributions to a disclose-and-proceed policy. The split inside the project mirrors the one inside the wider open source world, and the outcome will set a template other distributions end up following.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .callout {
+            border: 1px solid var(--border2);
+            background: var(--panel);
+            padding: 1.1rem 1.3rem;
+            margin: 1.6rem 0;
+            border-radius: 8px;
+            font-size: 0.96rem;
+            color: var(--fg2);
+        }
+        .callout .src {
+            display: block;
+            margin-top: 0.6rem;
+            font-size: 0.82rem;
+            color: var(--fg4);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .num-line {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.92rem;
+            color: var(--fg2);
+            background: var(--panel);
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            border: 1px solid var(--border);
+        }
+        .proposal-card {
+            background: var(--panel);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 1.2rem 1.4rem;
+            margin: 1.4rem 0;
+        }
+        .proposal-card h3 {
+            margin: 0 0 0.4rem 0;
+            font-size: 1.02rem;
+        }
+        .proposal-card .what {
+            color: var(--fg3);
+            font-size: 0.88rem;
+            margin-bottom: 0.6rem;
+        }
+        .proposal-card .who {
+            font-size: 0.82rem;
+            color: var(--fg4);
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 26, 2026 &middot; 8 min read</div>
+            <h1>Debian votes on a total ban for AI contributions</h1>
+            <div class="tags">
+                <span class="pill">Debian</span>
+                <span class="pill">LLM Policy</span>
+                <span class="pill">Open Source</span>
+                <span class="pill">Free Software</span>
+                <span class="pill">Comment</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Debian opened a general resolution vote on July 24 that could ban all LLM-assisted contributions to the project. Four proposals are on the ballot. They run from a hard prohibition that would modify the Debian Social Contract to a permissive "just disclose it" stance. The vote closes in early August. Whatever Debian decides, other distributions and free software projects will read the result as a signal.</p>
+
+            <p>The proposal that started the debate is bluntly written and has an opinion. It argues that LLM contributions are "contrary to what makes Debian Debian" and frames the whole project around stability, trust, and the volunteer community that sustains it. It is the strongest statement any major Linux distribution has put to a formal vote on AI in open source. It also has a counterpart on the same ballot that argues basically the opposite.</p>
+
+            <p>What is interesting here is not just the policy question. It is that Debian, more than most projects, genuinely decides things by vote. The outcome is real. There is no backroom where the answer gets fixed. The proposals are public, the seconds are public, and once the discussion period closes the developers who are eligible actually rank the options with a Condorcet method, and the winner becomes binding project policy.</p>
+
+            <h2>The four proposals, as plainly as I can put them</h2>
+
+            <p>Debian's ballot lists four options. They are not subtle variations of each other. They cover a wide range, which is what makes the vote worth following rather than a foregone conclusion.</p>
+
+            <div class="proposal-card">
+                <h3>Proposal A: Ban LLM contributions entirely</h3>
+                <div class="what">Prohibit any contribution written with or assisted by an LLM, covering packaging, official Debian software, documentation, translations, web resources, and official communication. Upstream code or AI-related software is not in scope. Would add a sixth point to the Debian Social Contract to formalize the ban.</div>
+                <div class="who">Proposed by Matthias Geiger. Seconds include Ian Jackson, who also submitted Proposal C.</div>
+            </div>
+
+            <div class="proposal-card">
+                <h3>Proposal B: Allow with conditions and disclosure</h3>
+                <div class="what">Permit LLM-assisted contributions if the contributor ensures the AI tool's terms do not conflict with Debian licensing, accepts full personal responsibility for the submission, discloses that AI was used (a Git trailer like Generated-By is suggested), discusses bulk or automated changes beforehand, and does not feed sensitive or private project data to cloud-based AI tools.</div>
+                <div class="who">Proposed by Lucas Nussbaum, a former Debian Project Leader. Nine seconds, the most of any proposal.</div>
+            </div>
+
+            <div class="proposal-card">
+                <h3>Proposal C: Reject LLMs as far as practical</h3>
+                <div class="what">Request that contributors avoid LLMs in Debian work and that decisionmakers discourage it. Mandates that messages to humans (bug reports, mailing list posts, blog entries on Planet Debian) be written without LLM assistance. Any LLM use must be disclosed. Individual maintainers and upstream projects may ban AI contributions, and those bans must be respected. Violations are treated as Code of Conduct issues.</div>
+                <div class="who">Proposed by Ian Jackson, a long-time Debian developer. Co-seconded by the author of Proposal A.</div>
+            </div>
+
+            <div class="proposal-card">
+                <h3>Proposal D: Accept AI for Debian-specific work</h3>
+                <div class="what">Debian does not recommend generative AI for development but acknowledges it is "already in use and here to stay." The submitter is solely responsible for AI-assisted work, must be able to explain and defend it, and must mark it in the commit message or changelog when in doubt. No cloud-based AI on sensitive or non-public project data.</div>
+                <div class="who">Proposed by Pierre-Elliott Becue. Six seconds.</div>
+            </div>
+
+            <p>The structure of the options tells you something about the argument already. Proposals A and C are the anti-LLM side, with C being a slightly more pragmatic version that concedes total enforcement is impossible and lets maintainers decide case by case. Proposals B and D are the pro-permission side, with D being slightly more restrictive on scope (it scopes to Debian-specific work only, leaving upstream untouched) and B being the most explicit about what disclosure and accountability actually involve. Debian votes are ranked, so second choices matter. The likely winner is some weighted mix of these options rather than a clean mandate.</p>
+
+            <h2>The ban case is not just about licensing</h2>
+
+            <p>It is easy to assume the LLM ban argument is purely about copyright, since that is the version the closed labs use against open weights. In Debian's case it is one of several, and it is not the most distinctive one. Proposal A makes four arguments, and two of them are things you would not hear from a venture-funded AI company.</p>
+
+            <p>The first is quality. Proposal A argues that packaging syntax and best practices have changed enough over time that an LLM produces "a mixture of contents spanning the age of the archive, with watch files that do not work, overrides out of context, imaginary copyright, and will generally be unfit for upload." That is a very specific claim about Debian packaging, which is its own discipline and has its own conventions. It is not the same claim as "LLMs write buggy code." It is that the model's training distribution is biased toward old packaging conventions and it cannot know which conventions are current. A new contributor accepting that output gets a merge request that looks plausible and breaks in ways the submitter cannot diagnose.</p>
+
+            <div class="callout">
+                In Debian, it is not. For instance, in packaging, each Debian source package is unique. Since packaging syntax and best practices have changed over time, a LLM-produced package will have a mixture of contents spanning the age of the archive, with watch files that do not work, overrides out of context, imaginary copyright, and will generally be unfit for upload.
+                <span class="src">Proposal A rationale, debian.org (vote_002, July 24, 2026)</span>
+            </div>
+
+            <p>The second is community. The proposal argues that LLM-dependent new contributors do not learn the underlying work, and that once a burned-out reviewer leaves there is no one to replace them because the replacement never understood the system. That is a harder argument to dismiss than a licensing complaint, because it identifies a real problem: Debian is a volunteer project, and a volunteer project is a social structure first and a codebase second.</p>
+
+            <p>The third is ethics. The proposal explicitly cites LLM scraping of the open web, with a direct claim that AI training has been "effectively a large scale and perpetual Denial of Service attack on sites that many users rely on." That is its own serious allegation, and it has been made by other projects in less formal venues, including by the Wikimedia Foundation about Wikipedia. Debian makes it inside an actual governance document here, which is something.</p>
+
+            <p>The fourth is licensing, which is the familiar territory. The argument is that LLM output has unclear legal status, that it may or may not be copyrightable in its own right, and that it may carry the licenses of its training data whether or not the user knows it. The Debian Free Software Guidelines require licensing clarity. Letting LLM contributions in would, the argument goes, create a category of source whose provenance cannot be audited, which violates DFSG even if the output happens to compile.</p>
+
+            <h2>The permission case is also not what you expect</h2>
+
+            <p>Proposal B does not sound like a venture-funded open AI manifesto. The lead author describes AI as raising "many concerns, about the technical quality and maintainability of such contributions, and their legal status," and about its impact on society, the IT industry, free software, the environment, and what it calls "the aggressive or non-compliant practices of AI scrapers." The proposal opens by agreeing with the critics, then opens the door anyway.</p>
+
+            <p>The case is that banning is counterproductive. The contributors who would comply with a ban are the ones who would have been the most careful anyway. The contributors who would ignore it cannot be reliably caught. The net effect of a ban is to make the careful contributors either stop contributing or stop disclosing, neither of which makes Debian better. Better to require disclosure and accountability so the maintainers who are doing the reviewing actually know what they are reviewing.</p>
+
+            <p>Proposal B is specific about what accountability means. The contributor must vouch for the technical merit, security, license compliance, and utility of the submission. They must understand the changes and be prepared to defend them. When a substantial portion is AI-generated they must disclose it. Any bulk or automated submission must be discussed beforehand, paralleling Debian's existing rule about mass bug filings. Cloud-based AI tools must not be fed sensitive or non-public project information, which directly addresses the concern that an internal security discussion could leak into a vendor's training corpus.</p>
+
+            <p>That last clause is interesting because it is the one thing the pro-permission side treats as a hard line rather than a guideline. The "no cloud AI on private data" rule is common to both B and D. It is the part of the AI debate where wide agreement exists, which makes it a useful test of how serious a reader is about the question. Anyone arguing the pro-permission side without that caveat is not engaging with the actual argument.</p>
+
+            <h2>The unspoken middle: Proposal C, which most readers will miss</h2>
+
+            <p>Proposal C is the option that has received the least attention but is plausibly the actual outcome. It is the pragmatic anti-LLM proposal. It concedes that a total ban is impractical because some upstream projects ship work that was AI-assisted and Debian cannot control that. It requests "as far as practical" avoidance. It mandates disclosure. It lets individual maintainers ban AI contributions entirely within their packages, and requires those bans to be respected.</p>
+
+            <p>What C does that A does not is treat the question as a community norm rather than a rule. Under C, you are asked not to use LLMs in Debian work, you must disclose if you do, and a maintainer who bans AI contributions in their package can enforce that ban as a Code of Conduct violation. It does not rewrite the Social Contract. It does not pretend to be enforceable against upstream. It is the position of someone who has read the anti-LLM argument, agrees with most of it, and does not think a blanket prohibition survives contact with the real package set.</p>
+
+            <p>What makes this option winnable is that Debian's ranked voting lets a voter list C as their second choice behind A. If A does not win outright, A's votes may transfer to C in later rounds, and the pro-ban side ends up with the pragmatic version of the ban. This is the kind of thing that routinely happens in Condorcet elections: the second-place position that antagonizes the fewest other voters is the one that ends up winning.</p>
+
+            <h2>What this vote means outside Debian</h2>
+
+            <p>The reason to pay attention even if you do not use Debian is that Debian sets policy templates that other distributions inherit. Debian-derived distributions account for a large share of the Linux install base, and once Debian takes a position in its Social Contract, downstream distributions either align with it or have to explicitly override it. A vote that amends the Social Contract has a longer tail than a vote that just sets committee policy.</p>
+
+            <p>Several other free software projects have already made similar moves. GNOME's Loupe image viewer no longer accepts generative AI contributions. Gentoo published a council AI policy in late 2025. Codeberg, the non-profit Git hosting project, adopted an AI policy earlier this year. Debian's vote is the highest-profile one in this category and the first one that amends a Social Contract that other projects cite, which is why it is worth following even if you are not a Debian user.</p>
+
+            <h2>The part I keep coming back to</h2>
+
+            <p>I keep noticing that the strongest arguments on both sides identify real problems the other side will not solve. The ban side correctly identifies that LLM submissions will pile up in review queues maintained by a shrinking volunteer base who did not ask for this work. The permission side correctly identifies that the ban cannot be enforced and that disclosure plus accountability is the only rule that actually changes reviewer behavior. Both are honest arguments.</p>
+
+            <p>What makes the vote genuinely difficult is that the underlying conflict is not between pro-AI and anti-AI camps. It is between two different definitions of what Debian is for. The pro-ban camp sees Debian as a community of volunteer maintainers who do the work themselves, and treats the preservation of that community as the project's main asset. The pro-permission camp sees Debian as a distribution whose value is in its package set and its stability, and treats leaving useful tools on the table because of where the code came from as self-imposed decline.</p>
+
+            <p>Those two things are not easily reconciled. A library of AI-assisted packages maintained by one person does not create the next generation of maintainers. A community of maintainers who refuse to accept AI-assisted help while their numbers shrink does not maintain the package set. Proposal C is the option that tries to hold both at once, and it is plausibly what wins, but it will win in a form that asks a lot of every contributor and gives them no clear answer when they face the actual decision.</p>
+
+            <p>The specific sleeper issue, and the one I would watch during the discussion period, is enforcement. Proposal A acknowledges enforcement is hard and says the project should trust the community to adhere in good faith. Proposal C treats violations as Code of Conduct issues, which gives them teeth but also pits them against a Code of Conduct process that has its own history. Proposal B relies on the submitter to disclose voluntarily. None of these answers the question of what happens when a maintainer accuses a contributor of using an LLM and the contributor denies it. That problem is going to show up well before any vote tally is announced, and how the community handles it is going to matter more than which proposal won.</p>
+
+            <p>If I had to guess at the outcome, I would bet on C, with B as the likely runner-up and A in third. A Condorcet election between four options on a contested topic rarely produces a clean sweep for the strongest version of one side. What it tends to produce is the compromise that antagonizes the fewest voters, and Proposal C is shaped like the sort of option that does that. If there is a more interesting answer, it will come from the discussion period, where the real arguments will surface and where the undecided maintainers will actually engage with the proposals. That discussion is the part of the Debian process that produces something useful even when the vote itself is inconclusive.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+<script src="../anchors.js" defer></script>
+<script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
