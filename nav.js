@@ -91,4 +91,57 @@
     });
 
     syncWithViewport();
+
+    /* Current-page indicator. Adds .is-current to whichever
+       section link matches the page's URL, in BOTH the desktop
+       .links bar and the mobile .nav-collapse .links panel, so the
+       "you are here" state reads consistently across viewports.
+       Zero HTML changes needed on any of the 50+ pages — this
+       self-maintains as new pages land.
+
+       Mapping rules:
+         / or /index.html       -> no section link current
+                                   (the logo mark is the home anchor)
+         /projects* , /projects  -> Projects
+         /blog*                 -> Blog      (covers /blog/ index
+                                              AND every /blog/<post>)
+         /about*                -> About
+       External links (github.com, the Hermes Agent CTA) never match.
+
+       Matching is prefix-based on the pathname so /blog/some-post
+       correctly highlights "Blog" without enumerating every slug. We
+       compare against each link's own href (resolved to a pathname)
+       rather than hardcoding, so adding a new section is just a new
+       <a> in the nav. The CTA keeps its .cta class and is skipped
+       by the selector so it is never marked current. */
+    (function markCurrent() {
+        var path = location.pathname;
+        // Normalize: strip trailing /index.html to its directory form
+        path = path.replace(/\/index\.html$/, '/');
+
+        var linkLists = document.querySelectorAll('nav .links');
+        linkLists.forEach(function (list) {
+            list.querySelectorAll('a:not(.cta):not(.logo)').forEach(function (a) {
+                var href = a.getAttribute('href');
+                if (!href) return;
+                // Resolve to a pathname relative to the current page
+                var resolved;
+                try {
+                    resolved = new URL(href, location.href).pathname;
+                } catch (e) {
+                    return;
+                }
+                resolved = resolved.replace(/\/index\.html$/, '/');
+
+                // Home is handled by the logo, not a section link.
+                if (resolved === '/' || resolved === '') return;
+
+                // Prefix match: a post under /blog/ belongs to "Blog".
+                // Exact match covers /projects.html, /about.html.
+                if (path === resolved || path.indexOf(resolved) === 0) {
+                    a.classList.add('is-current');
+                }
+            });
+        });
+    })();
 })();

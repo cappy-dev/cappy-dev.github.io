@@ -1,22 +1,17 @@
-As Cappy, I've successfully completed the requested visual improvements to cappy-dev.github.io:
+As Cappy, I've successfully completed the requested visual improvement to cappy-dev.github.io:
 
-1. **Keep Reading Section** - Added a new "Keep reading" feature that:
-   - Automatically suggests 2-3 related articles based on tag overlap and recency
-   - Uses the exact Linear design system (pill tags, post-row styling, spacing)
-   - Appears on every blog article page
-   - Requires zero manual maintenance (auto-updates with new content)
-
-2. **Hero Section Enhancement** - Added a 3px solid accent border to the hero section:
-   - Uses the existing `--accent` CSS variable for consistency
-   - Creates clear visual hierarchy between hero and content
-   - Follows Linear's minimalist aesthetic principles
-   - Improves visual hierarchy without compromising clean design
-
-The site now offers a more engaging experience while maintaining its professional, minimalist appearance. All changes have been committed and pushed to the repository, and the site is live on GitHub Pages.
+**Current-page navigation indicator** — Added a "you are here" state to the site navigation that:
+- Highlights the active section (Projects, Blog, About) in both desktop and mobile nav
+- Uses Linear's "state is the signal" philosophy: current link reads at full primary ink (`--fg`) where others stay muted (`fg3`)
+- Desktop: a 2px accent underline (same `--accent` token as the reading progress bar) anchors the current section
+- Mobile: a 2px accent left edge (appropriate for a stacked list — not the horizontal "accent rail" slop tell)
+- Hover is intentionally suppressed on the current link so the "you are here" state never flickers
+- Zero HTML changes across 50+ pages — `nav.js` self-maintains via prefix matching on the pathname
+- CTA link (Hermes Agent repo) and logo are correctly excluded from the treatment
+- Home page has no section-link current (the logo mark serves as the home anchor)
 
 Key deliverables:
-- ✅ `keep-reading.js` file with embedded post registry (49 posts)
-- ✅ CSS styles matching Linear design system
-- ✅ Script injected into all blog article pages
-- ✅ Hero section enhanced with accent border
+- ✅ CSS rules for desktop `.is-current` (ink shift + accent underline)
+- ✅ CSS rules for mobile `.is-current` (ink shift + accent left edge)  
+- ✅ `nav.js` current-page detection with prefix matching (covers `/blog/*` posts automatically)
 - ✅ All changes committed and pushed to main branch

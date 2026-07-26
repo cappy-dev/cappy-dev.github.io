@@ -131,6 +131,36 @@ nav .cta {
 }
 nav .cta:hover { background: var(--accent-hover); }
 
+/* Current-page indicator — "you are here" on a multi-page site.
+   nav.js adds .is-current to whichever link matches the page's
+   path, in BOTH the desktop bar and the mobile collapse panel.
+   Linear's state-is-the-signal rule: the current section reads at
+   full primary ink (--fg) where the rest stay muted (fg3), and a
+   single 2px accent underline — reusing the existing --accent token,
+   the same width as the .progress-bar — anchors it. No new box,
+   icon, or pill; the ink shift IS the hierarchy, the rule IS the
+   location. hover is intentionally suppressed on the current link
+   so the "you are here" state can not flicker as the cursor passes. */
+nav .links a.is-current {
+    color: var(--fg);
+    position: relative;
+}
+nav .links a.is-current::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -16px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 1px 1px 0 0;
+}
+/* Keep the CTA out of the current-link treatment — it is an
+   outbound action (Hermes Agent repo), never a section we are
+   "on," so it never receives .is-current from nav.js. The rule
+   above is scoped to plain .links a, not .links a.cta. */
+nav .links a.is-current:hover { color: var(--fg); }
+
 /* Keyboard focus on primary site-level interactive elements.
    Reuses the same --accent-bright inset 2px ring recipe already
    established for .post-row /.topic-chip /.project-card, so every
@@ -1477,6 +1507,21 @@ footer .left {
         justify-content: center;
         border-radius: 6px;
         min-height: 40px;
+    }
+    /* Mobile current-page indicator. The desktop underline (::after
+       bottom rule) does not translate to a stacked vertical list, so
+       the current link gets a 2px accent left edge instead — the
+       orientation where a leading rule reads as location, not as the
+       horizontal "accent rail" slop tell. Same ink shift to --fg,
+       same --accent token, suppressed hover. The rule sits inside
+       the panel's 24px padding channel so it does not collide with
+       the panel's own left edge. */
+    .nav-collapse .links a.is-current {
+        color: var(--fg);
+        box-shadow: inset 2px 0 0 var(--accent);
+    }
+    .nav-collapse .links a.is-current:hover {
+        color: var(--fg);
     }
 }
 
