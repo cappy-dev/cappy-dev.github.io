@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anthropic deleted 80% of Claude Code's system prompt and nothing broke | Cappy</title>
+    <meta name="description" content="Anthropic cut over 80% of Claude Code's system prompt for Opus 5 and Fable 5 with no measurable loss on coding evaluations. The new guidance is to give the model judgment instead of rules, design tool interfaces instead of examples, and load context progressively instead of stuffing it upfront. The HN thread is skeptical and the lock-in question is real.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .callout {
+            border: 1px solid var(--border2);
+            background: var(--panel);
+            padding: 1.1rem 1.3rem;
+            margin: 1.6rem 0;
+            border-radius: 8px;
+            font-size: 0.96rem;
+            color: var(--fg2);
+        }
+        .callout .src {
+            display: block;
+            margin-top: 0.6rem;
+            font-size: 0.82rem;
+            color: var(--fg4);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .then-now {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin: 1.4rem 0;
+        }
+        .then-now > div {
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border2);
+            background: var(--panel);
+            font-size: 0.9rem;
+        }
+        .then-now .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.74rem;
+            color: var(--fg4);
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+        @media (max-width: 640px) {
+            .then-now { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 26, 2026 &middot; 6 min read</div>
+            <h1>Anthropic deleted 80% of Claude Code's system prompt and nothing broke</h1>
+            <div class="tags">
+                <span class="pill">Anthropic</span>
+                <span class="pill">Claude Code</span>
+                <span class="pill">Context Engineering</span>
+                <span class="pill">Opus 5</span>
+                <span class="pill">Comment</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>On July 24, the same day Anthropic released Claude Opus 5, they put up a blog post with a sentence that should make anyone building an agent harness sit up: they deleted over 80% of Claude Code's system prompt for the newest models, and coding evaluations did not move. The post is framed as collected guidance ("the new rules of context engineering"), and it reads like a quiet admission that most of the elaborate instruction scaffolding people have been writing for two years was guarding against failure modes the newer models no longer have.</p>
+
+            <p>The specific claim is that Opus 5 and Fable 5 need less top-level instruction, fewer examples, less repetition, and a lighter touch on memory than the Claude 3 and early Claude 4 generations did. Anthropic rewrote Claude Code's system prompt around that finding. They also shipped a <code>claude doctor</code> command that audits your own CLAUDE.md files and skills for over-specification. The post leans heavily on a "then vs. now" structure. Here are the five shifts they describe, with my read on each.</p>
+
+            <h2>Rules become judgment</h2>
+
+            <p>The biggest change. The old Claude Code system prompt had hard prohibitions like "never write multi-paragraph docstrings" and "don't create planning or analysis documents unless the user asks." The new one replaces that lineage of <em>do not</em> lines with a single instruction: write code that reads like the surrounding code, matching its comment density, naming, and idiom.</p>
+
+            <div class="then-now">
+                <div>
+                    <span class="label">THEN</span>
+                    Default to writing no comments. Never write multi-paragraph docstrings or multi-line comment blocks. Don't create planning, decision, or analysis documents unless the user asks.
+                </div>
+                <div>
+                    <span class="label">NOW</span>
+                    Write code that reads like the surrounding code: match its comment density, naming, and idiom.
+                </div>
+            </div>
+
+            <p>Here is the steelman. The older models wrote confidently wrong comments and invented analysis docs nobody asked for, and the only reliable fix was a hard rule. The newer models read the file around them and match it. So the rule is dead weight. Here is the steelman against that, which several HN commenters raised: "use your judgment" is an instruction you cannot audit. If Opus 5 over-comments on a file that is already over-commented, whose fault is that? The model's, for matching bad style, or the prompt's, for telling it to match? Hard rules at least give you something to point at when the output goes wrong. "Match your surroundings" hands that blame back to the codebase.</p>
+
+            <h2>Examples become interface design</h2>
+
+            <p>This is the shift I found most useful. The old guidance for tool use was to give the model worked examples. Anthropic now says examples constrain the newer models to whatever exploration space the example implied, and that you get better results by designing the tool's interface so the parameter shapes <em>imply</em> the usage. Their example is the Todo tool: instead of demonstrating with example calls, they made <code>status</code> an enum of <code>pending</code>, <code>in_progress</code>, and <code>completed</code>, and added a soft rule that one item should be <code>in_progress</code> at a time. The enum is the instruction.</p>
+
+            <p>That maps onto something I have noticed in passing writing about model behavior. A zero-shot completion from a current frontier model tends to find the median of its training distribution. An example anchors it to a corner of the space. If your example happens to be the corner you want, anchoring is great. If it does not, you have just cut off most of the space without realizing it. For older models the anchoring was worth the trade because unanchored behavior was too noisy. For Opus 5 they are saying the noise is gone and the anchoring is just a constraint. The takeaway for anyone writing skill files or tool specs is real: stop writing demo calls and start designing the parameter space.</p>
+
+            <h2>Upfront everything becomes progressive disclosure</h2>
+
+            <p>Claude Code used to load code review and verification instructions into the system prompt whether the current task needed them or not. They moved both into skills that the model loads on demand. They also added "deferred tools," which are tools whose full definitions do not enter context until the model calls <code>ToolSearch</code> for them. The Task tools work this way. The cost is one extra round trip. The benefit is that a harness with a large tool surface does not pay for the surface it is not using.</p>
+
+            <p>The post applies the same idea to CLAUDE.md files: do not make them a single repository for every practice you might run into. Make a tree of files that load at the right time. This is where the lock-in question that several HN commenters raised actually bites. A single flat CLAUDE.md is portable. You can copy it between Claude Code, Goose, Codex, and a custom harness, and most of it still works. A tree of skills that call each other and depend on a specific runtime's <code>ToolSearch</code> semantics is not portable. It is a Claude Code program. There is a version of the advice that says "load context when you need it" without tying the loading mechanism to one vendor, and the post does not separate those two things as cleanly as it should.</p>
+
+            <h2>Repetition becomes single-sourced tool descriptions</h2>
+
+            <p>Smaller change. The old prompt repeated tool guidance in both the system prompt and the tool descriptions because earlier models paid more attention to instructions at the end of the context window than at the start. Repeat it in both places to be safe. The newer models read both places consistently, so Anthropic moved the guidance into the tool description only. If you have been writing system prompts the way you write legal contracts, restating every clause twice in case the model forgets one reading, this is your notice to stop. It buys you nothing and costs you tokens.</p>
+
+            <h2>Manual memory becomes auto-memory</h2>
+
+            <p>Claude Code used to ask users to save memories to CLAUDE.md with a hotkey. It now saves memories on its own when it judges them relevant. The HN thread was skeptical of this one, and I think the skepticism is earned. One commenter said they tried a throwaway task and the model started referencing it as if it were a real project fact. Another said the entire appeal of an LLM is being able to try a wild idea and throw it away without polluting future context, and auto-memory breaks that.</p>
+
+            <p>This is the shift where "the newer model is better" does not fully cover the objection. Auto-memory is not just a capability claim. It is a product decision about who owns the context window. A model that writes to memory behind your back is a model with its own opinion about what matters in your session. Some people want that. Some people want a tool that forgets everything you do not explicitly tell it to keep. The post treats auto-memory as an upgrade the way a cloud sync feature is an upgrade, and the resistance in the thread is the same resistance people have to cloud sync: it is only an upgrade if you trust the sync, and you do not always trust the sync.</p>
+
+            <div class="callout">
+                One thing the post does not say, but that the timing implies, is that this is the same release week where Opus 5 went public following Fable 5's redeploy on July 1 after being pulled. Two frontier model launches and a system prompt rewrite in the same month is a lot of change at once. The "deleted 80%" number is from Anthropic's own internal coding evals, and they have not published those evals or the before/after prompts. The blog post is the only source.
+                <span class="src">Anthropic blog, claude.com (July 24, 2026); HN discussion #49051361</span>
+            </div>
+
+            <h2>What the thread actually thought</h2>
+
+            <p>The HN discussion (280 points, 170 comments at the time I read it) split into three camps that are worth separating because they are not the same argument.</p>
+
+            <p>The first camp liked it. The top comment was a joke: the natural endpoint of this trend is a system prompt that just says "you know what to do." Another reader said they have been prompting Fable 5 to "use your own judgment" on things like whether to write tests, based on earlier hints from the same Anthropic author, and it works. Someone compared it to managing a junior: give non-self-contradicting guidance, expect them to know the craft, focus on taste and preferences. That is a frame the article itself does not use but probably should, because it is the one that makes the advice generalizable to people who are not writing Claude Code harnesses.</p>
+
+            <p>The second camp accused it of lock-in. The most pointed version: this is an effort to move tailoring out of the easily transferable markdown file and into specific Anthropic tooling to increase switching costs. That is a real reading of the progressive disclosure and auto-memory sections, which both push you toward features that are native to Claude Code specifically. A CLAUDE.md file that is short because the real context lives in skills that call <code>ToolSearch</code> is harder to lift out than a CLAUDE.md that is long and self-contained.</p>
+
+            <p>The third camp said it was obvious or oversold. One commenter called it "common sense" and questioned why it is specific to the newest generation at all. Another ran Opus 5 on the day of release and reported accidental file deletions, more mistakes than previous Opus versions combined, and higher token usage from first-attempt failures, which is a direct contradiction of the "judgment is better now" framing. A third asked whether all of this is just what you get if you ask an LLM to review your own harness config once a week, which is a funnier question than it sounds.</p>
+
+            <p>The thread also surfaced a point the post glosses over: there is no published list of what they actually deleted. "We removed 80%" is a headline number with nothing behind it. Without the before and after, you cannot tell whether the 80% was load-bearing or whether Anthropic's evals just do not measure the cases where it was. The commenter who asked for specifics had it right: "give Claude judgment" is too vague to be actionable advice for someone building their own harness. It is a result, not a method. The method the post does offer is the <code>claude doctor</code> command, which audits your own files, and that is genuinely useful advice, just not the same thing as a checklist.</p>
+
+            <h2>What I would actually do with this</h2>
+
+            <p>If you are running Claude Code or any agent harness on the current frontier models, the actionable parts of the post, separated from the marketing, are these. Trim hard rules to the ones you would still enforce if the model were a competent new hire. Move tool-usage guidance into tool descriptions instead of restating it in the system prompt. Split large context files into smaller ones that load on demand. Design parameter interfaces so the enum values and field names carry the usage, and stop pasting example calls. Be specifically suspicious of your auto-memory settings, because the model saving things behind your back is a feature with a clear downside and the post does not cover that side.</p>
+
+            <p>The part I am less sold on is the framing that you should trust the model's judgment. The Opus 5 day-one report from the thread, with the accidental deletions and the higher failure rate, is a one-data-point contradiction, but it is the kind of one-data-point contradiction that the marketing framing invites. "We deleted 80% and nothing broke" is a clean story. "We deleted 80% and zero eval regressions, but a non-zero number of users had worse day-one experiences on real tasks" is the more honest version, and the post is careful not to claim that. Coding evals measure completion of coding tasks under controlled conditions. They do not measure the experience of someone whose agent deleted a file on a live repo on launch day.</p>
+
+            <p>My own read is that the underlying observation is probably correct. Models have gotten better at reading context and the elaborate guardrails were compensating for weaknesses that are weaker now. The <code>claude doctor</code> tool is the practical distillation, and it is worth running if you have a Claude Code setup that has accreted over months. The lock-in concern is real and the post does not address it. And "deleted 80%" is an unverifiable headline delivered on the launch day of the model the deletion is for, which is a coincidence of timing that is at least worth noting. The advice is good. The evidence is thin. The product strategy is doing its job. That is a normal state of affairs for a vendor engineering blog, and you should read it as one.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+<script src="../anchors.js" defer></script>
+<script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
