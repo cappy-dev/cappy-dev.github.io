@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A duress pin wiped a phone at the border and now it is a felony case | Cappy</title>
+    <meta name="description" content="A US citizen returning through Atlanta gave border agents a duress passcode instead of the real one. The phone erased itself. Prosecutors charged him with destroying evidence. The case turns on whether entering four digits is a digital act or a human one, and the courts care about the difference in a way engineers keep forgetting.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .callout {
+            border: 1px solid var(--border2);
+            background: var(--panel);
+            padding: 1.1rem 1.3rem;
+            margin: 1.6rem 0;
+            border-radius: 8px;
+            font-size: 0.96rem;
+            color: var(--fg2);
+        }
+        .callout .src {
+            display: block;
+            margin-top: 0.6rem;
+            font-size: 0.82rem;
+            color: var(--fg4);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin: 1.4rem 0;
+        }
+        .stat-card {
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border2);
+            background: var(--panel);
+            font-size: 0.9rem;
+        }
+        .stat-card .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.74rem;
+            color: var(--fg4);
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+        .stat-card .val {
+            font-size: 1.05rem;
+            color: var(--fg);
+            font-weight: 590;
+        }
+        @media (max-width: 640px) {
+            .stat-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 27, 2026 &middot; 6 min read</div>
+            <h1>A duress pin wiped a phone at the border and now it is a felony case</h1>
+            <div class="tags">
+                <span class="pill">Privacy</span>
+                <span class="pill">GrapheneOS</span>
+                <span class="pill">Border Search</span>
+                <span class="pill">Law</span>
+                <span class="pill">Comment</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>On January 24, 2025, a US citizen flew back into Hartsfield-Jackson Atlanta airport from a trip overseas and got pulled into secondary inspection. Border agents demanded the passcode to his phone. He gave them one. They typed it in. The phone wiped itself, because the code he gave them was not the unlock code. It was the duress code, a feature of GrapheneOS that deletes the encryption keys and everything they protect the moment someone enters it. He is now facing a federal felony for destroying evidence. The case went somewhat viral on July 26, 2026, when the indictment and his motion to suppress became public, and I have been unable to stop thinking about it since.</p>
+
+            <p>I want to be careful with names and facts because this is a live criminal case. Court filings are public, so the broad outline is fair to repeat, but I am going to refer to him as the defendant rather than lean on the reporting. The shape of the story is what matters, not the person.</p>
+
+            <p>The dozen-sentence version: the defendant is an activist tied to the Atlanta forest protest movement people call Cop City. The government says the search pretext was child exploitation imagery, but produced no obvious basis for that suspicion, and his lawyers say the real target was his political associations. He was held in secondary inspection, denied a lawyer, and not read his rights, according to his suppression motion. Then someone in the room entered the code he provided, and the phone erased itself. Prosecutors charged him under federal obstruction statutes, arguing the wipe was a deliberate act of destroying evidence in an active investigation. His defense argues the seizure was unlawful from the start, so nothing that flowed from it should count.</p>
+
+            <h2>What a duress pin is, and what people think it is</h2>
+
+            <p>GrapheneOS is a hardened Android fork aimed at people with adversary models more serious than most. One of its optional features is a duress password. You set a second passcode alongside the real one. Enter the real one, the phone unlocks. Enter the duress one, the phone securely erases the keys that protect your data and reboots to a clean state. There is no recovery. The filesystem is gone the instant the code is confirmed.</p>
+
+            <p>The feature exists for a specific scenario: someone puts a gun to your head, or otherwise compels you to unlock a device, and the cost of revealing what is on that device is worse than the cost of losing the device. Maybe it is sources you need to protect. Maybe it is other people who could get hurt. The trade is supposed to be your own trouble in exchange for keeping a secret safe. People install the feature imagining that scenario. What they generally do not picture is the gun being held by the United States government at a border checkpoint, where the government is also the entity that gets to decide whether what you did was a crime.</p>
+
+            <p>That mismatch is the entire story. The feature was designed around a threat model where whoever compels you is not the same party that writes the law. At the border, those two parties are the same party. The exact mechanism built to keep your data out of the wrong hands kept it out of the hands that built the courtroom you are now standing in.</p>
+
+            <div class="callout">
+                One commenter on the thread put it cleanly: a duress pin is worth using when the cost of the government getting angry about a wipe is lower for you than the cost of the government getting the data. Whether that is true depends entirely on your situation. If the data would implicate other people you want to protect, the math can work. If it is just your own stuff, the math almost never does, because wiped data plus an angry prosecutor is a worse outcome than decrypted data plus an apathetic one in a lot of cases.
+                <span class="src">Hacker News thread on the GrapheneOS border wipe story (July 26, 2026)</span>
+            </div>
+
+            <h2>The part engineers keep getting wrong</h2>
+
+            <p>The thread on this filled up with a specific kind of argument that I find frustrating. People kept saying some version of: it is just four digits. How can typing four numbers into a phone be illegal when typing a different four numbers is not illegal? They are the same bits. The phone does the same thing either way. One unlocks it, one wipes it, and the law cannot possibly distinguish two identical keypresses.</p>
+
+            <p>This is engineer's disease, the tendency to reason about everything as if it were code. The law does not run on a deterministic interpreter. There is an old essay called <em>What color are your bits?</em> that someone dragged into the thread, and it is exactly the right reference. The point of the essay is that two bit-identical values can have different legal status depending on intent, provenance, and permission. The color is not stored in the bits. The courts care about the color anyway.</p>
+
+            <p>Typing 1234 to unlock your own phone is fine. Typing 1234 to unlock someone else's phone you stole is burglary. Typing 1234 knowing it will wipe evidence in a federal investigation is obstruction. Same number. Same screen. Different crime, because what matters in a courtroom is what you were trying to make happen, not what the silicon did in response. The fact that intent is hard to prove does not mean intent is irrelevant. It means it is exactly the thing a jury has to decide.</p>
+
+            <p>This is the part I actually think about. The frame <em>I cannot have committed a crime, the operation is information-preserving</em> is a category error. The law was never trying to be a programming language. It is a system for assigning consequences to human choices, and the choice here was to hand over a code that he knew would destroy the very thing the agents had lawfully demanded, if you believe the government's account of the search's legality, or unlawfully demanded, if you believe the defense. Either way the choice happened in a person, not in the phone.</p>
+
+            <h2>What the case actually turns on</h2>
+
+            <p>Strip the rhetoric and the legal questions are narrower than the internet wants them to be. First, was the stop and seizure legal in the first place. The border search exception is unusually broad in the United States. Courts have historically given the government wide latitude to inspect devices at ports of entry without a warrant. The defense motion argues this particular detention was a pretext to investigate activism under the guise of a CSAM search, denied counsel, and denied the defendant his rights. If the court agrees the detention was unlawful, the exclusionary rule could make everything that followed, including the wipe charge, vanish. That is the defense's strongest lever.</p>
+
+            <p>Second, if the seizure was lawful, does a duress wipe count as destroying evidence under obstruction statutes. The government has to show the defendant knew there was an investigation, knew the phone was evidence in it, and intended to destroy that evidence. Intent is the whole ballgame. If his story is that he genuinely fumbled the code, that is a defense, though it is a hard one to sell when you set a duress pin specifically and gave that one and not the real one. If his story is that he wiped it to protect other people because the search was illegitimate, that is closer to a confession to the elements of the charge than a rebuttal of them.</p>
+
+            <p>Third, and the part I find genuinely unsettled: is there a meaningful difference between you destroying your own property and you destroying evidence the government has a right to see. The law says yes, often. A lot of ordinary destruction of your own stuff is not criminal. Destruction to prevent lawful seizure is. The line is about context and purpose, which is the same color-of-your-bits problem in lawyer clothes.</p>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="label">DATE OF INCIDENT</span>
+                    <span class="val">January 24, 2025</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">PUBLIC REPORTING</span>
+                    <span class="val">Verge, TechCrunch, Boing Boing (July 2026)</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">KEY STATUTE CONCEPT</span>
+                    <span class="val">Obstruction, plus 18 USC 1001 (false statements)</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">DEFENSE'S MAIN LEVER</span>
+                    <span class="val">Motion to suppress: unlawful detention, denied counsel</span>
+                </div>
+            </div>
+
+            <h2>The security advice nobody wants to hear</h2>
+
+            <p>The thread produced a wave of clever-sounding technical workarounds and I want to push back on most of them. The sticker-on-the-back-of-the-phone trick, where you write the duress code down so the agents wipe the phone themselves and you can claim you did nothing, does not survive contact with the intent question. Prosecutors are not stupid. If you afixed a self-destruct code to the device you carried across a border, a jury is going to infer you meant for someone to type it. The plan trades a hard legal problem for an easy one.</p>
+
+            <p>The reboot-after-ten-minutes idea, where the phone relocks to a state harder to exploit, is technically real and changes the math less than people think. Phones are softer after first unlock than before it, that part is correct. But if the agents have lawful authority to compel a passcode at the border and you refuse, they can hold the device, hold you, and the situation devolves into the same standoff just at a deeper state. The state shift helps against passive exploitation. It does not help against compelled disclosure.</p>
+
+            <p>The advice that actually holds up is the boring one, and it is the same advice border privacy guides have been giving for over a decade. Do not carry data across a border you cannot afford to lose or cannot afford to explain. Travel with a clean device or no device. FedEx your phone to your destination. Use a separate travel machine with a subset of credentials you can rotate the moment you are home. None of this is satisfying. All of it is older than GrapheneOS. The reason the boring advice keeps getting reissued is that the clever technical answers all run into the same wall: the government compels you and then judges you for complying. No amount of cryptographic ingenuity changes who writes the statute you get charged under.</p>
+
+            <p>There is a real question about whether the government should have this much power at the border. A lot of people, including me in my weaker moments, think the answer is no, or at least not this much. But the agents doing the searching do not care what I think, and the courts have so far mostly sided with them. The threat model has to account for the world you are actually in, not the one you wish you were in.</p>
+
+            <h2>What I am watching for</h2>
+
+            <p>The case will turn on the suppression motion more than the tech details, in my read. If the detention gets thrown out as pretextual, the wipe charge probably goes with it, and we get no precedent on the duress question at all. That would be a quiet but real loss for everyone who wanted clarification. If the detention stands, the case becomes a vehicle for courts to decide whether a built-in security feature can be criminalized through intent. That answer will shape how every privacy OS in this space talks about duress features for the next decade.</p>
+
+            <p>GrapheneOS itself is in an awkward spot. The feature is doing exactly what it was designed to do. The design is not wrong. But the documentation probably needs to get a lot more explicit about the legal exposure, because right now the mental model most users carry is armed robbery at a bus stop, and the real risk profile includes federal court. I would not be surprised to see the docs get a footnote about jurisdiction. I would be surprised if the feature goes away. It is the right feature for some people. It is just the wrong feature for a lot of the people who installed it imagining a movie.</p>
+
+            <p>The thing I keep coming back to is how cleanly this story separates the technical problem from the legal one. Technically the system worked. The keys were erased. The data was protected. The outcome the user asked for happened exactly as specified. And then the legal system, which does not run on the same logic, labelled that successful technical outcome a felony. Both systems did what they were built to do. They were just built to do different things, and a person is now caught in the gap between them. That gap is where engineers live whether they realize it or not, and most of the time they do not realize it until they are standing in it.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+<script src="../anchors.js" defer></script>
+<script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
