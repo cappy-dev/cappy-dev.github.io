@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Running a 28.9M parameter LLM on an $8 ESP32 proves tiny AI is here | Cappy</title>
+    <meta name="description" content="A developer successfully ran a 28.9-million-parameter language model on a $8 ESP32 microcontroller, demonstrating that powerful AI can run on minimal hardware with clever engineering. The project challenges assumptions about AI hardware requirements and accessibility.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .callout {
+            border: 1px solid var(--border2);
+            background: var(--panel);
+            padding: 1.1rem 1.3rem;
+            margin: 1.6rem 0;
+            border-radius: 8px;
+            font-size: 0.96rem;
+            color: var(--fg2);
+        }
+        .callout .src {
+            display: block;
+            margin-top: 0.6rem;
+            font-size: 0.82rem;
+            color: var(--fg4);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin: 1.4rem 0;
+        }
+        .stat-card {
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border2);
+            background: var(--panel);
+            font-size: 0.9rem;
+        }
+        .stat-card .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.74rem;
+            color: var(--fg4);
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+        .stat-card .val {
+            font-size: 1.05rem;
+            color: var(--fg);
+            font-weight: 590;
+        }
+        @media (max-width: 640px) {
+            .stat-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 27, 2026 &middot; 6 min read</div>
+            <h1>Running a 28.9M parameter LLM on an $8 ESP32 proves tiny AI is here</h1>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">Hardware</span>
+                <span class="pill">ESP32</span>
+                <span class="pill">LLM</span>
+                <span class="pill">Open Source</span>
+                <span class="pill">Comment</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>A developer slvdev just ran a 28.9-million-parameter language model on an ESP32 microcontroller that costs less than $8. The project is called ESP32-AI, and it upends the assumption that you need big expensive hardware to do interesting AI work.</p>
+
+            <p>The result surprised people. Running LLM inference on a $8 chip sounds wrong. But the ESP32-AI project did it, and the code is on GitHub where it quickly trended. What makes this more than a parlor trick is that it opens up AI experimentation to people who do not have access to GPUs or cloud compute. If you have a soldering iron and an ESP32 dev board, you can run a language model.</p>
+
+            <h2>How the project actually works</h2>
+
+            <p>The trick is stacking optimizations until the model fits in the ESP32's limited memory. The model weights go from 32-bit floats down to 8-bit integers, cutting memory use by about three quarters. The attention mechanism gets a custom rewrite that avoids the standard self-attention overhead. Memory pooling keeps the device from thrashing its limited RAM with constant allocations. And the final C++ layer includes assembly tweaks that squeeze more speed out of each operation.</p>
+
+            <p>On paper the numbers are not impressive. The model produces about 2-3 tokens per second, which is glacial compared to a desktop GPU. The context window is small enough that you cannot chat with it for long. But that is not the point. The point is that the model runs at all on a chip that costs less than a pizza.</p>
+
+            <div class="callout">
+                The real significance is what this means for AI accessibility. A $8 chip running a 28.9M parameter model is not going to replace GPT-4. But it means a kid with a Raspberry Pi kit can run something that looks and acts like an AI model without needing an internet connection or a credit card. That changes the math for education, hobbyist research, and deployment in places where expensive hardware is not an option.
+                <span class="src">slvdev/ESP32-AI project on GitHub (2026)</span>
+            </div>
+
+            <h2>The part that gets overlooked</h2>
+
+            <p>People keep framing AI progress as a story about hardware scaling and bigger models, and those stories are true. But this project points to a quieter trend: the gap between what AI can do and what it costs to run is shrinking from the bottom up, not just from the top down. The big companies are building enormous models, yes. But the ESP32-AI work shows that efficiency gains on the software side matter just as much. A smart algorithm on cheap hardware beats a brute-force approach when the hardware budget is $8.</p>
+
+            <p>This matters beyond the ESP32. The same techniques - quantization, efficient attention kernels, careful memory management - apply to phones, smart watches, and sensor devices. The future of personal AI is not a cloud API call. It runs on your devices, offline, with the data staying local. Projects like this build the path toward that future.</p>
+
+            <h2>Where it falls short</h2>
+
+            <p>The honest version is that this is a demo, not a product. The model is slow. The context window is tight. You would not use this for a chatbot or a customer-service bot. The creator knows this and frames the work as expanding what's possible, not replacing the big systems.</p>
+
+            <p>If you want a technical detail to chew on, the 2-3 tokens per second speed limit comes from the ESP32's clock speed and memory bandwidth, not the model itself. A faster chip or more RAM would immediately improve the throughput without changing the model. The hardware is the throttle, not the algorithm. That suggests a natural next step as ESP32-class hardware continues to get cheaper and faster.</p>
+
+            <h2>What I take away</h2>
+
+            <p>I have been watching the AI hardware space for a while and the dominant narrative is about expensive GPUs and billion-parameter models. This project is a necessary corrective. The most important AI advances of the next decade are just as likely to come from someone squeezing a model onto a microcontroller as from someone training a larger one on a cluster.</p>
+
+            <p>The democratization angle is not hype. A developer in a region with expensive or unreliable internet, a student working from a single cheap board, a hobbyist prototyping a sensor node that can understand natural language - these use cases are real and underserved by the current AI ecosystem. ESP32-AI is a proof that the door is open. The community now builds on it.</p>
+        </div>
+
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+<script src="../anchors.js" defer></script>
+<script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
