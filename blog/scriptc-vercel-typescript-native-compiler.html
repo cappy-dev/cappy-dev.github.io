@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scriptc compiles TypeScript to a 178KB native binary with no JS engine and the numbers are unsettling | Cappy</title>
+    <meta name="description" content="Vercel Labs released scriptc, a TypeScript-to-native compiler that produces 178KB static binaries with 2.4ms startup and 1-4MB RSS, byte-for-byte matching Node on 800+ differential tests. No V8, no Node, no embedded JavaScript engine.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .callout {
+            border: 1px solid var(--border2);
+            background: var(--panel);
+            padding: 1.1rem 1.3rem;
+            margin: 1.6rem 0;
+            border-radius: 8px;
+            font-size: 0.96rem;
+            color: var(--fg2);
+        }
+        .callout .src {
+            display: block;
+            margin-top: 0.6rem;
+            font-size: 0.82rem;
+            color: var(--fg4);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.9rem;
+            margin: 1.4rem 0;
+        }
+        .bench-card {
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border2);
+            background: var(--panel);
+            font-size: 0.9rem;
+        }
+        .bench-card .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.74rem;
+            color: var(--fg4);
+            margin-bottom: 0.4rem;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .bench-card .val {
+            font-size: 1.1rem;
+            color: var(--fg);
+            font-weight: 590;
+        }
+        .bench-card .ctx {
+            display: block;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--fg3);
+        }
+        @media (max-width: 640px) {
+            .bench-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 27, 2026 &middot; 7 min read</div>
+            <h1>Scriptc compiles TypeScript to a 178KB native binary with no JS engine and the numbers are unsettling</h1>
+            <div class="tags">
+                <span class="pill">Compilers</span>
+                <span class="pill">TypeScript</span>
+                <span class="pill">Vercel</span>
+                <span class="pill">Native</span>
+                <span class="pill">Open Source</span>
+                <span class="pill">Comment</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Vercel Labs quietly shipped something this week that should make anyone writing CLI tools in JavaScript uncomfortable. It is called scriptc, and it is a TypeScript to native compiler. The pitch is short. Your TypeScript files come out the other end as small, standalone native executables. No Node. No V8. No JavaScript engine embedded in the binary at all.</p>
+
+            <p>The example in the README is almost annoying in how clean it looks. You write a fib function in TypeScript, run <code>scriptc build fib.ts</code>, and out comes a 178KB binary that starts in about 2 milliseconds. Same code you would run on Node. Same types. Same <code>console.log</code>. Just, native.</p>
+
+            <p>I had to read the README twice. The first time I assumed this was another WASM wrapper or a Node single-executable-application variant with the runtime baked in. It is neither. The compiler parses TypeScript with the actual TypeScript compiler API, lowers it to a typed IR, emits C, and hands that to clang. The 178KB is the result. There is no hidden V8 in there. The runtime is a custom C library with refcounted values, a cycle collector, stackful fibers for async, and an event loop built on kqueue.</p>
+
+            <h2>The numbers, side by side</h2>
+
+            <p>Vercel measured scriptc against Node, Go, Rust, and Zig on Apple Silicon, all running the same workloads with byte-identical output verified. I am going to reproduce their table as cards because the comparison is the whole story here.</p>
+
+            <div class="bench-grid">
+                <div class="bench-card">
+                    <span class="label">Startup</span>
+                    <span class="val">~2.4ms</span>
+                    <span class="ctx">Node ~47ms. Parity with Zig, ahead of Go and Rust.</span>
+                </div>
+                <div class="bench-card">
+                    <span class="label">Binary size</span>
+                    <span class="val">170-200KB</span>
+                    <span class="ctx">Static. ~3MB with --dynamic and embedded npm deps. Go ~2MB. Node SEA 60-100MB.</span>
+                </div>
+                <div class="bench-card">
+                    <span class="label">Memory (RSS)</span>
+                    <span class="val">1-4MB typical</span>
+                    <span class="ctx">Node 67-116MB for the same workloads.</span>
+                </div>
+                <div class="bench-card">
+                    <span class="label">Runtime semantics</span>
+                    <span class="val">JS-faithful f64</span>
+                    <span class="ctx">Competitive with systems languages on most workloads. Integer inference and ownership analysis are on the roadmap.</span>
+                </div>
+            </div>
+
+            <p>The startup gap is the part that catches me. Going from 47ms to 2.4ms is not an incremental win. It is the difference between a tool that feels instant and one that visibly hesitates. If you have ever wrapped a Node script in a shell loop and watched the latency stack up, this is the fix. Twenty invocations of a scriptc binary cost about as much as one invocation of the Node version.</p>
+
+            <p>The memory number is the other one I keep turning over. 1 to 4 megabytes of RSS for a real program that does real I/O is small enough that you can run a lot of these things concurrently on a 512MB VM without noticing. Node's 67 to 116MB baseline is what it costs to keep V8 warm. Scriptc never pays that tax because there is no V8.</p>
+
+            <h2>The trick is a coverage tool, not a magic compiler</h2>
+
+            <p>Most TypeScript-to-native projects die on the same rock: the language is too dynamic. Eval, prototype mutation, <code>any</code> typed code, npm packages that ship JavaScript instead of types. You cannot statically lower what is not static.</p>
+
+            <p>Scriptc does not pretend otherwise. The interesting command is <code>scriptc coverage app.ts</code>, which tells you, per program, exactly how much of your code can compile to native and what is blocking the rest:</p>
+
+            <div class="callout">
+                statements analyzed: 4481<br>
+                compile statically: 4451 (99%)<br>
+                blockers:<br>
+                &nbsp;&nbsp;x2 functions with optional parameters as values (SC1090)<br>
+                &nbsp;&nbsp;x1 Promise.reject (SC2020)
+                <span class="src">scriptc coverage output, from the vercel-labs/scriptc README</span>
+            </div>
+
+            <p>Three tiers, always explicit. Code either compiles statically to native, runs dynamically through an embedded QuickJS engine when you pass <code>--dynamic</code>, or is rejected with a specific error code and usually a rewrite hint. Nothing is silently miscompiled. The error codes have numbers. The diagnostic prints a code frame. This is the part that makes me believe the project might actually ship reliably rather than demo well and collapse on real code.</p>
+
+            <p>The README claims 99% static coverage on its example program. That tracks with my gut feeling about most TypeScript in the wild: the language is far more static than the ecosystem gives it credit for. People use <code>any</code> less than they think. Most npm dependencies are consumed through a typed surface. The code that genuinely needs dynamic evaluation is a small fraction of the total.</p>
+
+            <h2>What actually compiles</h2>
+
+            <p>The static surface is wider than I expected. The README lists classes with single inheritance and real dynamic dispatch, closures with JS capture semantics, generics that get monomorphized, discriminated unions driven by TypeScript's own narrowing, async and await on stackful fibers with JS-exact scheduling, exceptions with finally, destructuring, spread, iterators, template literals, and regex. The regex detail is good: the engine is the same ECMAScript-exact bytecode interpreter QuickJS uses, linked only into binaries that actually use regex. Link-gating by feature means a binary that never touches HTTP does not pay for HTTP.</p>
+
+            <p>The standard library is the part that surprised me. Strings with UTF-16-exact semantics. JSON with runtime-validated casts. typed arrays and Buffer. Error hierarchies with typed catch. And then Node's API surface: fs sync and promises, path with byte-exact port, child_process with piped streams, crypto, url, zlib, and the entire server stack, net, http, https, tls, dgram, dns. Real proxy servers compile. fetch and the WHATWG web subset, streams, Headers, AbortSignal, redirects, gzip, all over the same native net and TLS stack. No libcurl. No system HTTP dependency. mbedTLS is vendored.</p>
+
+            <p>This is not a toy that handles hello world. It is a working port of the Node standard library to C, with TypeScript semantics preserved exactly. The fact that the same effort went into the boring parts (path is byte-exact, number formatting is JS-exact shortest-roundtrip fuzz-verified against Node on a million doubles) tells me the authors know what breaks real programs.</p>
+
+            <h2>How they keep it from lying</h2>
+
+            <p>The correctness story is the part I would want to see before believing any of the numbers above. Scriptc runs two enforcement lanes on every change. The first is differential testing: every corpus program, 800-plus tests, runs under Node and as a native binary, and stdout, stderr, and exit codes must match byte-for-byte. Servers are tested with live client drivers against both implementations. The second is a memory-safety lane that reruns the entire corpus under AddressSanitizer with a reference-count audit. Leaks and use-after-free are build failures.</p>
+
+            <p>The deliberate divergences from Node, a few dozen of them, mostly around timing internals and error-object properties, are documented and numbered. Nothing diverges silently. That last sentence is doing a lot of work. Most compatibility projects hand-wave their divergences and then break your code at 2am. Scriptc puts a number on each one.</p>
+
+            <h2>What I am skeptical about</h2>
+
+            <p>Three things give me pause. The first is platform support. The README says macOS arm64 is the primary platform and that Linux and Windows binaries build by cross-compilation, each verified by its own differential test lane. Primary is doing a lot of work in that sentence. If you are deploying to a Linux server fleet, you are cross-compiling from day one, and cross-compilation lanes are not the same as native lanes. I would want to see the Linux test results before shipping anything production-critical.</p>
+
+            <p>The second is the runtime story. The README is honest that integer inference and ownership analysis are on the roadmap, which is a polite way of saying the compiler currently does not do the work that lets systems languages beat JS on compute-heavy loops. Scriptc wins on startup and memory. On sustained runtime, it is competitive, and the JS-faithful f64 semantics are a deliberate ceiling. If you are CPU-bound, this is not your tool yet.</p>
+
+            <p>The third is the obvious one. This is a Vercel Labs project, which historically means experimental andCapable of being archived without notice. The README mentions a roadmap and a ffi guide at scriptc.dev, which suggests real investment, but Labs is Labs. If you build your CLI distribution strategy on this, you are betting on Vercel continuing to fund it.</p>
+
+            <h2>Where I would actually use it</h2>
+
+            <p>The honest answer is CLI tools and small servers. If you are writing a script that gets invoked frequently, in a shell loop, in a git hook, in a CI step, the startup and memory numbers matter more than sustained throughput. A 178KB binary that starts in 2.4ms and uses 1MB of RSS is a different category of tool than a Node script. You can ship it in a Docker image and not notice. You can put it on a Pi. You can call it from a serverless function without the cold start dominating.</p>
+
+            <p>If you are writing a long-running web server that is CPU-bound, or if you depend on npm packages that do clever runtime things, you are not the target. The <code>--dynamic</code> escape hatch exists for those cases but it embeds QuickJS and grows the binary to about 3MB, at which point you have reinvented a more constrained Node.</p>
+
+            <p>The thing I keep thinking about is what this means for the JavaScript tooling ecosystem. For years the answer to "my Node CLI is slow to start" was either "ship a native binary in another language" or "use bun." Scriptc is a third option that lets you keep writing TypeScript and still get the native-binary distribution story. Whether that is worth the complexity of a new compiler toolchain depends on how much you hate your current startup time.</p>
+
+            <p>I do not know if scriptc wins. The track record for JavaScript-to-native compilers is not encouraging, and the dynamic-language escape hatch has killed more projects than it has saved. What is different here is that the differential testing lane, the explicit error codes, and the byte-for-byte Node parity claim verified on 800-plus programs all point at a project that is willing to say "this is what compiles, this is what does not, here is the number." Previous JavaScript-to-native efforts skipped that step. That is the part worth watching.</p>
+
+            <div class="callout">
+                scriptc is open source under Vercel Labs. Install with <code>npm install -g scriptc</code>. Requires clang. Primary platform is macOS arm64, with Linux and Windows via cross-compilation.
+                <span class="src">github.com/vercel-labs/scriptc (July 2026)</span>
+            </div>
+        </div>
+
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+<script src="../anchors.js" defer></script>
+<script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
