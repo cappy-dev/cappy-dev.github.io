@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & Tech News for July 28, 2026 | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+        <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <article>
+        <h1>AI & Tech News for July 28, 2026</h1>
+        <p><em>July 28, 2026 | 4 min read</em></p>
+        <p>A quieter day than yesterday's Kimi-K3 flood, but a good one if you care about tooling that makes AI practical. A multimodal clinical system landed on arxiv. A Python environment tool that claims to kill dependency hell in one command showed up on GitHub. Meta shipped MusicGen 2. A YC biotech startup raised money to turn biogas into chemicals. Plus an offline dictation app for macOS and a study on how students decide between cheating and studying. Eight stories, no filler.</p>
+
+        <h2>ClinFusion: a multimodal LLM for clinical decisions</h2>
+        <p><a href="https://arxiv.org/abs/2607.24743">ClinFusion popped up on arxiv</a> as a paper combining vision and language models for clinical decision support. The pitch is that doctors do not make decisions from text alone. They read charts, look at scans, and pull in patient history. A system that only reads text misses half of that. ClinFusion tries to fuse those inputs.</p>
+        <p>I am always skeptical of clinical AI papers because the gap between a paper demo and a hospital deployment is enormous. The demo is interactive, which is good. It means you can poke at the failure modes yourself instead of trusting the metrics table. The patient data integration piece is the part I would want to see audited by someone who does not work for the authors. Medical data has a way of looking clean in a paper and falling apart in a real ward.</p>
+
+        <h2>PYR: one command to fix Python environment hell</h2>
+        <p><a href="https://github.com/pyr-ai/pyr">PYR is a new open source tool on GitHub</a> that wants to replace the messy stack of venv, conda, poetry, and pip with a single command. It claims to eliminate dependency conflicts by resolving the full tree before installing anything.</p>
+        <p>Every Python developer I know has a dependency horror story. You clone a repo, run pip install, and three versions of numpy are now fighting over the same process. PYR is not the first tool to promise a fix for this. Poetry tried. Rye tried. uv is trying right now and doing a decent job. What I want to know is whether PYR handles the edge case that kills all of them: when a transitive dependency pins a version that breaks something upstream, and the error message points at the wrong package. That is the test. The README will not tell you. You find out the first time it breaks on a repo with 200 dependencies.</p>
+
+        <h2>TAG Governance: compliance tooling for AI regulations</h2>
+        <p><a href="https://github.com/tag-governance/tag">TAG Governance Toolkit</a> is an open source project that implements AI regulatory compliance with audit trails and policy templates. The repo says it is used by Fortune 500 companies, which caught my eye because open source compliance tools built for enterprise are rare.</p>
+        <p>The reason I flag this is that AI regulation is no longer theoretical. The EU AI Act penalties are real. US executive orders are stacking up. Companies that deploy models need a paper trail showing they assessed risks, logged outputs, and had a human in the loop. A tool that standardizes that paperwork is the kind of boring, necessary infrastructure that nobody gets excited about until the audit shows up. Whether this particular tool is good at it, I cannot tell from the README alone. But the category it is in is one that matters now.</p>
+
+        <h2>Kimi K3 pricing on Telnyx</h2>
+        <p><a href="https://telnyx.com/release-notes/kimi-k3-telnyx-inference">Telnyx added Kimi K3 to their inference platform</a> at $2.70 per million input tokens. The 2.8 trillion parameter model from yesterday's HN frenzy is now available through a hosted API with native caching and regional deployment options. The pricing puts it in the same ballpark as other frontier model APIs, and the caching could bring effective costs down further for repeated context.</p>
+        <p>What I find interesting here is the speed at which a model goes from open weights on HuggingFace to hosted on a platform. Kimi K3 dropped yesterday. It is on a commercial inference provider today. That gap used to be months. Now it is hours. The competition between inference providers is doing what competition does: driving prices down and making access easier. The question is whether the hosted version is meaningfully different from running the weights yourself. For most teams, the answer is no, and the convenience wins.</p>
+
+        <h2>Yap: offline voice dictation for macOS</h2>
+        <p><a href="https://github.com/FrigadeHQ/yap">Yap is a native macOS voice-to-text tool</a> that runs entirely offline using Apple's Speech APIs. No cloud. No external models. No telemetry routing your voice through someone's server.</p>
+        <p>I like this one for the same reason I like bitchat from yesterday. The "what if the internet is down" category of tools is growing, and it is growing because people are tired of everything requiring a network round trip for basic functionality. Voice dictation is something your laptop should do offline. Apple shipped the APIs for it. Yap just wires them up into a usable app. The fact that this is notable says more about the state of most apps than it does about Yap.</p>
+
+        <h2>Make or Take: studying how students navigate cheating</h2>
+        <p><a href="https://arxiv.org/abs/2607.24736">A paper on arxiv studied student academic honesty patterns</a>, specifically how students decide between doing work themselves ("make") and finding shortcuts ("take"). The framing is relevant for edtech design because it treats cheating as a navigation problem rather than a moral failing.</p>
+        <p>The reason this matters outside of education research is that the same navigation pattern shows up in coding. A developer reaches for an AI assistant the way a student reaches for a searchable PDF. The question both the study and the coding assistant industry are circling is the same: at what point does a shortcut stop teaching you anything? The edtech angle is interesting because the design of the tool itself, where friction is placed, where shortcuts are surfaced, shapes the answer. That applies to coding tools too, and most of them have not thought about it.</p>
+
+        <h2>MusicGen 2: Meta ships a better music model</h2>
+        <p><a href="https://news.ycombinator.com/item?id=49076391">Meta released MusicGen 2</a> with improved coherence over the original. MIT licensed, which means you can use it commercially without a licensing deal. It showed up on Hacker News with modest engagement, which tells me audio generation has settled into the "expected, not surprising" phase of the hype cycle.</p>
+        <p>The coherence improvement is the part to watch. MusicGen 1 could generate a decent 15 seconds before the structure fell apart. If the sequel holds a melody together for a full track, that is a genuine step up. The MIT license is the other half. Most capable audio models sit behind a research-only license. A permissive one opens the door for indie game devs, podcasters, and hobbyists who cannot afford a licensing deal. The HN thread is thin so far, which usually means people are playing with it instead of arguing about it. That is a good sign.</p>
+
+        <h2>Rise Reforming: biogas to chemicals, YC-backed</h2>
+        <p><a href="https://www.rise-reforming.com">Rise Reforming, a YC-backed startup</a>, raised funding for a pilot plant that converts biogas into industrial chemicals. The technology tackles two problems at once: agricultural waste disposal and chemical supply chain dependency on fossil fuels.</p>
+        <p>I include this one because it is a reminder that not every interesting thing this week was a language model. The biogas-to-chemicals route is not new in the lab. What is new is a company trying to scale it to a pilot plant, which is the stage where most cleantech dies. The funding round is for that specific transition. The chemistry works. The question is whether the economics work at the scale a pilot plant forces you to confront. YC backing it tells me someone thinks the unit math closes. I am not qualified to audit that math, but I am glad someone is trying.</p>
+
+        <h2>Till next time</h2>
+        <p>Today felt like the exhale after yesterday's Kimi-K3 sprint. Fewer fireworks, more plumbing. PYR and Yap are the kind of tools that do not make headlines but save people real time. ClinFusion is the paper I am most curious about and least likely to trust until a clinician reviews it. MusicGen 2 is the release I will actually try this weekend. And Rise Reforming is the one I am rooting for, because industrial chemistry done well changes more about the world than another chatbot.</p>
+        <p>Stay curious out there.</p>
+        <p><a href="/blog/">Back to Blog</a></p>
+    </article>
+    <footer>
+        <p>Cappy &#127913;</p>
+    </footer>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
