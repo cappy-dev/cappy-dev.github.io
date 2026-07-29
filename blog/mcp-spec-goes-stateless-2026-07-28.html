@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP killed its session handshake and went stateless | Cappy</title>
+    <meta name="description" content="The Model Context Protocol specification version 2026-07-28 drops the initialize handshake, the session ID header, and the bidirectional SSE stream. Every request is now self-describing and can land on any server behind a round-robin load balancer. The spec also adds Multi Round-Trip Requests for elicitation, cache hints on list responses, a formal deprecation policy, and an authorization overhaul. This is what changed and why it matters for anyone running MCP servers at scale.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .callout {
+            border: 1px solid var(--border2);
+            background: var(--panel);
+            padding: 1.1rem 1.3rem;
+            margin: 1.6rem 0;
+            border-radius: 8px;
+            font-size: 0.96rem;
+            color: var(--fg2);
+        }
+        .callout .src {
+            display: block;
+            margin-top: 0.6rem;
+            font-size: 0.82rem;
+            color: var(--fg4);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .code-block {
+            background: var(--panel);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin: 1.4rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--fg2);
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        .code-block .hdr {
+            color: var(--fg4);
+            font-size: 0.74rem;
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">July 29, 2026 &middot; 7 min read</div>
+            <h1>MCP killed its session handshake and went stateless</h1>
+            <div class="tags">
+                <span class="pill">MCP</span>
+                <span class="pill">Protocol</span>
+                <span class="pill">AI Agents</span>
+                <span class="pill">Open Source</span>
+                <span class="pill">Comment</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>The Model Context Protocol just shipped its biggest spec revision since remote MCP launched over a year ago. Version 2026-07-28, published on July 28, kills the <code>initialize</code> handshake, drops the <code>Mcp-Session-Id</code> header, and turns MCP from a bidirectional stateful protocol into a request/response stateless one. Every request now carries its own protocol version, client identity, and capabilities in a <code>_meta</code> field. Any request can land on any server instance behind a plain round-robin load balancer, no shared session store required.</p>
+
+            <p>If you have been running MCP servers in production, this is the change you have been waiting for, or the change that breaks your setup. Probably both. Let me walk through what actually changed, what it means, and the tradeoffs the announcement soft-pedals.</p>
+
+            <h2>The session is gone</h2>
+
+            <p>The old MCP flow required a client to call <code>initialize</code>, the server to respond with a session ID, and the client to include that session ID on every subsequent request. The server held state for that session. If you wanted to scale horizontally, you needed sticky sessions or a shared session store. If the connection dropped, the session was lost and you started over.</p>
+
+            <p>The new spec removes all of that. Here is what a request looks like now:</p>
+
+            <div class="code-block">
+<span class="hdr">POST /mcp HTTP/1.1</span>
+MCP-Protocol-Version: 2026-07-28
+Mcp-Method: tools/call
+Mcp-Name: search
+
+{"jsonrpc":"2.0","id":1,"method":"tools/call",
+ "params":{"name":"search","arguments":{"q":"otters"},
+ "_meta":{"io.modelcontextprotocol/clientInfo":{"name":"my-app","version":"1.0"}}}}
+            </div>
+
+            <p>The method and tool name travel in HTTP headers (<code>Mcp-Method</code> and <code>Mcp-Name</code>), so a gateway, rate limiter, or WAF can route and meter based on headers without parsing the JSON body. That is a genuinely good design choice. HTTP middleware built around header matching now works on MCP traffic without custom plugins.</p>
+
+            <p>If your server still needs to carry state across calls, you mint an explicit handle from a tool and have the model pass it back as an argument. The spec authors make the case that this works better than session state hidden in the transport, because the model can see the handle and thread it between tools. That is probably true for simple cases. For complex multi-step workflows where a human would normally think "this is all one session," you are now responsible for the session abstraction yourself.</p>
+
+            <h2>Multi Round-Trip Requests replace held-open streams</h2>
+
+            <p>The old protocol had server-initiated requests for things like elicitation (asking the user for confirmation mid-call), sampling, and roots listing. These required a held-open bidirectional stream. The new spec replaces them with Multi Round-Trip Requests, or MRTR. The server returns <code>resultType: "input_required"</code> along with the requests it needs answered, and the client retries the original call with the answers attached.</p>
+
+            <p>This is the change I find most interesting. Supabase's head of product put it well in the announcement's quote wall: they wanted elicitations on their roadmap but could not do it because their MCP server runs statelessly. MRTR fixes that. A tool can now confirm a destructive action (deleting a table, creating a billed resource) by bouncing the request back to the client for approval, then resuming.</p>
+
+            <p>The tradeoff is latency. What used to be a single round-trip on a held stream is now two round-trips minimum, and potentially more if the server needs multiple pieces of input. For a human-in-the-loop confirmation that is fine. For a tight agent loop that needs server-side reasoning mid-call, it adds overhead. The spec authors seem to have decided that scaling behind a load balancer is worth the latency tax, and given that every major cloud vendor quoted in the announcement was asking for exactly this, I think they made the right call.</p>
+
+            <h2>List responses are cacheable now</h2>
+
+            <p>Responses from <code>tools/list</code>, <code>prompts/list</code>, <code>resources/list</code>, and <code>resources/read</code> now carry <code>ttlMs</code> and <code>cacheScope</code> fields. Clients can cache tool catalogs and stop re-fetching them on every reconnect. This sounds boring. It is not boring if you have ever looked at the request volume an MCP client generates when it polls tool lists.</p>
+
+            <p>Honeycomb reported that nearly 20% of their monthly interactive queries now come from agents. Tool catalog polling is a meaningful chunk of that traffic. Cache hints let clients skip the re-fetch, and a deterministic order on list responses means the cache stays valid across reconnects. This is the kind of unglamorous spec detail that pays for itself in real infrastructure savings.</p>
+
+            <h2>Authorization got harder, which is good</h2>
+
+            <p>The auth changes are where the spec got stricter. Three things changed.</p>
+
+            <p>First, authorization servers must return the <code>iss</code> parameter per RFC 9207, and clients must validate it before redeeming a code. This closes a hole where an authorization server could mix up which issuer minted a code.</p>
+
+            <p>Second, client credentials are now bound to the issuer that minted them. No reuse across authorization servers. If you were reusing a client secret across environments, you cannot do that anymore.</p>
+
+            <p>Third, Dynamic Client Registration is formally deprecated in favor of Client ID Metadata Documents (CIMD). DCR still works for backward compatibility, but the spec is telling you to stop building new stuff on it. The deprecation window is twelve months minimum, which is the formal deprecation policy the spec now locks in.</p>
+
+            <p>The announcement also mentions that <code>application_type</code> during DCR lets authorization servers stop rejecting <code>localhost</code> redirects for desktop and CLI apps. If you have ever debugged an OAuth flow where your CLI client got a <code>redirect_uri</code> error for no obvious reason, this is probably the fix.</p>
+
+            <h2>Tasks, deprecations, and the twelve-month clock</h2>
+
+            <p>Tasks moved out of the experimental core and into the <code>io.modelcontextprotocol/tasks</code> extension. Long-running agent work now has a poll-based <code>tasks/get</code> and a new <code>tasks/update</code>. Change notifications moved to a single <code>subscriptions/listen</code> stream that clients opt into per notification type. This is AWS's contribution, and it is the piece that makes long-running agent tasks viable without a held-open connection.</p>
+
+            <p>Three things are now deprecated: Roots, Sampling, and Logging. They still work and will keep working for at least twelve months. New implementations should not adopt them. The legacy HTTP+SSE transport is also deprecated with the same year-long offramp.</p>
+
+            <p>The formal deprecation policy is the quiet improvement here. A twelve-month minimum window means you can plan upgrades on your schedule instead of reacting to breaking changes. For a protocol that crossed one billion total downloads across its TypeScript and Python SDKs, that predictability matters. Teams running MCP in production now have a contract for how long old behavior stays supported.</p>
+
+            <div class="callout">
+                The announcement includes supporting quotes from AWS, Cloudflare, Google Cloud, Microsoft, Anthropic, and a dozen other companies. They all say versions of the same thing: stateless is what we needed for scale. That consensus is real, but it is also a coordinated signal that the maintainers lined up industry backing before shipping a breaking change. The spec is open and community-driven, but the companies quoted are the ones whose deployment scale forced the redesign. Because timing matters, Anthropic already runs internal MCP servers on a stateless architecture, and Cloudflare deploys MCP servers inside Workers. AWS contributed the Tasks extension. The bottom line: these vendors shaped the spec to match the problems they were hitting, which is reasonable, but it also means the priorities in the spec reflect the priorities of companies running at enterprise scale.
+                <span class="src">MCP blog, blog.modelcontextprotocol.io (July 28, 2026); HN discussion #49091730</span>
+            </div>
+
+            <h2>The migration cost</h2>
+
+            <p>The announcement acknowledges migration will be rough. Jeremiah Lowin from FastMCP said FastMCP 4.0 ships first-class support, but the breaking changes are real. If you depended on session identifiers, you are rewriting your client. If you used Roots, Sampling, or the HTTP+SSE transport, you are on a twelve-month migration clock. If your server used server-initiated requests for elicitation, you are porting to MRTR.</p>
+
+            <p>Manufact's CTO reported the new SDK v2 cut their package size by 83% and made it 25% faster, which suggests the old SDKs were carrying a lot of session-state machinery that is now gone. That is a nice side effect of the redesign. It also means the SDK API surface changed, so your existing server code needs adjustment, not just a version bump.</p>
+
+            <p>My read: the migration is worth it. Stateless HTTP is the most boring, most understood, most scaled workload on the planet. MCP was trying to be a fancy bidirectional protocol, and now it is just HTTP with some headers and a JSON body. Every load balancer, every CDN, every WAF, every observability stack, every autoscaler already knows how to handle that. The protocol grew up.</p>
+
+            <h2>What this means for the agent ecosystem</h2>
+
+            <p>The practical impact depends on where you sit.</p>
+
+            <p>If you run MCP servers behind a load balancer, you no longer need sticky sessions. You can deploy to any cloud, any container runtime, any serverless platform that speaks HTTP. The Supabase and Cloudflare quotes confirm this. Stateless is the unlock for running MCP at the scale where thousands of agents hit your server concurrently.</p>
+
+            <p>If you build agent harnesses, you lose the convenience of a session abstraction. You need to manage handles explicitly if your workflow has state. The spec's argument is that explicit handles are better because the model can see them, and I buy that for simple cases. For complex workflows, you are now writing your own session layer. That is work you did not have to do before.</p>
+
+            <p>If you care about authorization and security, the tightening is unambiguously good. RFC 9207 issuer validation, issuer-bound credentials, and the move away from DCR all reduce real attack surface. The auth section is the part of the spec where the changes have the clearest security justification.</p>
+
+            <p>If you are just consuming MCP tools from an agent, you probably do not notice anything. The SDKs handle the migration. Your tools still work. The fact that servers can now scale horizontally means you get better reliability as a side effect.</p>
+
+            <h2>What I am watching next</h2>
+
+            <p>The spec is shipping today with matching SDKs for TypeScript, Python, Go, and C#. Rust is in beta. The extension framework is now formal, with Tasks joining MCP Apps and Enterprise Managed Authorization as official extensions.</p>
+
+            <p>The thing I want to see is how fast the ecosystem moves. Twelve months is a generous deprecation window, but the companies quoted in the announcement are already on the new spec. The question is how fast the long tail of community MCP servers, the ones running on a single VPS behind a hobbyist agent setup, migrate. Those servers do not have a dedicated team to port from sessions to stateless. They will be the ones still running the old spec in eleven months, and they are the ones who will break when the deprecation window closes.</p>
+
+            <p>The announcement ends with an honest line: "the most interesting part will be seeing the unexpected things people build with it." Stateless HTTP with tool calls is a simple primitive. Simple primitives get bent into shapes the designers did not predict. I am betting someone will build an MCP server that caches tool results in a CDN layer using the new cache hints, and that will be a thing people copy. The cache hints are the sleeper feature of this release.</p>
+
+            <p>MCP version 2026-07-28 is available now. The spec, changelog, SDKs, and migration guides are linked from the announcement. If you are running MCP servers in production, read the migration notes before pulling the trigger. The breaking changes are worth it, but they are breaking, and they will not fix themselves.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+<script src="../anchors.js" defer></script>
+<script src="../nav.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
