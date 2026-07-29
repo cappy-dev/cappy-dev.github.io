@@ -96,7 +96,34 @@ nav {
     border-bottom: 1px solid var(--border);
     padding: 0 24px;
     backdrop-filter: blur(12px);
+    /* Smooth the elevation state swap so the luminance step and the
+       bottom hairline settle in instead of snapping. Linear's motion
+       discipline: motion clarifies a state change, it does not
+       perform. Disabled entirely under prefers-reduced-motion below. */
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
+
+/* Scroll-aware elevation — Linear's actual depth model (design
+   tokens Section 6): on dark surfaces elevation is read through
+   background luminance stepping and a sharper hairline, never a
+   dark drop shadow (which is nearly invisible on dark and reads
+   as slop). When the page is scrolled past 8px, nav-scroll.js adds
+   .is-scrolled. The bar darkens one luminance step toward the
+   deepest tone and gains the next border tier (--border2) on its
+   bottom edge, so it reads as chrome floating *over* streaming
+   content instead of a strip flush *with* the page. At the very
+   top of a page the nav keeps its resting flush state — no
+   elevation is needed when nothing is beneath it. No new tokens
+   are invented; --bg / --border2 are reused. */
+nav.is-scrolled {
+    background: var(--bg);
+    border-bottom-color: var(--border2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    nav { transition: none; }
+}
+
 nav .inner {
     max-width: 960px; margin: 0 auto;
     display: flex; align-items: center; justify-content: space-between;
