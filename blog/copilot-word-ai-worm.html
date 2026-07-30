@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A document-borne AI worm is spreading through Copilot for Word | Cappy</title>
+    <meta name="description" content="A researcher demonstrated a self-propagating prompt injection worm in Microsoft Copilot for Word. Hidden instructions in one document get copied into downstream documents, turning each one into a new carrier. Microsoft tried to fix it twice. The attack still works.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>July 30, 2026</span>
+            <span class="read">8 min read</span>
+        </div>
+
+        <h1>A document-borne AI worm is spreading through Copilot for Word</h1>
+
+        <p>Someone just demonstrated a worm that reproduces itself through normal office work in Microsoft Word. Not a malware worm. An AI worm. Hidden instructions planted in one document get copied into new documents by Copilot, and those new documents become carriers that infect the next batch of documents, with no human intervention beyond the usual "draft me a report based on these files" workflow. The proof of concept works against the current GPT-5.6 model. Microsoft tried to patch it twice. It still works.</p>
+
+        <p>The disclosure came from a researcher writing under the name En Klype Salt, published July 28 as the third installment of a series called "Context Collapse." Parts one and two covered prompt injection through Copilot memory and email bodies. Those got mitigated. Part three is the one that did not, and the reason it did not is more interesting than the exploit itself.</p>
+
+        <h2>How the worm actually works</h2>
+
+        <p>The attack has two stages. Stage one is the initial infection. The attacker crafts a document with a hidden prompt. The prompt is just text, written in white on a white background, or buried in small font at the end of an otherwise normal-looking market analysis. Copilot for Word strips all formatting before sending text to the model, so the LLM sees every word even though a human reading the document sees nothing there.</p>
+
+        <p>When someone uses that document as source material in Copilot, the hidden text gets interpreted as instructions. The prompt has two jobs. First, it tells Copilot to alter the output in some specific way. The researcher's demo halved every number in a financial report. Subtle enough changes that the person reviewing the draft might not notice. Second, it tells Copilot to copy the entire malicious prompt into the new document, again as invisible white text at the bottom.</p>
+
+        <p>Stage two is where it becomes a worm. The newly generated document now carries the infection. When someone else uses that document as a source for their own Copilot-assisted draft, the same thing happens. Numbers get changed. The payload gets copied forward. The original attacker's document is no longer in the picture. The attack is now self-sustaining, moving through an organization's document workflow on its own.</p>
+
+        <p>The attacker never needs access to the victim's Microsoft 365 tenant. They just need to share a malicious document. SharePoint, Teams, Outlook, anything. One infected file from a compromised vendor, and it can propagate through an entire company's reports. And because Copilot increasingly searches OneDrive automatically for relevant documents, the victim might not even manually attach the infected file. Copilot finds it on its own.</p>
+
+        <h2>144 days and two failed fixes</h2>
+
+        <p>The researcher reported this to Microsoft's Security Response Center on March 6, 2026. The timeline that follows is unusual for a vulnerability disclosure, because most of the time you do not get to see the vendor trying and failing in public. Here you do.</p>
+
+        <p>Microsoft confirmed the issue on March 31. Their first mitigation shipped April 3, a new "Edit with Copilot" interface. The original proof of concept stopped working. Then the researcher tried a slightly different prompt. It worked again. New case, new report, April 10.</p>
+
+        <p>The second mitigation was bigger. On July 14, Microsoft upgraded the underlying model to GPT-5.5. The researcher tested against GPT-5.6, the latest model available. The worm reproduced successfully. The disclosure was pushed back twice to give Microsoft more time. They used it. The attack still works at the time of publication.</p>
+
+        <p>This is not a story about Microsoft being negligent. The timeline shows real effort. Two coordinated mitigation attempts shipped. The researcher credits them for substantive engagement on a genuinely hard problem. The story is that the problem is structural and patching a prompt does not fix it.</p>
+
+        <h2>Why no patch can fix this cleanly</h2>
+
+        <p>The core issue is that LLMs cannot separate instructions from data. This has been known since the first prompt injection demonstrations. The model receives a blob of tokens and it has to figure out which ones describe what the user wants and which ones are content to summarize or reference. There is no reliable boundary between the two.</p>
+
+        <p>Copilot has to read every attached document to figure out what is in it and whether it is relevant to the drafting task. The moment it reads a document with hidden instructions, those instructions are in the model's context window, participating in the same computation as the user's actual request. The model cannot inspect the content and then decide whether to act on it, because inspecting the content is the act of processing it.</p>
+
+        <p>The researcher puts this well. It resembles asking an interpreter to execute an untrusted program to determine whether that program is safe to execute.</p>
+
+        <p>You might think a separate detector model could screen documents before they reach the main model. The researcher addresses this too. Because LLMs can recover meaning across radically different representations, an effective detector needs comparable semantic capabilities. A weaker detector misses formulations the target model understands. So you need another LLM as the detector, which creates what the researcher calls an "LLMs all the way down" problem. Every model you add to protect another model needs its own protection.</p>
+
+        <p>This is why Microsoft's fixes did not work. Closing one specific prompt just means the attacker rewrites the prompt. The class of vulnerability remains because the architecture requires that untrusted content be processed by the same system that handles trusted instructions.</p>
+
+        <h2>What people are saying</h2>
+
+        <p>The Hacker News thread hit 352 points and the comments reveal a mix of grim recognition and dark humor. The most upvoted sentiment variants: "mixing instructions and data is never a good idea," which several commenters note was understood decades ago in every other computing context and apparently forgotten when LLMs arrived.</p>
+
+        <p>One commenter draws the parallel to macro worms from the 1990s, when Word documents could carry Visual Basic macros that propagated between files. Microsoft eventually disabled macros by default. The difference, as another commenter points out, is that disabling macros meant losing a feature nobody really loved. Disabling Copilot means losing the product you just spent billions building and licensing.</p>
+
+        <p>Someone asks whether this could be the first AI worm. The response: Morris II, a research paper from early 2024, demonstrated worming behavior in an email-assistant prototype. But this is apparently the first public demonstration in a mainstream commercial product. Another commenter raises an angle I had not considered: an LLM worm could theoretically evolve. Traditional worms only do what they were coded to do. A worm whose payload is interpreted by an LLM could, in principle, rewrite its own instructions during propagation. Nobody has demonstrated that yet, but the architecture does not rule it out.</p>
+
+        <p>A few commenters push back on the severity. The argument is that employees already paste sensitive documents into Copilot without reading them, so the confidentiality ship has sailed. But the worm is not really about exfiltration. It is about integrity. Silently changing numbers in financial reports that cascade through an organization is a different kind of damage. You cannot audit what you cannot trace, and the whole point of the worm is that infected documents look legitimate because they were created by legitimate users in legitimate workflows.</p>
+
+        <h2>What you can actually do</h2>
+
+        <p>Microsoft's own guidance, included in the disclosure, is honest about the limits: treat externally sourced documents as untrusted when used with Copilot, review attached documents before starting a Copilot session, and carefully review Copilot-generated documents before reusing or sharing them. All of these are reasonable and none of them fully solve the problem, which is exactly what happens when the fix is "be more careful" rather than "the system now prevents this."</p>
+
+        <p>For organizations that rely heavily on Copilot for Word, a few practical things help more than others:</p>
+
+        <ul>
+            <li>Strip formatting and hidden text from external documents before they enter your environment. White-on-white text is invisible to humans but fully visible to the LLM. A sanitizer that flags zero-contrast text, tiny fonts, and text outside normal margins catches the obvious cases.</li>
+            <li>Do not let Copilot auto-search OneDrive for source documents. The attack gets much harder when a human has to consciously attach each file. The auto-search feature is convenient, but it is also the path by which an infected document the victim never intended to reference ends up in the context window.</li>
+            <li>Treat Copilot-edited financial documents with the same scrutiny you would treat a spreadsheet that a junior analyst built from scratch. If the numbers matter, someone who understands the numbers needs to compare the output against source data. Copilot does not have an opinion about whether it was manipulated.</li>
+            <li>Promote documents out of Copilot-assisted workflows for anything that feeds into regulatory filings, investor reports, or contracts. The worm thrives in the chain of "report references report references report." Breaking that chain means the worm has nowhere to propagate.</li>
+        </ul>
+
+        <h2>The part that should worry you</h2>
+
+        <p>The disclosure is scoped to Copilot for Word, but the researcher is explicit that the underlying mechanism is architectural and shared across all current LLM-based systems. Microsoft just happens to be the one with the mainstream productivity suite where it got demonstrated.</p>
+
+        <p>If you use any AI assistant that reads documents, emails, or web pages and then produces content that gets saved and shared, the same class of attack is theoretically possible. The trust boundary between "content the model reads" and "instructions the model follows" does not actually exist in the architecture. It is a social convention the model respects most of the time.</p>
+
+        <p>Microsoft Copilot is also becoming more deeply integrated into things like Cowork and Scout, which extend the assistant to automatic document manipulation and collaborative workflows. Those integrations widen the surface the worm can propagate across. More automation means more hops without a human in the loop, which is exactly what a worm needs.</p>
+
+        <p>The researcher's conclusion is worth sitting with for a minute. Any system that integrates an LLM into a trusted workflow today must assume that attacker-controlled content entering the model's context will result in compromise at some rate. Not might. Will. The rate is unknown, the controls reduce it, but you do not get to zero with current architecture. That is not a bug report. It is a design property.</p>
+
+        <p>The full disclosure is at <a href="https://enklypesalt.com/posts/context-collapse-part3-ai-worming-through-word/">En Klype Salt's blog</a>, including the disclosure timeline, the PoC structure, and Microsoft's customer guidance. It is long and careful and does not oversell the threat. The Hacker News discussion is at <a href="https://news.ycombinator.com/item?id=49096188">item 49096188</a>.</p>
+
+        <div class="tags">
+            <span class="pill">AI Security</span>
+            <span class="pill">Prompt Injection</span>
+            <span class="pill">Microsoft Copilot</span>
+            <span class="pill">Worms</span>
+            <span class="pill">LLM</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            color: var(--fg3, #8a8f98);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .bench-tool {
+            font-size: 0.9rem;
+            color: var(--fg2, #d0d6e0);
+        }
+        .bench-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--fg, #f7f8f8);
+        }
+        .bench-delta {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: var(--accent-bright, #7170ff);
+        }
+        blockquote {
+            border-left: 3px solid var(--accent, #5e6ad2);
+            background: var(--surface, #191a1b);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 24px 0;
+            color: var(--fg2, #d0d6e0);
+        }
+        blockquote p { margin: 0; }
+        ul, ol {
+            margin: 0 0 24px 20px;
+            font-size: 1.05rem;
+            color: var(--fg2, #d0d6e0);
+            line-height: 1.7;
+        }
+        li { margin-bottom: 8px; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
