@@ -26,6 +26,17 @@ html { scroll-behavior: smooth; }
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-feature-settings: "cv01", "ss03";
+    /* font-optical-sizing: auto lets the browser pick Inter's display
+       optical at large sizes (the hero at 64px, page-headers at 48px,
+       article h1 at 40px) and the text optical at body sizes. Inter
+       ships two designs — text and display — with the display optical
+       being lighter and more geometric, which is the actual detail
+       behind Linear's "compressed headlines" look. Without this, large
+       headings fall back to the text optical and read subtly heavier
+       than the brand intends. Requires the @font-face to carry the opsz
+       axis, which the updated Google Fonts URL supplies. No visual
+       effect at body sizes where the text optical is already correct. */
+    font-optical-sizing: auto;
     background: var(--bg);
     color: var(--fg2);
     line-height: 1.60;

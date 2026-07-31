@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemma 4 26B at reading speed on a 13-year-old Xeon, no GPU, AVX1 only | Cappy</title>
     <meta name="description" content="Someone got Gemma 4 26B running at about 5 tokens per second on a 2013 dual-socket Ivy Bridge Xeon with no GPU and no AVX2. The trick was an AVX1 fallback patch to ik_llama.cpp that caught a silent fall-through in the MoE expert dispatcher. Here is what actually broke and how the fix works.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
     <style>
         .spec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.6rem 0; }
