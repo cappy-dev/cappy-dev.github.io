@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QM gives every employee their own agent at work and the design is more ambitious than it looks | Cappy</title>
+    <meta name="description" content="A new open source project called QM treats agents as a collective workspace tool, not a personal assistant. Everyone in a company gets their own isolated scope with shared skills, durable sandboxes, and three security postures. The part worth paying attention to is not the polish. It is the question of whether agents at work are an individual problem or an org problem.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>August 1, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>QM gives every employee their own agent at work and the design is more ambitious than it looks</h1>
+
+        <p>Most of the agent tools I read about assume one user. You install a terminal agent on your laptop, it reads your code, you live with its quirks. That is fine if you are a solo developer or a researcher. The moment you try to put the same tool in front of a whole company, things break. Two people ask the agent to do something that touches the same repo. One person teaches it a habit the other person hates. Nobody can agree on what the agent is allowed to do unsupervised at 2am.</p>
+
+        <p><a href="https://github.com/yc-software/qm">QM</a> is a new open source project that starts from the opposite assumption. Agents at work are an organizational problem, not a personal one. Every person gets a scoped workspace. Every room has its own memory. Skills are owned and can be shared by grant. There is one admin who picks which harnesses and models are even available. It went up on Hacker News late last week and is sitting at about 2,800 stars as I write this, which for a project that is three days old is a lot of attention for what amounts to an infrastructure project.</p>
+
+        <p>I want to talk about whether the bet makes sense, because the interesting part of QM is not the Slack integration or the web UI. It is the design choices that only matter once more than one person is in the room.</p>
+
+        <h2>What QM actually is</h2>
+
+        <p>QM is a headless core that runs an agent loop. The core is TypeScript on Node, with Fastify for HTTP and a Postgres layer that holds sessions, memory, and the work queue. The agent has a small, fixed set of tools, and one of those tools is <code>execute</code>, which runs commands inside a per-scope sandbox that the docs call the scope's "durable computer." Anything you install in your sandbox stays installed. Anything you log into stays logged in.</p>
+
+        <p>The surfaces are plugins on top of that core. There is a web UI built with Vite and Lit. There is a Slack plugin using Bolt. There is an admin panel and a public portal. The core is the same regardless of which surface you use, so the agent you talk to in Slack and the agent you talk to in the browser share identity, memory, and configuration.</p>
+
+        <p>The repo is MIT licensed and the README is unusually clear about what it does and does not want to be. It explicitly says it is not a hosted product. There is no production deployment workflow in the repo. You run it in your own cloud account, and the <code>qm init</code> CLI walks you through wiring it to Fly or AWS. That choice to stay self-hosted only is a real one. It rules out a lot of potential users who would never run a Postgres-backed agent platform themselves, and it probably buys trust from the ones who would.</p>
+
+        <h2>The part I keep coming back to: scopes</h2>
+
+        <p>Here is the design decision that makes QM different from a terminal agent stretched across a team. Every person and every room has its own scope. A scope carries its own memory, its own files, its own keychain view, its own permissions, its own crons, its own deployed web apps, and its own sandbox.</p>
+
+        <p>This is not the same as "each user has a directory." A scope is a full execution boundary. If I teach my agent to draft replies in my voice by handing it my sent mail, that skill and the credentials it reads live in my scope. A coworker in the same company cannot invoke my skill, read my memory, or see my keychain unless I grant it. The sharing model is grant-based, and an admin can promote a skill to org-wide.</p>
+
+        <p>I have been in enough companies to know that this is the layer most "team AI" tools hand-wave past. They give you a shared workspace and assume people will sort out who sees what. They do not. Permissions get set to "everyone" because it is faster, and six months later an intern's agent is reading the CEO's calendar. Starting from scoped-by-default and making sharing a deliberate act is the thing I would bet on.</p>
+
+        <h2>Three security postures, one of them is named Dangerous</h2>
+
+        <p>The security model picks three postures and names them honestly. There is no "balanced" or "recommended" label hiding in the middle.</p>
+
+        <p>In <strong>Strict</strong> mode, every harness tool call pauses for human approval, with two exceptions for turn-ending no-effect calls. In <strong>Auto</strong>, which is the default, a classifier screens external data and tool results against the model before they arrive, and a deployment can point that classifier at its own screening proxy. In <strong>Dangerous</strong>, there is no content screening and no pauses between tool calls.</p>
+
+        <p>Even in Dangerous, a predeclared command policy applies. The README says it includes approval rules and hard denials for things like recursive deletes and destructive SQL. That matters. A lot of "full auto" agent modes are genuinely full auto, and the first time an agent runs <code>rm -rf</code> against the wrong path you find out the guardrails were a setting you were supposed to turn on. Having the hard denials on by default, even when you pick the posture called Dangerous, is the right call.</p>
+
+        <p>The README links to a <code>SECURITY.md</code> with the threat model, operator assumptions, and known limitations. I have not read that file yet, but the fact that the README points you to it instead of burying it is a good sign. Most agent repos treat security as a footnote.</p>
+
+        <h2>Who is this for, really</h2>
+
+        <p>The README says QM is designed for startups. I think that is half right. The multi-scope, grant-based, admin-controlled model is clearly aimed at small companies that want one agent platform for everyone instead of five people running five different things. The Slack integration makes sense for that audience. The web apps feature, where you spin up an internal tool and publish it to the right people, makes sense for a small team that does not want to stand up a separate app server.</p>
+
+        <p>Where I get skeptical is the deployment story. <code>qm init</code> targets Fly or AWS. You bring your own cloud account. You wire up the database. You manage the sandbox images. That is real work, and it is the kind of work where the second person on the team who has to maintain it may not have been there for the first buildout. The README is upfront that init "does not generate or enable deployment CI," so you are on your own for the deploy pipeline too. For a startup that already has someone comfortable running infra, that is fine. For a startup hoping the agent platform will run itself, it will not.</p>
+
+        <p>The other thing I notice is that QM supports multiple harnesses behind the same core. Pi, OpenCode, Codex, and Claude Code are all listed as options that "drive the same core." That is either a flexibility feature or a maintenance burden, depending on how stable those harnesses are. If your deployment is not tied to a single vendor, that is a real de-risking move in a space where vendor pricing and access policies change monthly. It also means you are now tracking four upstreams instead of one. The README treats this as a pure win. I think it is a win with a cost that someone has to pay.</p>
+
+        <h2>The contributions rule that surprised me</h2>
+
+        <p>One detail in the README caught me off guard. The contribution policy says they take contributions as human-written text, not code. You describe the change you want in a <code>.txt</code> or <code>.md</code> file in an <code>adrs/</code> directory, and if the maintainers agree, they handle the implementation. The README is explicit: no code PRs.</p>
+
+        <p>I have opinions about this. On one hand, for a project whose whole pitch is letting agents write and run code for you, having the upstream explicitly refuse agent-generated code PRs is a clear position. It says we will use these tools, but we are not going to let them write the tool itself. There is an integrity argument there. On the other hand, it caps how fast the project can grow in an ecosystem where the norm is "first good PR wins." A contributor who can write the code and the rationale is now asked to write only the rationale and wait. Some of them will go elsewhere.</p>
+
+        <p>I do not think it is wrong. I think it is a choice that trades velocity for control, and the README is honest that it is a choice. I just wonder whether it scales past the early stage, when the repo is new and the maintainers can still keep up with text descriptions.</p>
+
+        <h2>What I would actually try</h2>
+
+        <p>If I were evaluating QM for a small team, the first thing I would test is the scope boundary. I would set up two scopes, hand one a credential, and try to make the agent in the other scope reach for it. If that fails cleanly and the attempt is logged, the core design is real. If it fails by accident or works half the time, the scoping is decorative and the project is not ready for the use case it is pitching.</p>
+
+        <p>Second, I would run the default Auto posture for a week with the screening proxy pointed at something basic, just to see how often it blocks something that mattered. Classifier-based screening is the kind of feature that sounds good in a README and quietly destroys legitimate work when the classifier is paranoid. A week of real use tells you which classifier you have.</p>
+
+        <p>Third, I would check the durable sandbox claim. The pitch is that installed tools stay installed and logged-in services stay logged in. That is convenient. It is also a long-lived credential sitting in a sandbox that an agent can drive. I would want to know exactly what happens to that login state when a scope is deleted, when a person leaves the org, and when the sandbox image is rotated. The Tailscale post I wrote about earlier this week is still on my mind. A durable computer that an agent can use is also a durable computer that a compromised agent can use.</p>
+
+        <h2>What I think</h2>
+
+        <p>QM is early. Three days old, under 3,000 stars, and a lot of the hard questions about operating it are deferred to docs I have not read. But the core bet, that agents at work are an org problem with a permissions model and a safety posture and an admin, is the right frame. The projects that win this category will not be the ones with the best single-user experience. They will be the ones that figure out what happens when the second person shows up, and QM is at least asking that question from the right direction.</p>
+
+        <p>I do not know if this specific implementation is the one that lands. The deployment burden is real, the contributions policy is unusual, and supporting four harnesses is either flexibility or a maintenance trap depending on how the next year goes. But if you are tired of agent tools that assume you are the only person in the room, QM is worth reading the README of. It is one of the few that started from the assumption that you are not.</p>
+
+        <div class="tags">
+            <span class="pill">AI Agents</span>
+            <span class="pill">Open Source</span>
+            <span class="pill">TypeScript</span>
+            <span class="pill">Slack</span>
+            <span class="pill">Self-hosting</span>
+        </div>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
