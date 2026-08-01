@@ -1166,16 +1166,34 @@ article .body .tags {
 .cta-box h3 { margin-top: 0; color: var(--accent-bright); }
 .cta-box p { margin-bottom: 12px; }
 
-/* Benchmark grid — fastsdcpu, apertus, cancel-claude */
+/* Benchmark grid — used across feature articles.
+   Two consumption patterns live on the same .bench-card component,
+   kept distinct by class name so they never collide:
+
+   1. Big-stat card: .bench-card .label / .stat / .detail —
+      one large mono number per card (fastsdcpu, apertus, turbovla).
+   2. Row-pair table: .bench-label / .bench-row / .bench-tool /
+      .bench-time — key/value pairs stacked inside a card with
+      hairline separators (oak-version-control, gpt-5-6-sol,
+      reame-cpu-first, and ~30 other articles).
+
+   The grid uses auto-fit so the same component renders two columns
+   inside the 720px article body (672px content / 280px min = 2) and
+   collapses to one on narrow viewports — replacing the old fixed
+   1fr 1fr that needed a media query the original desktop-first
+   definition never carried. */
 .bench-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 12px; margin: 16px 0 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 16px; margin: 24px 0;
 }
 .bench-card {
     background: var(--surface);
     border: 1px solid var(--border2);
     border-radius: 8px; padding: 16px 20px;
 }
+
+/* --- Big-stat variant (one hero number per card) --- */
 .bench-card .label {
     font-size: 12px; font-weight: 510; color: var(--fg4);
     text-transform: uppercase; letter-spacing: 0.04em;
@@ -1188,6 +1206,87 @@ article .body .tags {
 }
 .bench-card .detail {
     font-size: 13px; color: var(--fg3); margin-top: 4px;
+}
+
+/* --- Row-pair table variant ---
+   These class names previously had to be inline-<style>-defined in
+   every article that used them (33 files), and the definitions
+   drifted: some articles stapled rows without hairlines and printed
+   the value in --fg (white) instead of the accent, others used
+   baseline alignment + accent-bright, and font sizes moved between
+   rem and px on each rewrite. Pulling them into the shared
+   stylesheet normalizes every benchmark table on the site to one
+   on-system treatment: baseline-aligned label/value, hairline row
+   separators (the same --border token the .post-row list uses),
+   and Mono-on-accent for the measured value — Linear's numeric-
+   emphasis register for a Compare surface inset inside a reading
+   surface. */
+
+/* .bench-label: the section title inside a row-pair card.
+   Mono, fg3, xs caps tracking — the same .spec-label /
+   .bench-card .label recipe so the two variants read as one
+   family. Carries the row group's name (e.g. "Run summary",
+   "13-year-old Xeon, AVX1 only"). */
+.bench-card .bench-label {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; font-weight: 500; color: var(--fg3);
+    letter-spacing: 0.04em; text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+/* .bench-row: one key/value pair.
+   baseline alignment so the label's descenders line up with the
+   value's — a key/value pair reads as a pair, not two floats.
+   The top hairline separates stacked rows the same way .post-row
+   rows separate, so a multi-row benchmark table reads as a list
+   of measurements, not a card of random rows. */
+.bench-card .bench-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 6px 0;
+    border-top: 1px solid var(--border);
+}
+.bench-card .bench-row:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+/* .bench-tool: the left label of a pair. */
+.bench-card .bench-tool {
+    font-size: 13px; font-weight: 400; color: var(--fg2);
+    letter-spacing: -0.01em;
+    line-height: 1.40;
+}
+
+/* .bench-time: the right value of a pair.
+   Mono — Linear's numeric register. accent-bright (the exact
+   --accent-bright #7170ff token every link and heading anchor
+   already uses) so the measurement reads as the figure the
+   reader came for, without calling for a heavier weight or a
+   higher contrast tone. Keep it on one line; the flex space-
+   between lets long tool names wrap without forcing the value
+   off its baseline. */
+.bench-card .bench-time {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px; font-weight: 500;
+    color: var(--accent-bright);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* .bench-note: a foot caption under a row-pair card.
+   Italics, fg4 — the existing convention used interchangeably by
+   16 articles. Kept stable so removing the inline definitions
+   doesn't drop the caption tone anywhere it was in use. */
+.bench-card .bench-note {
+    font-size: 13px; color: var(--fg4);
+    margin-top: 10px;
+    font-style: italic;
+    line-height: 1.45;
 }
 
 /* Spec grid — apertus, cancel-claude */
