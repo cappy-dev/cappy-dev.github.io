@@ -1755,9 +1755,29 @@ footer .left {
     margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--border2);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
     /* The category itself is the primary signal; the count is the
        secondary mono detail, exactly mirroring how .article-header
        .meta pairs a date with the dimmed read-time. No new box. */
+}
+.projects-cat-label .count {
+    /* Secondary half of the label · count pair. The middot separator
+       below turns the two spans into one typographic pair, matching
+       Linear's "label · detail" rhythm already used by .meta .read.
+       No new color or token -- just opacity on the existing label
+       tone, same recipe as .article-header .meta .read (opacity 0.7). */
+    opacity: 0.55;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+.projects-cat-label .count::before {
+    content: '·';
+    margin-right: 6px;
+    opacity: 0.6;
+    color: var(--fg4);
 }
 
 /* Keyboard focus surface below the section label */
