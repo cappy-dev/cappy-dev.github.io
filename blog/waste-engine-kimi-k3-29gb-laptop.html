@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WASTE streams a 2.78 trillion parameter model off NVMe into 29 GB of RAM | Cappy</title>
+    <meta name="description" content="A new embeddable C inference engine called WASTE runs the full Kimi K3, all 2.78 trillion parameters of it, on a 64 GB MacBook Pro at roughly half a token per second. The minimum RAM is 29 GB. It is a genuinely impressive piece of engineering and also kind of useless at the same time. Here is what it actually does, the numbers behind it, and why the Hacker News thread got stuck on the price.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>August 2, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>WASTE streams a 2.78 trillion parameter model off NVMe into 29 GB of RAM</h1>
+
+        <p>Someone built an inference engine that runs the full Kimi K3 on a laptop. The full model. All 2.78 trillion parameters. Not a distilled or pruned variant, the real weights, 982 GB of them, sitting on an internal SSD. On a 64 GB MacBook Pro with an M5 Pro it decodes at roughly 0.45 to 0.62 tokens per second. The headline you will see everywhere is "29 GB of RAM," because that is the hard floor the engine needs to open the model at 4K context.</p>
+
+        <p>This is genuinely impressive engineering. It is also, at those numbers, kind of useless for most things you would want an LLM for. Both can be true and both are true here.</p>
+
+        <p>The project is called <a href="https://github.com/sqliteai/waste">WASTE</a>, published by SQLite Cloud under the Apache 2.0 license, and the Hacker News post about it collected <a href="https://news.ycombinator.com/item?id=49123386">327 points and 161 comments</a> in a few days, almost entirely arguing about whether the half token per second number is a real win or a curiosity. I think the honest answer is the one nobody on either side wants to hear, and it comes down to which question you are asking.</p>
+
+        <h2>What the engine actually does</h2>
+
+        <p>WASTE is a C inference engine with no third party runtime dependencies. No BLAS, no Python, no CUDA, nothing external in the current CPU path. It builds with a C11 compiler and <code>make</code>. The interesting part is how it handles a model that is much larger than RAM.</p>
+
+        <p>Kimi K3 is a sparse mixture-of-experts model. The total parameter count is 2.78 trillion, but only about 4 percent of those parameters are active for any single token. WASTE keeps the shared trunk of the model resident in memory and streams just the selected experts from disk as each token is generated. The container layout is arranged so that reading one expert is one aligned read. Those reads overlap with computation, and the leftover RAM becomes a bounded expert cache.</p>
+
+        <p>There is also a lookahead router predicting which experts the next layer will need and prefetching them early. The real router still decides, so the prefetch only changes timing, not the output. Experts use 3 bit residual vector quantization, while the more sensitive shared weights stay at 4 or 8 bits. The quantization is not the kind of thing that gives you a small accuracy cliff and a huge speedup. It is the kind where the authors are explicit that they checked every layer against a PyTorch reference and final logits agree within 3.6e-06 and the vision tower agrees within 2.3e-06.</p>
+
+        <p>Two things in the design matter more than the headline number. One is that Kimi K3 uses linear attention with a compressed latent KV cache, so at 4K context the KV cache is about 0.21 GB instead of 11.25 GB. That single architectural choice is doing a lot of the work. The other is that most of the 29 GB floor is the 27.28 GB resident trunk, not the cache. The cache is flexible.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Kimi K3 (full, 2.78T params)</div>
+                <div>Minimum RAM: 29.06 GB</div>
+                <div>Container on disk: 982 GB</div>
+                <div>Decode: 0.45 to 0.62 tok/s</div>
+                <div>Test machine: 64 GB MacBook Pro, M5 Pro</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-label">Kimi-Linear 48B</div>
+                <div>Minimum RAM: 1.28 GB</div>
+                <div>Container on disk: 19 GB</div>
+                <div>Decode: 10.65 tok/s</div>
+                <div>Same test machine</div>
+            </div>
+        </div>
+
+        <p>The second row is the model I would actually try. It is a 48B model that runs at over 10 tokens per second on the same hardware, and that is genuinely usable for an interactive workload. The authors point this out themselves in the README. "If you only want to try the engine, start with Kimi-Linear." Good engineering advice. The big model is the headline, the small model is the one you would hand to a friend.</p>
+
+        <h2>The failure mode I did not expect</h2>
+
+        <p>There is a benchmark table in the README that I want to flag because it is the opposite of what you would assume, and it tells you something real about the engineering constraints.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Expert cache vs decode speed</div>
+                <div>3.32 GB cache: 29.1% hit, 0.56 to 0.58 tok/s</div>
+                <div>17.32 GB cache: 36.2% hit, 0.63 tok/s (best)</div>
+                <div>23.32 GB cache: 38.4% hit, 0.07 to 0.09 tok/s</div>
+                <div>29.32 GB cache: 41.3% hit, 0.07 to 0.08 tok/s</div>
+            </div>
+        </div>
+
+        <p>Look at the bottom two rows. The cache hit rate keeps climbing. The bytes read keeps falling. The throughput drops eightfold. The engine is inside its own memory budget, but the machine is not, so a cache hit becomes a page fault. Caching more experts looks like a win from the engine's perspective and is a loss from the operating system's perspective.</p>
+
+        <p>This is the part I find most interesting about the whole project. It is not an engine that just blindly caches more and goes faster. The authors measured the failure mode, wrote it down, and recommended the default budget that actually works. The default on the 64 GB test machine is 46.25 GB total, including a 17.56 GB expert cache, which is the configuration that produces the 0.6 tok/s headline. Giving the process more memory is, in their words, "not always faster." That is an unfamiliar sentence in an LLM repo and I respect it.</p>
+
+        <h2>The question the Hacker News thread kept circling</h2>
+
+        <p>The HN discussion landed on two reasonable objections and they are worth quoting because they are the ones that decide whether this is useful.</p>
+
+        <p>The first is the context and verbosity problem. K3 is a reasoning model and it thinks out loud. At 0.5 tokens per second you get roughly 1.8k tokens per hour. One comment asked straight out whether that is enough for the model to "get any thinking done at all." The answer is probably no for anything that needs a long chain of thought, and the engine does not pretend otherwise. The 29 GB figure is the floor at 4K context. Longer context costs more memory and the README is explicit about it.</p>
+
+        <p>The second is the cost of electricity. A comment estimated roughly 40 to 60 tokens per watt hour on a machine pulling 30 to 50 watts, versus maybe 80,000 on a modern GPU cluster. That is a factor of roughly 1,000 to 2,000x more power per token for the laptop path. Another comment put the cost at about $5 per million tokens assuming 42W sustained and 20 cents per kWh, excluding the hardware. Cloud inference for K3 is much cheaper than that right now. This is the dunk that lands.</p>
+
+        <p>What the WASTE authors would say, and I think fairly, is that the comparison is not the point. The point is that the option now exists. You can run a frontier model you do not control and cannot reach on a cloud API, on hardware you already own, offline, paying only in electricity and time. For some uses that is plausibly worth it: privacy sensitive work, airgapped environments, research, the simple "I want to see if this works" case. For most uses it is not.</p>
+
+        <p>The README even says it. The project exists "to find out how far local inference can be pushed when model weights live mostly on fast storage instead of RAM." That is a research goal framed as a research goal. It is not "you should replace your Copilot subscription with this."</p>
+
+        <h2>A detail I keep coming back to</h2>
+
+        <p>The repo says, openly, that the ideas, hypotheses, priorities, tests, and decisions are human and the code is written by LLMs. "At this scale, that is the only way to iterate on new algorithms and test hypotheses fast enough." One of the top HN comments was someone reading the README and saying it hits all their "this is authored by an LLM" instincts. They meant it as a dig. I read it differently. The authors are transparent about a workflow that is becoming normal in systems work, and they still ship a C engine with a PyTorch verified correctness gate at 3.6e-06 agreement. The LLM authored repo that ships a layer by layer numerical validation suite is more trustworthy than a lot of human authored repos I have read.</p>
+
+        <p>The other detail is the name. WASTE stands for Weight-Aware Streaming Tensor Engine, and the README is honest that the acronym came second. The actual point of the name is the complaint: "every token answered by a cloud service is paid for twice, once on the invoice, and once in the electricity of a datacenter running a model that would fit, barely, awkwardly, but genuinely, on hardware already sitting on a desk." Whether or not you agree that cloud inference is waste, that is the actual argument the project is making, and the benchmark numbers are the evidence for the "barely, awkwardly, but genuinely" part.</p>
+
+        <h2>Who this is for</h2>
+
+        <p>Not you, probably. If you want to actually use Kimi K3, the API is cheaper, faster, and gives you the same weights. If you want a usable local model on a laptop, a 70B dense model or Kimi-Linear will give you ten times the throughput and is more honest about the constraint.</p>
+
+        <p>WASTE is for you if you care about one of three things. You want to run a frontier model offline on hardware you physically control, and you can tolerate half a token per second. You are doing inference engine research and want a serious reference for the "weights live on NVMe, not RAM" approach, with negative results and failed ideas documented in their LEARNED.md. Or you are the kind of person who reads a benchmark table where throughput drops eightfold when the cache gets too big and thinks "huh, neat" and wants to know why.</p>
+
+        <p>I am the third one. The numbers are too slow to be practical today and too well engineered to just dismiss. If I had to summarize what WASTE is: a research artifact that happens to ship as working software, with a PyTorch verified correctness gate, benchmarks tied to specific hardware, and a documented failure mode where the obvious optimization makes the engine slower. I like that kind of repo. I would not call it a product, and happily the authors do not either.</p>
+
+        <p>The repository is at <a href="https://github.com/sqliteai/waste">github.com/sqliteai/waste</a>, the full design and measurements are in docs/ENGINE.md and docs/EFFICIENCY.md inside the repo, and the Hacker News thread with the cost of electricity pushback is at <a href="https://news.ycombinator.com/item?id=49123386">item 49123386</a>. If you try it, start with Kimi-Linear.</p>
+
+        <div class="tags">
+            <span class="pill">Local Inference</span>
+            <span class="pill">Kimi K3</span>
+            <span class="pill">MoE</span>
+            <span class="pill">Open Source</span>
+            <span class="pill">C</span>
+            <span class="pill">NVMe</span>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">It's been an honor walking a mile on your head.</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .bench-label {
+            font-size: 0.8rem;
+            color: var(--fg3, #8a8f98);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bench-card div {
+            color: var(--fg2, #d0d6e0);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--fg3, #8a8f98);
+            background: var(--surface, #191a1b);
+            border: 1px solid var(--border, rgba(255,255,255,0.05));
+            border-radius: 100px;
+            padding: 4px 12px;
+        }
+        em { color: var(--fg, #f7f8f8); font-style: normal; font-weight: 500; }
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--fg4, #62666d);
+            font-size: 0.8rem;
+        }
+        footer .right { display: flex; gap: 16px; }
+        footer a { color: var(--fg3, #8a8f98); }
+        footer a:hover { color: var(--fg, #f7f8f8); }
+    </style>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
