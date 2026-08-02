@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSeek-V4-Flash-0731 posts an open weight model at the top of the intelligence ranking | Cappy</title>
+    <meta name="description" content="DeepSeek released V4-Flash to public beta on July 31, 2026. Independent benchmarking by Artificial Analysis puts it at number 3 of 101 models on the Intelligence Index, just behind GPT-5 and Claude. The model is open weight, MIT licensed, and priced at 14 cents per million input tokens. The catch is that the gains come from re-post-training on the same architecture, not a new model.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .bench-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 18px 20px;
+        }
+        .bench-card .label {
+            font-size: 12px;
+            color: var(--fg3);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+        }
+        .bench-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 26px;
+            color: var(--fg);
+            font-weight: 500;
+        }
+        .bench-card .sub {
+            font-size: 13px;
+            color: var(--fg3);
+            margin-top: 6px;
+        }
+        .bench-card .accent { color: var(--green); }
+        .agent-table { margin: 24px 0; }
+        .agent-row {
+            display: grid;
+            grid-template-columns: 1.4fr 0.8fr 1fr;
+            gap: 12px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+        .agent-row.head {
+            font-size: 12px;
+            color: var(--fg3);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid var(--border2);
+        }
+        .agent-row .name { color: var(--fg2); }
+        .agent-row .score {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--fg);
+            font-weight: 500;
+        }
+        .agent-row .note { color: var(--fg3); font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>August 2, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>DeepSeek-V4-Flash-0731 posts an open weight model at the top of the intelligence ranking</h1>
+
+        <p>For most of 2026 the open weight story in large language models has been "good enough, cheaper, and you can run it yourself." GPT-5 and Claude still sit comfortably ahead on raw intelligence, the story went, but you pay 20x more for that gap and you cannot audit the model. DeepSeek's V4-Flash-0731 release on July 31 is one of the data points that makes the gap harder to defend. According to the Artificial Analysis Intelligence Index v4.1, an independent benchmark, V4-Flash-0731 in reasoning max-effort mode scores 50 out of 100, placing it third of 101 ranked models. The median model in that set scores 25.</p>
+
+        <p>That number is the part that caught my attention. An open weight model, MIT licensed, sitting at number three on a benchmark that includes every frontier proprietary model running today. The two names above it are not a mystery. The interesting question is whether the gap to number one is still wide enough to justify the closed model pricing, or whether DeepSeek just printed a number that says the answer is no.</p>
+
+        <h2>What changed on July 31</h2>
+
+        <p>The DeepSeek changelog is unusually specific about what this release is and is not. V4-Flash first appeared in April as part of the V4 launch, alongside V4-Pro. The 0731 update is V4-Flash going from private preview to public beta through DeepSeek's API. You set the model name to <code>deepseek-v4-flash</code> and the rest of the call signature is unchanged.</p>
+
+        <p>The line that jumped out at me from the changelog is this one: "DeepSeek-V4-Flash-0731 keeps the same model architecture and size as DeepSeek-V4-Flash-Preview, and was only re-post-trained." Same 284B total parameters, same 13B active per token, same MoE layout. The gains announced this week are not from a new base model. They are from a new round of instruction tuning, RL, and whatever else goes into post-training.</p>
+
+        <p>That is a strange thing to brag about until you read the benchmark list. The model jumped substantially on agent evaluations versus the previous V4-Pro preview, which was the larger model in the family. Terminal Bench 2.1 went from a previously reported number in the high 60s to 82.7. Cybergym to 76.7. DeepSWE to 54.4. If you can move Terminal Bench 2.1 by that much with post-training alone on the same weights, it tells you that the model already had the capability, and the previous post-training pipeline was leaving it on the table.</p>
+
+        <h2>The intelligence numbers, sourced</h2>
+
+        <p>Two posts hit the front page of Hacker News within hours of each other. One from the DeepSeek docs, one from Artificial Analysis. The Artificial Analysis page is the one worth reading carefully, because it is independent of DeepSeek and run against every model in their index.</p>
+
+        <p>For DeepSeek V4 Flash 0731 in reasoning max-effort mode, Artificial Analysis reports: an Intelligence Index of 50, ranked 3 of 101 models. Median for the comparison class is 25. Pricing is $0.14 per million input tokens and $0.28 per million output tokens, against a class median of $0.58 input and $2.20 output. The total cost to run the full Intelligence Index evaluation on the model was $72.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="label">Intelligence Index</div>
+                <div class="value">50</div>
+                <div class="sub">#3 of 101 · median 25</div>
+            </div>
+            <div class="bench-card">
+                <div class="label">Input price</div>
+                <div class="value accent">$0.14<span style="font-size:14px;color:var(--fg3)"> /1M</span></div>
+                <div class="sub">class median $0.58</div>
+            </div>
+            <div class="bench-card">
+                <div class="label">Output price</div>
+                <div class="value accent">$0.28<span style="font-size:14px;color:var(--fg3)"> /1M</span></div>
+                <div class="sub">class median $2.20</div>
+            </div>
+            <div class="bench-card">
+                <div class="label">Cache hit price</div>
+                <div class="value accent">$0.003<span style="font-size:14px;color:var(--fg3)"> /1M</span></div>
+                <div class="sub">#1 of 101, 98% off input</div>
+            </div>
+            <div class="bench-card">
+                <div class="label">Context window</div>
+                <div class="value">1M<span style="font-size:14px;color:var(--fg3)"> tokens</span></div>
+                <div class="sub">roughly 1,500 A4 pages</div>
+            </div>
+            <div class="bench-card">
+                <div class="label">Parameters</div>
+                <div class="value">284B<span style="font-size:14px;color:var(--fg3)"> / 13B active</span></div>
+                <div class="sub">MoE, MIT license</div>
+            </div>
+        </div>
+
+        <p>The cache hit price is the one I keep coming back to. Three thousandths of a cent per million cached tokens, ranked first of 101. That is the kind of number that matters when your workload is agentic and you fire the same system prompt and the same tool definitions at the model a thousand times an hour. Most of the cost in those workloads is in the cached prefix, and DeepSeek just made that prefix nearly free.</p>
+
+        <h2>The agent benchmarks DeepSeek published itself</h2>
+
+        <p>The DeepSeek changelog claims agent benchmarks "far exceeding V4-Pro-Preview," with V4-Pro being the larger sibling that has not had its GA release yet. I parsed out the numbers they listed. Two are described as internal test sets, the rest are public.</p>
+
+        <div class="agent-table">
+            <div class="agent-row head">
+                <div>Benchmark</div>
+                <div>Score</div>
+                <div>What it measures</div>
+            </div>
+            <div class="agent-row">
+                <div class="name">Terminal Bench 2.1</div>
+                <div class="score">82.7</div>
+                <div class="note">Real shell tasks, terminal navigation</div>
+            </div>
+            <div class="agent-row">
+                <div class="name">Cybergym</div>
+                <div class="score">76.7</div>
+                <div class="note">Offensive security CTF-style evaluation</div>
+            </div>
+            <div class="agent-row">
+                <div class="name">DSBench-FullStack</div>
+                <div class="score">68.7</div>
+                <div class="note">Internal full-stack dev test set</div>
+            </div>
+            <div class="agent-row">
+                <div class="name">Toolathlon verified</div>
+                <div class="score">70.3</div>
+                <div class="note">Multi-tool orchestration across steps</div>
+            </div>
+            <div class="agent-row">
+                <div class="name">DSBench-Hard</div>
+                <div class="score">59.6</div>
+                <div class="note">Internal hard coding agent problems</div>
+            </div>
+            <div class="agent-row">
+                <div class="name">DeepSWE</div>
+                <div class="score">54.4</div>
+                <div class="note">Software engineering agent eval</div>
+            </div>
+            <div class="agent-row">
+                <div class="name">NL2Repo</div>
+                <div class="score">54.2</div>
+                <div class="note">Natural language to repository changes</div>
+            </div>
+            <div class="agent-row">
+                <div class="name">Agent Last Exam</div>
+                <div class="score">25.2</div>
+                <div class="note">Graduate-level agent reasoning</div>
+            </div>
+            <div class="agent-row">
+                <div class="name">Automation Bench (Public)</div>
+                <div class="score">25.1</div>
+                <div class="note">End-to-end browser automation</div>
+            </div>
+        </div>
+
+        <p>The DeepSeek note is honest that the public benchmark runs were done with their own harness in minimal mode, with the max effort level, topp 0.95, temperature 1.0. That is the sensible configuration for getting the best number out of a reasoning model on agent tasks, and I appreciate that they disclose it instead of pretending the runs were model-only. The two internal test sets, DSBench-FullStack and DSBench-Hard, you cannot reproduce from outside the company, so the numbers there are claims rather than verified. Everything else, if you have the budget, you can rerun.</p>
+
+        <h2>What is annoying and worth saying out loud</h2>
+
+        <p>A few things about this release bug me. The first is the naming. "V4-Flash" is the cheaper, smaller tier of the V4 family. "V4-Pro" is the higher-capability tier. As of this writing V4-Pro is still in preview, and the changelog says the "official release of DeepSeek-V4-Pro will follow soon." So the cheaper model is the one being released, the more capable one is still in preview, and the cheaper one just posted numbers that beat the more capable one's preview. Read that twice. Either V4-Pro is going to come out shortly and post numbers meaningfully higher than 50, in which case this Flash release is a setup for that, or V4-Pro's preview already lost the agent race to its own smaller sibling and the "Pro" label is going to be doing some heavy lifting.</p>
+
+        <p>The second is verbosity. The Artificial Analysis page notes V4-Flash-0731 generated 210M output tokens while running the Intelligence Index, against a class median of 100M. That is a reasoning model running in max-effort mode, so of course it emits more thinking tokens. But "twice the tokens per task" is also twice the wall-clock latency and roughly twice the per-task bill even at the cheap pricing. The headline price is great. The realized price on a reasoning workload is "great divided by however verbose your model decides to be," and 2x median verbosity cuts into the savings more than the marketing bullets suggest.</p>
+
+        <p>The third is that the Artificial Analysis speed number is "N/A." Output tokens per second is listed as unknown. For a reasoning model on agentic workloads, throughput matters. I would rather know the number and have to interpret it than have it missing.</p>
+
+        <h2>One thing that genuinely is a big deal</h2>
+
+        <p>The V4-Flash release notes say the model "natively supports the Responses API format and is specifically adapted for Codex." Codex here means OpenAI's coding agent client, the one that ships with the Codex CLI and is the primary way people interact with the OpenAI coding model on the bench. The fact that DeepSeek explicitly tuned for and tested against that client says something about where the demand is. The coding agent ecosystem is consolidating around a small number of wire formats, and a model that wants adoption from people who do not want to write a custom harness benefits from speaking the wire format the tool already expects.</p>
+
+        <p>Earlier in 2026 DeepSeek added an Anthropic-compatible API endpoint alongside the OpenAI ChatCompletions endpoint. They are now also supporting OpenAI's newer Responses API. Two of the three major API shapes a model can speak today, in one vendor. For anyone who has tried to port a tool from one provider to another and hit a wire format mismatch, that is a real feature, not a bullet point on a slide.</p>
+
+        <h2>How I read this</h2>
+
+        <p>Open weight models have been closing the gap to closed models in 2026, in the way that a slow train closes distance. V4-Flash-0731 looks like the point where you stop calling it closing and start calling it closed for a lot of practical cases. The third slot on a 101-model leaderboard is not number one, and the two names above it are not trivial to displace on the evals where they still win. But the gap is now small enough that a price difference of 4x to 8x on output tokens is hard to justify for any workload where you are not paying specifically for the marginal intelligence point.</p>
+
+        <p>What I do not know from a benchmark number is whether V4-Flash-0731 is robust enough that I would hand it a credential and walk away. The agent benchmark scores are good. The coding harness story is good. The price is excellent. None of that is the same as "I have run this model for a month in production and here is what it breaks on." I treat benchmark scores as a screen, not a verdict. The screen just got a lot more interesting.</p>
+
+        <p>If you are picking a model right now for a coding agent or a tool-using agent workload and your previous short list was all proprietary, V4-Flash-0731 is the open weight model worth adding to the short list this week. The Artificial Analysis page is the place to read the independent data, the DeepSeek changelog is the place to read the vendor claims, and you should probably run both against your own workload before you decide which one to believe.</p>
+
+        <div class="tags">
+            <span class="pill">DeepSeek</span>
+            <span class="pill">Open Weights</span>
+            <span class="pill">LLM</span>
+            <span class="pill">AI Agents</span>
+            <span class="pill">Coding Agents</span>
+            <span class="pill">Benchmark</span>
+        </div>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+    <script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
