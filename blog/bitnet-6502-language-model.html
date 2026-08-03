@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitNet on the 6502 | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 3, 2026</div>
+            <h1>BitNet on the 6502: a language model on an 8-bit CPU from 1975</h1>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">Hardware</span>
+                <span class="pill">BitNet</span>
+                <span class="pill">Edge Inference</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Someone trained an autoregressive language model and ran the inference on the MOS 6502 processor. That's the chip from 1975 that powered the BBC Micro and the Apple II. It has 32KB of RAM total, the user-space budget is around 25KB, and here's the kicker: the instruction set has no multiply instruction.</p>
+
+            <p>The model produced text. Not good text, but text. "once upon a time tom and lily saw things lily were sad her house." That's English-adjacent garbage, the kind a very small model produces when it has barely enough parameters to learn letter transitions. And honestly, that's the more interesting part. The fact that it works at all tells you something about how much of modern LLM math is decorative.</p>
+
+            <h2>The problem with the 6502</h2>
+            <p>The 6502 predates floating point by a decade. It operates on 8-bit integers. There is no MUL instruction. If you want to multiply two numbers, you write a routine that shifts and adds, bit by bit. A single 8x8 multiply-accumulate costs around 150 clock cycles.</p>
+
+            <p>This is a problem for neural networks, which are mostly matrix multiplications. The standard compute for a linear layer is a pile of dot products, and each dot product is a lot of multiply-add. On a stock 6502, even a tiny model would spend almost all its time in that shift-and-add loop.</p>
+
+            <h2>BitNet changes the math</h2>
+            <p>BitNet addresses this directly. Instead of storing weights as float32 or int8, it quantizes them to ternary values: -1, 0, or +1. The multiply in the dot product disappears. You either add, subtract, or skip each term. No multiply instruction needed at all.</p>
+
+            <p>On the 6502, this takes a ternary accumulate from 150 cycles down to about 30. That's a 5x speedup, and it's the whole reason this project is possible. The ternary parameters also pack tightly: each weight takes only 1.58 bits of storage, so you can fit more model in the same tiny memory budget.</p>
+
+            <p>The project packs 4 parameters per byte (using 2 bits each instead of the optimal 5-per-byte with log base 3). It costs some storage density, but unpacking is just a right-shift instead of repeated floor-divides by 3, which the 6502 cannot do natively. A reasonable tradeoff for this machine: speed over density.</p>
+
+            <h2>Why not a transformer</h2>
+            <p>The original BitNet papers target transformers, but that architecture has a problem here. A self-attention layer builds up a KV cache that grows with sequence length. Every token you generate, the cache gets bigger. On a machine with 32KB total RAM, that growth eats the space reserved for weights. The longer you generate, the less room for the model.</p>
+
+            <p>The project uses Mamba instead, a recurrent state-space model. Recurrent models keep a fixed-size hidden state, so every forward pass has the same memory shape regardless of how long the sequence gets. That property matters a lot when your entire RAM is smaller than a single JPEG.</p>
+
+            <p>The author tried GRU first. It diverged on every training run, because BitNet's ternary matrices have a spectral radius well above 1, and recurrent error compounding blows up fast. Mamba sidesteps this with a per-channel scalar decay computed at inference time, capped so the value never exceeds 1. Explosion impossible by construction.</p>
+
+            <h2>The model itself</h2>
+            <p>Vocabulary is 27 tokens: the 26 lowercase letters plus a space. No subword tokenizer, no byte-pair encoding. Word-level vocab would eat too much of the parameter budget on the embedding layers alone. The hidden dimension is 56.</p>
+
+            <p>The total model is 13KB of weights at 4 ternary params per byte: roughly 52,000 BitNet parameters. The inference engine is 9KB of compiled C. Together they fit in the user-space memory of a BBC Micro. The embedding maps each letter into a 56-dimensional vector, Mamba layers mix them, and a final projection back to the 27-letter vocab picks the next character.</p>
+
+            <p>The LM head is kept at int4 rather than ternary, because the output projection needs enough resolution to spread probability across the vocabulary cleanly. Every other matrix in the model is ternary.</p>
+
+            <h2>Training, and the activation scaling trick</h2>
+            <p>The weights train in PyTorch on a normal machine, not on the BBC Micro. Training uses float32 with a straight-through estimator: the forward pass quantizes to ternary, but gradients flow at full precision in the backward pass. This is the standard BitNet recipe.</p>
+
+            <p>The interesting bit is the activation function. Activations are stored as 8-bit integers. Each accumulator term is bounded in magnitude by 128, so you can sum up to 256 terms into a 16-bit accumulator before overflow. After a layer, you need to map the 16-bit result back to 8 bits for the next layer.</p>
+
+            <p>A plain clip to [-128, 127] destroys most of the dynamic range. About 83% of values would saturate. So the author introduces a learned right-shift: the activation clips (x >> shr), where shr is a learned parameter the model tunes during the first half of training, then freezes in the second half. Changing shr by 1 doubles or halves the post-activation magnitude, so the model is extremely sensitive to it. Freezing it late in training stabilizes things.</p>
+
+            <h2>Getting code onto a 1980s machine</h2>
+            <p>The compiled C binary (via CC65, a C compiler for the 6502) gets written to the BBC Micro using a 3.5mm-to-tape cable and PlayUEF software. The laptop plays audio out of the headphone jack. The BBC Micro thinks it's loading a program from a tape drive. This is how users loaded software in 1982, and it still works.</p>
+
+            <p>You can try it in a browser. The author links a jsbeeb emulator page that boots a BBC Micro, loads the UEF tape image from GitHub, and auto-types the run command. Generation takes a few minutes because, again, this is a 2 MHz 8-bit CPU doing neural network math with no multiply instruction.</p>
+
+            <h2>Why this matters beyond the novelty</h2>
+            <p>I keep thinking about what this says about model efficiency. Frontier labs train trillion-parameter models and then spend enormous effort quantizing them to int4 or int2 so they can run on consumer hardware. The quantization is always presented as a lossy afterthought, a concession.</p>
+
+            <p>This project flips that. It starts from ternary weights as the design center and builds everything around them. The architecture choice (Mamba over transformer) is driven by memory constraints, not benchmark scores. The activation function is designed for fixed-point math on a chip with no FPU. The vocabulary is small because the parameter budget is small and there's no room for a 50K-token embedding table.</p>
+
+            <p>Every choice flows from the hardware constraints up, instead of training the biggest model you can afford and hoping someone finds a way to compress it later. The result is a model that's useless for real work but that runs on hardware from the Ford administration. There's a lesson in there about designing for the target instead of designing for the cloud and porting down, but I'm not going to pretend it's a clean one, because the practical value of a 52K-parameter letter model is zero.</p>
+
+            <p>What isn't zero is the demonstration. If ternary weights can make a matrix multiplication cheap enough to run on a 6502, imagine what they do for a phone, a microcontroller, or anything else where battery and memory are the real constraints. The scaling is the point. A 5x reduction in cycles per multiply matters more when you have 32KB of RAM than when you have 32GB, but it still matters.</p>
+
+            <h2>The limits</h2>
+            <p>The generated text is barely coherent. The model learns letter-level transitions and simple word shapes, but it can't model meaning or grammar at this scale. The vocabulary is lowercase letters only. There is no way this model produces useful output. It exists to prove the inference path works, not to do a task.</p>
+
+            <p>The architectural hack has real limits too. Mamba's fixed-state property is great for constrained memory, but the same property caps how much context the model can actually use. You trade the transformer's recall ability for the recurrent model's memory efficiency. That trade makes sense on a 6502. It might make sense on an ESP32 or a watch. It probably doesn't make sense on a datacenter GPU that has memory to spare and needs exact recall for long-context tasks.</p>
+
+            <p>The whole thing is a curiosity that happened to work. But curiosity is underrated. Most real efficiency gains start as someone trying to make a weird thing run on a machine it has no business running on, then noticing what the constraints forced them to optimize. I don't think this project changes how anyone trains frontier models. I do think it changes how someone reading it thinks about the gap between "the math a transformer does" and "the math a transformer has to do," and that gap is where the next round of efficiency work is hiding.</p>
+
+            <p><a href="/blog/">Back to Blog</a></p>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
