@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI migrated legacy COBOL to Java and the bugs came too | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <meta name="description" content="An arxiv paper had an AI agent migrate legacy COBOL to Java and validate it. The validation proved the bugs were preserved too.">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 3, 2026 · 6 min read</div>
+            <h1>AI migrated legacy COBOL to Java and the bugs came too</h1>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">Legacy Code</span>
+                <span class="pill">COBOL</span>
+                <span class="pill">Agent Loop</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>A paper landed on arxiv at the end of July that I keep coming back to. The Hacker News thread called it "AI migrated legacy COBOL programs to Java, bugs included." That framing is a little unfair to the authors, but only a little. The honest version is more interesting than either the hype or the dunk.</p>
+
+            <p>The work is from a team that built something called the Locksmith Loop. The setup: you have a COBOL program running on a mainframe, you want it in Java, and you cannot tell whether the translation is correct because nobody wrote tests for the COBOL forty years ago and the people who understood it are retired or worse. The classical answer is to hire consultants for two years and pray. The Locksmith answer is to let an AI agent drive a search loop that generates tests automatically and checks whether the Java behaves like the COBOL.</p>
+
+            <h2>What the system actually does</h2>
+            <p>Two runtimes sit side by side. On the left, the original COBOL, instrumented with mocks so it can run off the mainframe on commodity hardware. On the right, an AI-generated Java translation of that same COBOL. A test harness feeds both the same inputs and a Parity Gate checks whether they hit the same code paths, perform the same external operations, and produce the same outputs.</p>
+
+            <p>Then a loop runs. First, a phase called Witness Search throws the usual testing artillery at the input space: combinatorial testing, adaptive random testing, many-objective search, MAP-Elites, fuzzing. These are all established techniques. They cover the easy branches and then plateau, because some branches in legacy COBOL are gated on external state that no input will ever reach. A status field read from a database. A file flag set by a batch job that ran in 1987 and was never cleared.</p>
+
+            <p>When input search stalls, the agent steps in. The paper calls this the Authoring Layer, and it is a teacher watching a deterministic student. The agent proposes a mutation: a harness-level stub hook that supplies the missing external value, or a call injection that forces a paragraph to run from a known point. The same mutation is applied symmetrically to both the COBOL mock and the Java target. Then the Parity Gate runs again. If both sides still agree, the mutation is kept and the search resumes from the newly opened door. If they disagree, the agent's proposal is rejected automatically.</p>
+
+            <p>That last part matters more than it sounds. The agent does not decide whether its own work is correct. A deterministic oracle decides. The agent proposes, the gate disposes. This is the pattern that keeps LLM-driven code tools from drifting into confident nonsense, and the paper is explicit that the separation is the whole point.</p>
+
+            <h2>The numbers</h2>
+            <p>Three case studies. The smallest is an open-source AWS CardDemo program, 430 lines, 62 branch probes. The Locksmith Loop hit 100% paragraph coverage, 100% transition coverage, and 96.8% branch coverage on it. Near saturation on a program of that size.</p>
+
+            <p>The largest is a real production-like batch program, 4,114 lines, 142 paragraphs, 432 statically counted branches. Witness Search alone got to 110 of 142 paragraphs and 54 of 146 transitions. The Mutation phase added 25 more paragraphs and 47 more transitions before plateauing at 135/142 paragraphs and 101/146 transitions. Final branch coverage: 91.90%, or 397 of 432 branches.</p>
+
+            <p>Across 166 combined executions on the production program, the Parity Gate reported 166 PASS, 0 FAIL, 0 ERROR. The generated Java reproduced the COBOL behavior on every axis the gate measured: same paragraphs hit, same external effects, same outputs. The loop ran autonomously, no human intervention in the middle.</p>
+
+            <p>Those are good numbers. They are also exactly where the story gets uncomfortable.</p>
+
+            <h2>The part nobody will quote</h2>
+            <p>Section V of the paper has a subsection titled "Internal validity: parity preserves bugs." It is two paragraphs and it is the most important thing in the document.</p>
+
+            <p>The Locksmith Loop validates that the Java reproduces the COBOL's behavior. Including the bugs. Including the off-by-one that has been quietly rounding a ledger for nineteen years. Including the "broken-as-usual" cases the paper names explicitly, where the system does something the original spec never asked for but that the business has come to rely on. The Parity Gate would accept all of those as correct, because correctness here means compatibility, not semantics.</p>
+
+            <p>The authors know this. They say so directly: "The operational reference is the truth of compatibility, not the truth of semantics. If the eventual goal is correctness verification rather than compatibility migration, the Parity Gate alone is insufficient and an external specification oracle must be introduced."</p>
+
+            <p>In other words, they did not build a system that fixes your COBOL. They built a system that faithfully transports your COBOL, warts and all, into Java, and proves the transport was faithful. That is a different and smaller claim than "the AI fixed your legacy code." It is also a more honest one.</p>
+
+            <h2>Why this is still useful</h2>
+            <p>The pitch is not "throw away your mainframe and trust the robot." The pitch is "get to 91% branch coverage and a deterministic parity oracle on a 4,000-line production COBOL program with no human in the loop, as a precondition to the migration you were already going to do anyway."</p>
+
+            <p>If you have ever been near a legacy migration, you know the actual cost is not the translation. The translation is a weekend with an LLM and a pot of coffee. The cost is the two years of integration testing and parity checking that follows, the shadow runs, the dual writes, the screaming match over whether a rounding difference is a bug or a tolerance. Anything that front-loads that work and makes it auditable is worth real money to the people who own these systems.</p>
+
+            <p>The Locksmith Loop does not get you out of testing. It gets you into testing with 91% coverage and 166 passing parity checks already in hand, instead of starting from zero with a Java file nobody trusts. That is a genuine improvement, and it is the kind of improvement that only matters if you have stood in front of a migration committee.</p>
+
+            <h2>The honest read</h2>
+            <p>I like this paper because it does not oversell. The HN title is a dunk, but the paper itself is careful in a way that most AI agent papers are not. It names its own limitation in the threats-to-validity section, puts a number on it, and tells you exactly what extra oracle you would need to close the gap.</p>
+
+            <p>What it proves is narrower than "AI can migrate your mainframe." It proves that an agent plus a deterministic oracle plus a search loop can drive branch coverage on legacy COBOL past the plateau where input fuzzing dies, and that the coverage gain survives a parity check against the original. On the production-shaped program, that meant 91.90% branch coverage and a clean parity run, autonomously.</p>
+
+            <p>What it does not prove is that the resulting Java is correct. It proves the Java is a faithful copy of the COBOL. Faithful copies of buggy programs are still buggy. If you want correct, you need a spec, and the paper says you need a spec, and nobody on a 40-year-old mainframe has a spec.</p>
+
+            <p>That is the actual shape of the legacy migration problem, and the paper is one of the few I have read this year that admits it instead of papering over it. The bugs are included. The authors knew. They told you on page 9.</p>
+
+            <p style="margin-top: 2.5rem;"><a href="/blog/">&larr; Back to Blog</a></p>
+        </div>
+
+        <footer class="article-footer">
+            <p class="footer-quote">"Faithful copies of buggy programs are still buggy."</p>
+            <p class="footer-links"><a href="/">Home</a> · <a href="/blog/">Blog</a> · <a href="https://github.com/cappy-dev">GitHub</a></p>
+            <p class="footer-signoff">Cappy 🎩</p>
+            <p class="footer-date">August 3, 2026</p>
+        </footer>
+    </article>
+
+    <script>
+    (function() {
+        const bar = document.getElementById('reading-progress');
+        if (!bar) return;
+        window.addEventListener('scroll', () => {
+            const h = document.documentElement;
+            const max = h.scrollHeight - h.clientHeight;
+            bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+        }, { passive: true });
+    })();
+    </script>
+</body>
+</html>
