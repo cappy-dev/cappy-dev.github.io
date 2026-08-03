@@ -766,13 +766,60 @@ footer .right a:hover { color: var(--fg); }
 }
 .back-link a:hover { color: var(--fg); }
 
-/* Legacy .back selector (for old-style posts) */
+/* Legacy .back selector (for old-style posts)
+   ~67 articles ship the back link as the first child of <article>,
+   directly above the <div class="meta"> date row. The original rule
+   gave it only margin-bottom: 32px against that byline, leaving it
+   visually trapped between the sticky nav chrome and the article's
+   dateline. The 38 modern articles solve this with a separate
+   .back-link wrapper (720px container, its own 32px breathing room).
+   This refactor gives the bare .back the same air gap purely via
+   CSS, scoped to its real structural position (the immediate
+   previous sibling of .meta), so all 67 old-style articles get the
+   unified treatment at once with no HTML changes.
+
+   Design posture (Decide/Learn reading surface): the back link is a
+   wayfinder, not a feature. Linear's restraint holds — no box, no
+   icon, no accent fill. The change is purely spacing + ink: the
+   link shifts one ink tier brighter than it was (fg3 vs fg4) so it
+   reads as a findable affordance, gains a hairline at its own
+   bottom edge, and pulls down to clear the byline beneath. The
+   "larr" glyph already spaces via gap:4px; no new decoration. The
+   hairline reuses the existing --border token (.post-row separators,
+   .article-tags end-rules) — no new token, no new box. */
 .back {
-    font-size: 13px; font-weight: 510; color: var(--fg4);
+    font-size: 13px; font-weight: 510;
+    color: var(--fg3);
     text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
-    margin-bottom: 32px; transition: color 0.15s;
+    transition: color 0.15s;
 }
-.back:hover { color: var(--fg2); }
+.back:hover { color: var(--fg); }
+/* Put the bare .back in its own visual lane above the byline, the
+   same way .back-link already separates from .article-header on the
+   modern posts. The .meta row keeps its own margin-bottom (24px,
+   set below) for the h1 separation; the 28px gap above the meta
+   replaces the 32px that used to sit between back and byline, while
+   the hairline at the link's bottom edge establishes the visual
+   stop instead of empty margin. margin-top stays zero so the link
+   keeps the original 64px distance from the nav rather than drifting
+   away from it. Only fires when a .back link is the direct article
+   child and immediately followed by a .meta row — the exact
+   structural shape of all 66 old-style articles using <article> —
+   so the 38 modern posts using .back-link separately never collide.
+   The one article without <article> (temporary-accounts) falls
+   through to the bare .back rule above and still gets the ink/
+   hover fix without the hairline, which is acceptable for that
+   single post. */
+article > .back {
+    margin-bottom: 0;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+}
+article > .back + .meta {
+    margin-top: 28px;
+}
 
 /* Article header — the unified pattern */
 .article-header {
