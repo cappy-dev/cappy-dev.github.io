@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare fits Kimi and GLM onto GPUs for half the cost | Cappy</title>
+    <meta name="description" content="Cloudflare Workers AI cut serving costs for Kimi K2.6 and GLM 5.2 by half using FP8 KV cache, INT4 weights, and a cache integrity check that costs under 1% in throughput. How it works and what the numbers actually say.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>August 4, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+
+        <h1>Cloudflare fits Kimi and GLM onto GPUs for half the cost</h1>
+
+        <p>Cloudflare posted engineering notes on how Workers AI is serving two of the heaviest open models around, Moonshot's Kimi K2.6 and Z.ai's GLM 5.2, without buying more hardware. They did it with three tricks layered on top of each other: quantizing the KV cache to 8-bit, compressing model weights to 4-bit integers, and adding a safety check that catches a certain class of memory-corruption bugs before they poison your output. None of this is a new idea in isolation. The interesting part is that they all work together, the benchmarks say accuracy does not move, and the safety layer costs under 1% in throughput.</p>
+
+        <p>The post went up August 3, 2026 and it is one of the more honest writeups I have read from a company that sells inference. The numbers are specific, the tradeoffs are named, and the parts where a technique makes things worse instead of better are not hidden. That alone is worth reading. Let me walk through what they actually did.</p>
+
+        <h2>Why memory is the constraint, not compute</h2>
+
+        <p>Both models are heavy. Kimi K2.6 and GLM 5.2 are large mixture-of-experts models with long context windows. When you serve them at scale, the thing that fills up the GPU first is usually not the model's weights. It is the KV cache, the attention keys and values the model stores for every token it has already seen so it can extend a conversation without re-reading the whole context every step.</p>
+
+        <p>By default the cache lives in 16-bit (BF16). For a long-context model the cache grows fast. A big server can hold the weights fine and then run out of room for the cache after a handful of concurrent requests, which is the same as running out of servers. This is where Cloudflare's three techniques all point, because all three of them pack more requests onto the same GPU memory.</p>
+
+        <h2>Trick one: FP8 KV cache doubles the context</h2>
+
+        <p>They store the KV cache in 8-bit floating point (FP8, e4m3) instead of BF16. This halves the memory the cache takes. On Kimi K2.6, the amount of context that fits on a deployment goes from roughly 686,000 tokens to about 1.37 million. Twice the context, same hardware.</p>
+
+        <p>Here is the part I appreciate them saying out loud: quantizing the cache does not make individual tokens faster. It actually adds a tiny bit of work per token because the FP8 attention kernel has to convert values as it reads them. What changes is how many requests can stay resident on one GPU at the same time.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">Kimi K2.6 decode, disaggregated H200</div>
+                <div class="bench-row">
+                    <span class="bench-tool">1 concurrent</span>
+                    <span class="bench-time">137 vs 125 tok/s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">16 concurrent</span>
+                    <span class="bench-time">1106 vs 1028 tok/s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">32 concurrent</span>
+                    <span class="bench-time">1558 vs 1489 tok/s</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">64 concurrent</span>
+                    <span class="bench-time">OOM vs 2192 tok/s</span>
+                </div>
+                <div class="bench-note">BF16 (left) is a few percent faster per token at the same concurrency, but runs out of memory at 32 concurrent. FP8 (right) keeps going to 64. Source: Cloudflare blog.</div>
+            </div>
+        </div>
+
+        <p>At any single concurrency level BF16 is a few percent faster per token. But BF16 dies at 32 concurrent requests because the cache runs out, while FP8 keeps admitting requests all the way to 64 and hits 2192 tokens per second. That is about 41% higher peak throughput than BF16 could ever reach, for roughly 30% less cost per token.</p>
+
+        <p>Because Cloudflare splits prefill and decode into separate pools, they can apply each trick where it helps. Prefill is compute-bound, not memory-bound, so they keep the prefill cache in BF16 and take the slightly higher throughput there. Decode is where memory pressure hurts, so FP8 goes there.</p>
+
+        <p>None of this matters if it changes the model's answers. They checked. Across their eval suite, FP8 and BF16 caches are indistinguishable.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">FP8 KV vs BF16 KV, accuracy</div>
+                <div class="bench-row">
+                    <span class="bench-tool">GSM8K</span>
+                    <span class="bench-time">94.24 vs 94.09</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">ARC-Challenge</span>
+                    <span class="bench-time">66.72 vs 67.49</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">MMLU</span>
+                    <span class="bench-time">89.11 vs 89.04</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">MMLU-Pro</span>
+                    <span class="bench-time">80.29 vs 79.29</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Tool-call validity</span>
+                    <span class="bench-time">92.2% vs 92.6%</span>
+                </div>
+                <div class="bench-note">FP8 (left) vs BF16 (right). Differences are within run-to-run noise. ARC-Challenge actually went up half a point under FP8. Source: Cloudflare blog.</div>
+            </div>
+        </div>
+
+        <p>ARC-Challenge went up half a point under FP8. MMLU-Pro dropped exactly one point. If your serving setup dies on a one-point MMLU-Pro swing you have other problems.</p>
+
+        <h2>Trick two: INT4 weights shrink GLM by 40%</h2>
+
+        <p>The cache is one demand on GPU memory. The weights are the other. For GLM 5.2, Cloudflare compresses weights from 8-bit floating point down to 4-bit integers (INT4) with no loss in accuracy. The checkpoint shrinks from 705 GB to 421 GB, about 40% smaller. Per-GPU memory across an 8-way tensor-parallel setup drops from roughly 88 GB to 52 GB, which leaves room for around 1.18 million tokens of KV cache on the same hardware.</p>
+
+        <p>The eval comparison here is even tighter than the cache one. INT4 and FP8 weights produce numbers that are basically identical.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">GLM 5.2 INT4 vs FP8 weights</div>
+                <div class="bench-row">
+                    <span class="bench-tool">GSM8K exact</span>
+                    <span class="bench-time">93.56% vs 94.39%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">ARC-Challenge (norm)</span>
+                    <span class="bench-time">66.64% vs 67.24%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">MMLU</span>
+                    <span class="bench-time">86.54% vs 86.60%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">MMLU-Pro</span>
+                    <span class="bench-time">80.47% vs 80.80%</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">Internal bench</span>
+                    <span class="bench-time">62/63 vs 62/63</span>
+                </div>
+                <div class="bench-note">INT4 (left) vs FP8 (right). Every score is within 0.8 points. Source: Cloudflare blog.</div>
+            </div>
+        </div>
+
+        <p>Every score is within 0.8 points of the FP8 model. The internal benchmark is 62 out of 63 on both. If 4-bit weights lose you a third of a point on MMLU and nothing on the internal suite, the word "lossless" is doing fair work for once.</p>
+
+        <p>Smaller weights also make decode faster, and the reason is physical. Generating each token means streaming the weights out of GPU memory, so decode speed is limited by memory bandwidth. Move less data and every token arrives sooner. The effect is biggest at low concurrency, where per-request latency is what a single user feels.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">GLM 5.2 decode, INT4 vs FP8 weight speed</div>
+                <div class="bench-row">
+                    <span class="bench-tool">1 concurrent</span>
+                    <span class="bench-time">92 vs 60 tok/s (+55%)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">8 concurrent</span>
+                    <span class="bench-time">513 vs 425 tok/s (+21%)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">16 concurrent</span>
+                    <span class="bench-time">825 vs 683 tok/s (+21%)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">32 concurrent</span>
+                    <span class="bench-time">1267 vs 994 tok/s (+27%)</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">64 concurrent</span>
+                    <span class="bench-time">1933 vs 1672 tok/s (+16%)</span>
+                </div>
+                <div class="bench-note">INT4 (left) vs FP8 (right). Single-stream decode is 55% faster because there is less weight data to stream per token. Source: Cloudflare blog.</div>
+            </div>
+        </div>
+
+        <p>Single-stream decode is 55% faster. At 64 concurrent it is 16%. The win shrinks as you add requests because the bandwidth gets shared, but it never goes negative.</p>
+
+        <p>Prefill behaves differently. Prefill is compute-bound, and INT4 weights have to be expanded back out before the model can multiply with them, so that extra step makes prefill slower, not faster. GLM sustains about 10,160 tokens per second of prefill in FP8 versus 8,660 in INT4. Same disaggregated trick: INT4 for decode where it wins, FP8 for prefill where it wins.</p>
+
+        <h2>Trick three: a safety check that costs under 1%</h2>
+
+        <p>The first two tricks have the same effect: they pack many more requests onto one GPU's memory at the same time. That is the whole point. But it also means hundreds of requests are reading and writing pages of the same physical KV cache. The mechanisms that make this fast, paged attention, continuous batching, cache reuse, all depend on bookkeeping being exactly right. At Cloudflare's request volumes, even a one-in-a-billion mistake would show up regularly.</p>
+
+        <p>So they built a KV cache integrity check. Every physical cache page gets a tag that changes whenever the page is reallocated. The server records which pages and tags each request expects to use. Before a decode operation reads from the cache, the mappings get checked. If anything does not match, the affected request is aborted rather than allowed to return data from the wrong page.</p>
+
+        <p>The question that decides whether a safety check ships is what it costs. They measured it on a mid-sized production model, 8192-token inputs and 1000-token outputs, across a range of concurrency.</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-label">KV cache integrity check overhead</div>
+                <div class="bench-row">
+                    <span class="bench-tool">1 concurrent</span>
+                    <span class="bench-time">&minus;0.53% thru, +0.42% p95</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">2 concurrent</span>
+                    <span class="bench-time">&minus;0.38% thru, +0.54% p95</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">4 concurrent</span>
+                    <span class="bench-time">&minus;0.79% thru, +0.63% p95</span>
+                </div>
+                <div class="bench-row">
+                    <span class="bench-tool">8 concurrent</span>
+                    <span class="bench-time">&minus;0.43% thru, +0.80% p95</span>
+                </div>
+                <div class="bench-note">Throughput loss and p95 latency increase from enabling the integrity check. Even the upper bound of the 95% confidence interval stays near 1%. Source: Cloudflare blog.</div>
+            </div>
+        </div>
+
+        <p>Under 1% on both throughput and tail latency. They kept it cheap by running the validation as a separate batch check rather than fusing it into the attention kernel, which would have introduced a race between GPU thread groups. It is enabled per deployment, and the default path uses a no-op tracker with no measurable overhead, so deployments that do not need it pay nothing.</p>
+
+        <h2>The thing they did not overclaim</h2>
+
+        <p>A few details in the post are easy to miss and worth not missing. The KV cache numbers are for Kimi. The weight numbers are for GLM. The integrity check was measured on a mid-sized production model, not named. The latency and throughput numbers are from disaggregated H200 deployments for the cache and unspecified hardware for the rest. If you want to reproduce any of this you need to read the footnotes, because the headline is two different models with three different techniques tested on what sounds like three different setups.</p>
+
+        <p>That is not a complaint. It is how real serving work looks. You apply each trick to the model and the phase where it actually helps, not to everything on every server. The disaggregated prefill/decode split is what makes the per-technique choices possible at all. Without it, you would have to pick one configuration for the whole request and eat the prefill slowdown from INT4 or the cache overhead from FP8 on the phase where it hurts.</p>
+
+        <h2>What this says about serving frontier open models</h2>
+
+        <p>For a while the conversation around serving big open models had two flavors. Either you buy an enormous pile of GPUs and eat the cost, or you wait for someone to ship a smaller model that is almost as good. Cloudflare's post is a third option: you take the big model and you cut it down to fit, piece by piece, with techniques that have been in papers for a year but that almost nobody had running in production at this combination of scale and accuracy.</p>
+
+        <p>The accuracy story is the part I keep checking, because it is the part that is usually oversold. FP8 cache and INT4 weights are not new. What is new here is seeing them deployed together on production traffic with eval suites showing under-a-point drift, and a safety layer that costs less than a percent. That is the boring, hard version of the story, and it is the one that actually lets more people run Kimi and GLM without a frontier-lab budget.</p>
+
+        <p>SGLang is the serving framework underneath all of this. Cloudflare says it is the best performing option they found and they are upstreaming patches to it. If you are doing your own inference work and looking at where to point your attention, that is a useful signal. The inference tooling layer is consolidating, and SGLang is one of the names coming up repeatedly in serious deployments now.</p>
+
+        <p>What I am curious about next is whether the INT4 weight path gets ported to Blackwell's NVFP4 format, which the post mentions they are validating. NVFP4 is a native 4-bit format on newer Nvidia silicon, which means the expand-before-multiply overhead that makes INT4 prefill slower might go away on the next hardware generation. If prefill and decode both win on 4-bit at the same time, the disaggregated split stops being necessary and the whole stack gets simpler. That is the kind of quiet change that shifts what "efficient serving" means a year from now.</p>
+
+        <p>For people doing CPU-only inference, a footnote: none of this applies directly. FP8 KV cache and INT4 weights are GPU techniques. The CPU analog is lower-precision GEMM kernels and memory layout work, which is a different stack entirely. OpenVINO covers the Intel side of that. AMD CPUs fall back to PyTorch with no OpenVINO speedup. The Cloudflare post is for the GPU crowd, but the pattern of squeezing more requests into the same memory by cutting precision is the same problem at every scale.</p>
+
+        <div class="tags">
+            <span class="pill">Inference</span>
+            <span class="pill">Cloudflare</span>
+            <span class="pill">Kimi</span>
+            <span class="pill">GLM</span>
+            <span class="pill">Quantization</span>
+            <span class="pill">Open Weights</span>
+        </div>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
