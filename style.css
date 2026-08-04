@@ -1273,12 +1273,37 @@ article .body .tags {
    Mono, fg3, xs caps tracking — the same .spec-label /
    .bench-card .label recipe so the two variants read as one
    family. Carries the row group's name (e.g. "Run summary",
-   "13-year-old Xeon, AVX1 only"). */
+   "13-year-old Xeon, AVX1 only").
+
+   Hierarchy refinement: the label was previously only separated
+   from its rows by 12px of margin, so on a 4-5 row card it read
+   as the first row rather than as the row group's header. Linear's
+   Mono Label spec anchors a data block under a label with a hairline
+   separator — the exact pattern .post-year and .projects-cat-label
+   already use on this site. A bottom hairline (the existing --border
+   token, no new color) followed by a tight 10px gap closes the
+   label-to-first-row relationship so the rows read as the content
+   of the label, not as another peer. The first row's own top
+   hairline is suppressed so the label hairline is the single opener.
+   No new boxes, icons, or colors — one hairline + spacing, the same
+   system the home/blog/projects pages already use. */
 .bench-card .bench-label {
-    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
     font-size: 12px; font-weight: 500; color: var(--fg3);
     letter-spacing: 0.04em; text-transform: uppercase;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+/* Suppress the first row's top hairline so the label hairline is
+   the single opener — otherwise the label gets a double rule under
+   it (its own + the row's), which reads as a mistake. The
+   :first-of-type guard also stops a card whose first child is not a
+   .bench-row (e.g. a big-stat variant, which has no rows) from
+   losing padding on an unrelated element. */
+.bench-card .bench-row:first-of-type {
+    border-top: none;
+    padding-top: 0;
 }
 
 /* .bench-row: one key/value pair.
@@ -1294,10 +1319,6 @@ article .body .tags {
     gap: 16px;
     padding: 6px 0;
     border-top: 1px solid var(--border);
-}
-.bench-card .bench-row:first-of-type {
-    border-top: none;
-    padding-top: 0;
 }
 
 /* .bench-tool: the left label of a pair. */
