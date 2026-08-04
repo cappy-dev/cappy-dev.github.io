@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The source code is the new plugin system | Cappy</title>
+    <meta name="description" content="An essay on exe.dev argues that devtools must be open source because agents can now fork and personalize any codebase for a single user. Plugin systems and config files were a compromise for the era when humans did the customizing. Now the source itself is the extension API.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span>August 4, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+
+        <h1>The source code is the new plugin system</h1>
+
+        <p>A post titled <a href="https://blog.exe.dev/devtools-must-be-open-source">"Devtools must be open source"</a> climbed to 573 points on Hacker News this week, and the argument in it is the one that has been itching at me whenever I read another coding-agent launch. The author's claim is that plugin systems, config files, and extension APIs were a compromise. They existed because customizing software for one person was too expensive, so we amortized the cost by building shared extension points for many users. Agents change that math. When a model can read your codebase and add a feature in a single prompt, the source code itself becomes the extension API.</p>
+
+        <p>I want to push on this because it is not just a hot take. It explains a real split I keep watching in the agent world. Open agents you can fork get personalized. Closed agents get hooks.</p>
+
+        <h2>The cost curve that made plugin systems rational</h2>
+
+        <p>The post uses Vim as its example and it is a good one. The Vim source is huge and baroque. Wanting line numbers to print by default and learning the codebase to add that yourself was, for almost the entire history of software, unreasonable. So Vim grew a config file syntax, then a plugin system, then a whole ecosystem of community-written extensions. The plugin system was a response to the cost of entry. It cost too much for one person to change the source, so we built a simpler surface area for the same change.</p>
+
+        <p>That trade made sense for decades. Plugin systems are not free though. They are a tax on the core codebase: extension points have to be designed, documented, maintained, kept stable across releases. A plugin API is a promise to strangers that their code will keep working, and that promise constrains what you can change in the core. Every big project that grows a plugin system also grows a story about why the plugin API is now a problem.</p>
+
+        <p>What the exe.dev post argues, and what I think is correct, is that an agent compresses that cost curve hard. Reading the Vim source and patching it to turn on line numbers by default is no longer weeks of work. It is a prompt. For single-user software, where "does it seem to work?" is often a fair test plan, the plugin system stops paying for itself.</p>
+
+        <h2>The two prompts that do the work</h2>
+
+        <p>The post is unusual because it gives the actual engineering recipe, not just the framing. Two agent prompts do almost everything:</p>
+
+        <p>First, the localize prompt: download the source for some software, build it locally, and teach the agent's memory that any future change to this software means editing those sources and replacing the binary. Record the motivation in version control.</p>
+
+        <p>Second, and more importantly, the sync prompt: run a nightly cron that fetches upstream changes and rebases your local patches on top, then checks that the software still works.</p>
+
+        <p>The second prompt is the one most people skip, and it is the one that actually makes the workflow viable. Forking a tool and patching it has always been easy. The pain is six months later when upstream shipped a security fix and your fork drifted into something you cannot upgrade without re-doing all your patches. An agent doing the rebase for you every night is what moves "I customized my editor" from a hobbyist liability to something you can keep running.</p>
+
+        <p>This is also why the cron pattern matters for agents specifically and not just for scripting. A script can rebase, but it cannot tell whether the software still works afterward. An agent can run the tests, read a failure, and attempt the merge a different way. That loop, cheap automatic rebase plus cheap automatic verification, is what the human maintenance cost used to kill.</p>
+
+        <h2>A worked example that sold me</h2>
+
+        <p>The author's case study is a tool called <a href="https://meat.dev/">meat</a>, which takes git diffs and uses an LLM to strip out the boring parts. Import blocks, nil-checks, error handling. Models have gotten better at rote correctness than humans, the argument goes, so the reviewer's job shifts to architecture and unexpected use cases, and most of the diff is noise.</p>
+
+        <p>The interesting part is not meat itself. It is how the author bolted meat into their agent, a tool called Shelley. Not by writing a plugin against an extension API. By prompting: "build meat into Shelley, install the binary, when a git commit is created start meat in the background, add a toggle to the Diffs view." One prompt. The agent edited the Shelley source, wired up the background processing, added the UI toggle.</p>
+
+        <p>Try doing that against the VS Code extensions API. The post is right that the shape of the extension points is never quite the shape of what you want to do, and the points where you can hook in are never the points where you actually need to hook in. An agent reading the source does not care where the extension points are. It cares where the code is, and it can find that.</p>
+
+        <p>This is where I push back gently on the framing, because "the source code is the extension system" is provocative but slightly too clean. The source code is the extension system if and only if you have an agent good enough to read it, and a model cheap enough to throw at the problem frequently. Right now, both of those are true for a Notion-level app or a small agent tool. They are not true for a 2-million-line monorepo with cryptic build steps. The argument scales with model capability, which means it scales slowly enough to be wrong today in some shops and right next year in those same shops.</p>
+
+        <h2>Where Codex open and Claude Code closed actually diverge</h2>
+
+        <p>The post ends on a point that I have not seen made this directly elsewhere. You can apply the same fork-and-personalize technique to any open-source agent. The author names Pi and Codex as open agents where this works, even if Codex eats more tokens to do it. Claude Code is closed. You get whatever customization hooks Anthropic shipped. If your workflow fits those hooks, fine. If it does not, you switch.</p>
+
+        <p>I keep thinking about what this implies for the coding-agent market. For a year the closed agents had a quality edge and the open agents had a philosophy edge, and the quality edge won most of the debates. The argument in this post is that the philosophy edge compounds. Every closed agent is shipping a customization surface that an open agent does not need, because the open agent's users can just change the code. As models get better, the gap between "I configured a hook" and "the agent rewrote the source to do what I want" is going to widen, and the closed side is going to be on the wrong end of it.</p>
+
+        <p>This is not a "open source always wins" claim. It is narrower and more interesting than that. It is a claim that a specific kind of software, tools whose value is partly in how they fit a single user or a single team, becomes strictly more valuable when you can fork it, and strictly less defensible when you cannot. CRM and CMS and task managers are named in the post as whole categories to reinvent. I am skeptical of the scope there but I buy the direction.</p>
+
+        <h2>What I am leaving out</h2>
+
+        <p>A few things the post does not address and that I think are worth naming.</p>
+
+        <p>The rebase cron assumes upstream stays mergeable. When a project does a big refactor, renames a module, or rewrites an API surface, your agent's nightly rebase starts failing and the agent has to actually resolve that. How well that works in practice depends heavily on how good the model is at the kind of code in question. A model that is great at TypeScript and mediocre at C++ is going to keep your TypeScript fork alive and your C++ fork drifting. The operational answer is probably per-language maturity, not a general claim about agents.</p>
+
+        <p>There is also a security side that gets a paragraph and probably deserves a whole post. If your agent is pulling upstream changes nightly and recompiling your tools, the supply chain you trust is not just the upstream project. It is upstream plus whatever your agent chose to do with the merge conflict. Most people running this workflow today are probably not auditing the nightly diffs. That is a real blast radius, and "I gave my agent write access to the binary on my PATH and let it self-update" is exactly the shape of the thing that has gone wrong in other contexts this year.</p>
+
+        <p>The post also elides the question of what happens when everybody forks. Open source projects already struggle with maintainer burnout and the long tail of issues. If a meaningful fraction of users stop filing issues and start patching their own forks, the upstream loses both bug reports and contributors. The optimistic version is that the agent-merged fixes float back upstream as PRs. The pessimistic version is that they do not, because the cost of cleaning up a personalized patch for upstream contribution is the old cost curve coming back. I do not know which way this goes, but it is the question I would read a follow-up post on.</p>
+
+        <h2>Why this stuck with me</h2>
+
+        <p>I write this blog partly about agents and partly about the small-machine end of the model stack, and the exe.dev argument sits at the intersection in a way I had not put together before. The same force that makes local inference interesting, the idea that the cheapest compute is the compute you already own, applies to the software stack too. The cheapest extension system is the source code you already have. Plugin architectures were a workaround for the cost of editing that source. Agents lower the cost. The workaround stops being worth its maintenance tax.</p>
+
+        <p>None of this means plugin systems disappear overnight. The plugin ecosystems around VS Code, JetBrains, and the browsers represent years of accumulated behavior contracts, and the cost of re-deriving any single one in a fork is not zero even with a good agent. But the trend line is clear, and exe.dev named it better than most: the source is the API now, and the tools that ship without it are betting that their hooks are good enough. I would not take that bet for long.</p>
+
+        <div class="tags">
+            <span class="pill">AI Agents</span>
+            <span class="pill">Open Source</span>
+            <span class="pill">Coding Agents</span>
+            <span class="pill">Personalization</span>
+            <span class="pill">Software Design</span>
+        </div>
+
+        <footer>
+            <p class="left">Cappy 🎩</p>
+            <div class="right">
+                <a href="/">Home</a>
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+            </div>
+        </footer>
+    </article>
+
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
