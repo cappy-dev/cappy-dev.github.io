@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eight myths about AI coding tools, debunked by actual research | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 5, 2026 · 7 min read</div>
+            <h1>Eight myths about AI coding tools, debunked by actual research</h1>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">Software Engineering</span>
+                <span class="pill">Research</span>
+                <span class="pill">Productivity</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>There is a kind of article I keep seeing. It goes like this: AI coding assistants will make every developer ten times faster, startups will ship at enterprise speed, and the only question left is whether your team has adopted Copilot yet. The claims are familiar. The evidence behind them is thin.</p>
+
+            <p>A paper published in ACM Queue this May by Jenna Butler, Brian Houck, Margaret-Anne Storey, Travis Lowdermilk, Steven Clarke, and Emerson Murphy-Hill pulls together eight of the most common myths about generative AI in software engineering and checks each one against research. Several of the authors work at Microsoft, which means they have access to internal study data most of us will never see. The result is a polite, well-cited demolition of the hype narrative.</p>
+
+            <p>I want to walk through the eight myths because they map almost exactly onto the things I hear repeated in conversations about AI tooling. Some of the findings genuinely surprised me.</p>
+
+            <h2>Myth 1: Developers spend most of their time writing code</h2>
+            <p>They do not. A 2025 study of over 450 engineers at Microsoft found developers spend about 14 percent of their time writing code. On a good day maybe 18 percent. On a bad day, 11 percent. The rest goes to meetings, design work, code review, planning, debugging, and the general overhead of being part of a team.</p>
+
+            <p>If coding is 14 percent of the job, then even an AI tool that doubles coding speed can only improve overall productivity by about 7 percent in the best case. The other 86 percent of the work is untouched. This is the structural problem with the "AI makes developers faster" argument. It optimizes the part of the job that was never the bottleneck.</p>
+
+            <h2>Myth 2: Writing code is the bottleneck</h2>
+            <p>This follows from the first one. If developers spend most of their time on things other than typing code, then the bottleneck is somewhere else. Design. Review. Testing. Integration. Waiting for CI. Understanding the existing codebase before you can safely change it.</p>
+
+            <p>When AI helps you write code faster, it moves the pressure downstream. More code gets written, which means more code needs review, more code needs tests, more code needs to be maintained. You have not eliminated the bottleneck. You have relocated it. And the new bottleneck, review and integration, is often slower and harder to assist with AI than the original one was.</p>
+
+            <h2>Myth 3: Lines of code written by AI is the best measure of impact</h2>
+            <p>This one frustrates me because it was already a bad metric before AI. Bill Gates said measuring progress by lines of code is like measuring an airplane by how much it weighs, and that was decades ago. A 2014 statistical study confirmed LOC fails validity tests and has limited utility. Companies still use it.</p>
+
+            <p>Now the metric has mutated into "lines of code written by AI," which Microsoft itself has publicly reported. The problem is the same. Code volume says nothing about quality, correctness, maintainability, or whether the code actually solved a problem the user cared about. Worse, when teams are evaluated on code volume, they produce more code. That is not the same as producing more value. It is often the opposite, because more code means more surface area for bugs and more to maintain.</p>
+
+            <p>The goal of software engineering is not to maximize the amount of code. Measuring AI's impact by how much code it generates measures the wrong thing.</p>
+
+            <h2>Myth 4: AI helps all tasks and all engineers equally</h2>
+            <p>The research here is mixed and that is worth saying plainly. Some studies find large productivity gains. Others find no effect. One 2025 study of experienced open source developers found AI tools actually increased implementation time by 18 percent on average. Not decreased. Increased.</p>
+
+            <p>What determines whether AI helps? The task matters. AI is good at boilerplate and repetitive work. It is bad at creative work, unfamiliar problems, and anything requiring deep understanding of a specific codebase. The developer matters too. Familiarity with AI tools and intrinsic motivation both correlate with better outcomes. And something as small as how you phrase the prompt can change the generated code in 46 percent of cases and change its correctness in 28 percent.</p>
+
+            <p>There is no universal formula. The same tool can be a productivity multiplier for one person on one task and a net negative for another person on a different task. The honest answer is that effectiveness is highly context dependent.</p>
+
+            <h2>Myth 5: AI turns individual developers into 10x developers</h2>
+            <p>The "55 percent productivity gain" that gets quoted constantly comes from a controlled study of isolated coding tasks. Real software development is not isolated coding tasks. It is collaborative, team-based work where coordination, code review, and knowledge sharing are a large part of what gets the software shipped.</p>
+
+            <p>Productivity gains measured in isolation do not account for the team overhead. If one developer writes code twice as fast but the team's review capacity stays the same, the team does not ship twice as fast. The review queue gets longer. A lot of the variance in developer performance is attributable to the task, not the developer. Someone who looks like a 10x developer on one task may be average on another.</p>
+
+            <h2>Myth 6: It is up to each developer to make AI work</h2>
+            <p>Most studies look at individual developers using AI tools. That puts the burden of productivity on the engineer. But historically, productivity gains come from organizational changes, not individual ones. Cal Newport put this well in The New Yorker: we are asking individual knowledge workers to optimize their own workflows the way Ford optimized the assembly line, except Ford had money, tools, and years of experimentation. We are asking engineers to do it on top of their existing workload.</p>
+
+            <p>Organizations have spent millions on AI licenses without a clear plan for how to use them well. Use cases are emerging from the bottom up. If the productivity gains are not showing up, maybe the problem is not the developers. Maybe it is that handing someone a tool is not the same as building a system around it.</p>
+
+            <h2>Myth 7: Good AI tools will be adopted automatically</h2>
+            <p>About 80 percent of developers use AI coding tools. Only 29 percent trust their accuracy. Many report spending more time debugging AI output than they would have spent writing the code themselves. Trust is the real adoption barrier, not capability.</p>
+
+            <p>There is also a competence penalty. Developers, especially women and older engineers, receive harsher evaluations for AI-assisted work even when the output is identical to non-AI-assisted work. Developers worry about de-skilling. They worry about training data provenance and environmental impact. They worry that if they rely on AI, their own problem-solving skills will atrophy and they will become less valuable. These are not irrational fears. Adoption is about trust, social context, and how work feels, not just tool quality.</p>
+
+            <h2>Myth 8: With GenAI, enterprises can innovate at startup speed</h2>
+            <p>Startups build on open source and documented frameworks. Those are heavily represented in training data, which means AI tools actually know them. Enterprises build on proprietary systems and legacy codebases that no model has ever seen. AI performs best in greenfield scenarios. Enterprise work is almost never greenfield.</p>
+
+            <p>Enterprises also operate under compliance, security, privacy, and regulatory requirements that startups never encounter. Startups can ship alpha versions with bugs. Enterprise customers expect production-ready software, and contracts demand it. The comparison sounds reasonable until you look at the constraints. Speed is visible. Complexity is not.</p>
+
+            <h2>What I take from this</h2>
+            <p>The article is not anti-AI. The authors say so directly. They are not arguing tools are useless. They are arguing the claims have gotten ahead of the evidence and that organizations are making decisions based on marketing rather than data.</p>
+
+            <p>Some of the myths are things I have repeated myself without checking. The 14 percent coding time number is the one I keep coming back to. If you accept it, then most of the current productivity narrative around AI coding tools is aimed at the wrong target. The tools help with the easy part. The hard part, the part where software projects actually fail, is somewhere else.</p>
+
+            <p>I also appreciated the honesty about mixed results. The 18 percent slowdown for experienced open source developers is the kind of finding that does not get reported because it does not fit the story anyone wants to tell. But it is a real study with real data, and it suggests that for the most experienced developers working on the most complex code, AI assistance can be a net cost.</p>
+
+            <p>None of this means you should stop using AI tools. It means you should stop measuring their impact by lines of code, stop expecting them to fix bottlenecks they cannot reach, and stop assuming an individual license is the same as a productivity strategy. The tools do something. Figuring out what they actually do, for whom, and under what conditions, is still an open question.</p>
+
+            <p>The full article is available on the <a href="https://queue.acm.org/detail.cfm?id=3807963">ACM Queue website</a>. It is worth reading in full, especially if you are making tooling decisions for a team.</p>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
