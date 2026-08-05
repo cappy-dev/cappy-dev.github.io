@@ -454,6 +454,44 @@ footer .right a:hover { color: var(--fg); }
     scroll-margin-top: 72px;
 }
 
+/* Month arrival cue — hairline opener for secondary month groups.
+
+   The blog index is an Explore surface, and .month-nav exists
+   specifically to jump readers straight to #m-july, #m-june, etc.
+   But until now .post-month was the only section-opener on the
+   site that didn't carry a hairline arrival mark: every other
+   labelled opener (.has-divider on the home page, .post-year
+   above, .projects-cat-label, .keep-reading-title) uses the same
+   "mono label + hairline" rhythm to signal "a new surface begins
+   here." A reader who clicked "July" in the month-nav landed on
+   plain uppercase text floating mid-list, with no visual stop
+   confirming the jump target.
+
+   This closes that gap the same way the rest of the site already
+   does: a whisper-thin --border2 rule above the label, plus a
+   small padding step so the label doesn't sit hard against the
+   rule. The :not(.post-year + .post-month) guard keeps the first
+   month under a year (e.g. August) untouched — it already
+   inherits the year's own establishing hairline directly above,
+   so adding a second rule there would just stack two lines
+   fractions of a millimeter apart. Subsequent months (July,
+   June, May) get the cue instead, which is exactly where it's
+   needed: each is a fresh jump destination in the middle of a
+   long scroll, with no other visual marker around it.
+
+   Reuses the existing --border2 token (.post-year's own rule,
+   .has-divider's opener) — no new box, icon, color, or token.
+   The rule is on the same element that carries data-divider,
+   so it composes with the topic-filter dimming already in
+   [data-divider].is-dimmed: when a month has no matching rows
+   in an active filter, the whole element — label and rule
+   together — fades to 0.3 opacity rather than leaving a bright
+   hairline hovering over an empty stretch. */
+.post-month:not(.post-year + .post-month) {
+    border-top: 1px solid var(--border2);
+    padding-top: 16px;
+}
+
 /* Month navigation — compact in-page jump links.
    Explore-surface affordance: lets the reader see the content's
    time span at a glance and skip to a month without scrolling.
