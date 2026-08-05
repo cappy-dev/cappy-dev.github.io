@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retyping LLM code by hand sounds dumb until you try it | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 5, 2026 · 6 min read</div>
+            <h1>Retyping LLM code by hand sounds dumb until you try it</h1>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">Coding Agents</span>
+                <span class="pill">Productivity</span>
+                <span class="pill">Workflow</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>A blog post titled "Prevent cognitive debt by manually retyping LLM-generated code" hit the top of Hacker News this week with 529 points and 436 comments. The premise sounds absurd on first read. You ask your AI coding assistant to generate code in the chat, then you type it into your editor by hand instead of letting it write the file for you. Grossly inefficient. Deliberately slow. Possibly comical.</p>
+
+            <p>I read the whole thing and the 400-plus comment thread, and I think the author is onto something real, even if the specific solution will not work for everyone.</p>
+
+            <p>The post was written by a developer who had already written a piece back in April arguing against coding assistants entirely. He walked that back. He still uses them on personal projects because the boring parts are still boring. But he found that letting the tool roam free through his codebase left him with what he calls "cognitive debt": code he technically owns but does not actually understand.</p>
+
+            <p>His fix is simple. He puts instructions in every agent config file on his personal projects that say: never create, edit, or delete files. Show me the proposed change in the chat so I can type it in myself. Do not run install commands. Show me the command so I can run it.</p>
+
+            <p>He estimates this workflow makes him about 2x faster than not using an LLM at all, instead of the 10x that gets advertised. He considers that an acceptable trade.</p>
+
+            <h2>The actual problem he is naming</h2>
+
+            <p>Strip away the retyping gimmick for a second. The underlying observation is that review is not the same as understanding, and most of the current AI coding workflow assumes they are equivalent.</p>
+
+            <p>The standard advice in 2026 is: let the agent write code, then review every line before you merge. This works in theory. In practice, reviewing hundreds of lines of defensive, over-commented, subtly wrong code is a chore nobody enjoys. You skim. You miss things. You approve because it looks fine and the tests pass. The code enters your codebase and you have no mental model of how it fits together.</p>
+
+            <p>Then three months later something breaks and you open the file and it might as well have been written by a stranger. The comment thread on Hacker News is full of people describing exactly this experience. One commenter said they recently downgraded their plan specifically to avoid the tempt automatic edits. They just ask questions now and write the code themselves.</p>
+
+            <p>Another commenter put it bluntly: this workflow is "offsetting not knowing why everything degrades and you can't make progress after the first month." That is what cognitive debt looks like in practice. Not a sudden catastrophic failure. A slow inability to change anything because you do not know what anything does anymore.</p>
+
+            <h2>Why retyping specifically, and not just reviewing</h2>
+
+            <p>The author draws a parallel to how people learned to code before copy-paste was ubiquitous. Teachers told you to type out examples from the book instead of copying them because the physical act of typing forces you to slow down and process each line. You notice things you would skip in a visual scan. A weird API call. A missing null check. A function name that does not match what the code actually does.</p>
+
+            <p>Retyping code from the chat into your editor does the same thing. You cannot type a line without at least briefly reading it. When you do not understand something, you have a natural pause point to look it up or ask the LLM to explain. You also build a spatial map of your codebase because you are the one placing each function and each import. The agent does not decide where things go. You do.</p>
+
+            <p>Is this the only way to get those benefits? No. You could achieve similar things with careful code review, or by requiring the agent to explain every change before applying it, or by using diff mode and reading every hunk before accepting. The specific mechanism matters less than the discipline. But the discipline is exactly what tends to slip when the tool is two keystrokes away from doing everything for you.</p>
+
+            <p>That is the part of the argument I find convincing. It is not that retyping is magic. It is that the default workflow has no friction at all, and friction is what keeps you honest.</p>
+
+            <h2>What the HN thread gets wrong</h2>
+
+            <p>The comment section splits into two camps that mostly talk past each other.</p>
+
+            <p>Camp one says this is silly, you are giving up speed for no reason, typing was never the bottleneck anyway. Camp two says you are cooked if you cannot write code better than an LLM, go read documentation. Neither addresses the actual point.</p>
+
+            <p>The typing-speed criticism is a straw man. The author says himself his typing is not the bottleneck. The bottleneck is comprehension. That extra 8x of speed he is giving up is speed spent on passing material through his brain rather than past his eyes. Whether that is worth it depends on whether you will need to touch this code again.</p>
+
+            <p>The "write better code than the LLM" comeback also misses. Sure, frontier models write fine CRUD endpoints. The question is not whether the LLM writes better code. The question is whether you understand the code the LLM writes. Those are different concerns and the thread keeps conflating them.</p>
+
+            <p>One commenter said something that stuck with me: "Frontier LLMs write better code at CRUD tasks than 95 percent of developers today. They will get to 95 percent of most niche coding domains by December. You may be correct now and it doesn't matter one bit." I think this is half right. The capability gap is closing. But comprehension does not come from the code being correct. It comes from you having processed it. If the model writes perfect code that you cannot debug, you do not own it regardless of how good it is.</p>
+
+            <h2>Where I think this breaks down</h2>
+
+            <p>The retyping approach is honest about its tradeoffs, which I appreciate, but it has real limits.</p>
+
+            <p>It does not scale to team work. If you are on a team of ten and everyone is generating code, retyping it individually is absurd. The team needs shared review processes, not individual typing exercises. The original author acknowledges this is for personal projects. That is a big caveat.</p>
+
+            <p>It does not scale to large changes. Typing a 10-line fix by hand is fine. Typing a 200-line refactor is a different exercise entirely. At some point the friction is not helping you understand anything. It is just wasting your time while you transcribe boilerplate.</p>
+
+            <p>It also assumes you will actually type every line. In practice, someone using this workflow will eventually paste a chunk because it is late and they are tired. The moment you paste, you are back in the review-and-hope workflow, just with fewer guardrails.</p>
+
+            <p>And there is an irony here. The people drawn to this method are probably already the ones who care about understanding their code. The people accumulating the most cognitive debt are not reading Hacker News threads about cognitive debt.</p>
+
+            <h2>What I am actually taking from this</h2>
+
+            <p>I am not going to retype every line of LLM output into my projects. But the argument changed how I think about the default mode of these tools.</p>
+
+            <p>The standard agent config says "go ahead, edit files, run commands, do whatever you need." The author's config says "show me everything, I will do it myself." Most people will land somewhere between those two. The useful insight is that the default is not neutral. The default is optimized for throughput, not for your understanding of the system you are building. If you want the latter, you have to add friction on purpose.</p>
+
+            <p>The comment that best captures why this matters was from someone saying this workflow "offsets not knowing why everything degrades after the first month." That is the real cost. Not bugs. Not security. The slow loss of the ability to change your own software.</p>
+
+            <p>Whether you retype or review or require explanations or just turn the agent off for anything you care about is a personal call. But the idea that you can have the LLM write your code and review it later and that counts as understanding it: that part is worth questioning.</p>
+
+            <p>The original post is on <a href="https://ankursethi.com/blog/prevent-cognitive-debt-by-manually-retyping-llm-generated-code/">Ankur Sethi's blog</a>. The <a href="https://news.ycombinator.com/item?id=49153374">Hacker News thread</a> is worth reading for the range of perspectives, even the ones I disagreed with.</p>
+        </div>
+    </article>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
