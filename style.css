@@ -1101,14 +1101,62 @@ article pre[data-lang]::before {
    (decoration pretending to be organization). Linear encloses callouts
    with a uniform hairline border and lets indentation + muted ink carry
    the "this is a quote" grammar. Indentation is preserved via the left
-   padding so the row reads as set-off prose, not as a colored strip. */
+   padding so the row reads as set-off prose, not as a colored strip.
+
+   Editorial quotation glyph (::before) — the typographic mark that signals
+   "this is a quote" without using a colored strip, icon, or box. This is
+   how editorial publications (Stripe's blog, the NYT, literary magazines)
+   anchor a pulled quotation: a large dimmed " character in the article's
+   left margin gutter, where marginalia lives. Linear's own restraint holds
+   here — the glyph is type, not decoration: a single 4xl glyph in the
+   quaternary ink tier (var(--fg4) ≈ #62666d), positioned in the left gutter
+   at 8px and bottom-anchored to the top of the quote so its baseline sits
+   against the opening line. No new color, no new token, no new box — just
+   type set-as-hierarchy at a scale the body cannot carry.
+
+   Spatial reasoning: the article body is centered at max-width 720px, so
+   any viewport wider than 720px + 2×24px padding leaves dead margin space
+   on both sides. The glyph lives there at left: -28px, occupying no
+   content width. On narrow viewports (≤ 720px + padding) the article
+   spans most of the width and the left gutter closes; a max-width: 880px
+   media query hides the glyph so it never collides with the body text or
+   gets clipped off-screen. Below that, the hairline + muted ink still do
+   the full job of marking the quote — the glyph is a marginalia gain for
+   wide viewports, not a load-bearing signal. */
 .article-body blockquote,
 article blockquote {
+    position: relative;
     border: 1px solid var(--border2);
     border-radius: 8px;
     padding: 14px 20px;
     margin: 28px 0;
     color: var(--fg3);
+}
+.article-body blockquote::before,
+article blockquote::before {
+    content: '\201C'; /* left double quotation mark " */
+    position: absolute;
+    left: -28px;
+    top: -10px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 56px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--fg4);
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+    /* Hide the glyph on viewports whose left gutter is too narrow to
+       hold it without colliding with body text. 880px ≈ 720px body +
+       28px glyph offset + ~80px each side of sensible margin. Below
+       that the hairline + muted ink already carry the quote signal. */
+    display: none;
+}
+@media (min-width: 880px) {
+    .article-body blockquote::before,
+    article blockquote::before {
+        display: block;
+    }
 }
 .article-body blockquote p,
 article blockquote p {
@@ -1212,11 +1260,36 @@ article .body pre code {
     display: block;
 }
 article .body blockquote {
+    position: relative;
     border: 1px solid var(--border2);
     border-radius: 8px;
     padding: 14px 20px;
     margin: 28px 0;
     color: var(--fg3);
+}
+/* Same editorial glyph as the shared blockquote rule above — kept here
+   explicitly rather than sharing the selector because legacy .body posts
+   have their own copy of the blockquote definition. The position:relative
+   above is the anchor this glyph's absolute positioning keys off. */
+article .body blockquote::before {
+    content: '\201C';
+    position: absolute;
+    left: -28px;
+    top: -10px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 56px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--fg4);
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+    display: none;
+}
+@media (min-width: 880px) {
+    article .body blockquote::before {
+        display: block;
+    }
 }
 article .body blockquote p {
     margin-bottom: 0; font-size: 15px; color: var(--fg3);
