@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMD bought Taalas to etch AI model weights directly into silicon | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 7, 2026 · 6 min read</div>
+            <h1>AMD bought Taalas to etch AI model weights directly into silicon</h1>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">Hardware</span>
+                <span class="pill">Inference</span>
+                <span class="pill">AMD</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>AMD made a move this week that sounds absurd until you sit with it for a minute. The company acquired Taalas, a 25-person Toronto startup that bakes neural network weights directly into the physical structure of a silicon chip. Not into memory attached to the chip. Into the chip itself, the same way the circuit paths are etched. The weights become hardware.</p>
+
+            <p>The pitch is that this makes inference absurdly fast and cheap, because there is no memory wall anymore. The weights are where the compute is. You do not load anything. The model just runs.</p>
+
+            <p>The catch, and there is a big one, is that once you etch a model into silicon, changing that model means physically redesigning the chip. We will get to that.</p>
+
+            <h2>What Taalas actually built</h2>
+
+            <p>Taalas was founded in 2023 by Ljubisa Bajic, who previously started Tenstorrent after stints at AMD and Nvidia. The company raised over $200 million across three rounds and spent only $30 million of it on R&D before demonstrating a working chip. That is a tiny amount of money for silicon development.</p>
+
+            <p>The first chip, called HC1, was fabbed on TSMC's 6nm process. It is 815 square millimeters, just under the reticle limit, with 53 billion transistors on a package that burns about 200 watts. A two-socket x86 server can hold ten of these cards at 2,500 watts total.</p>
+
+            <p>The architecture has two regions. A mask ROM "recall fabric" holds the etched model weights. An SRAM "recall fabric" handles KV cache and fine-tuning adapters at runtime. The ROM side is fixed. The SRAM side can change.</p>
+
+            <p>The part that got people's attention in February 2026 was the speed. Taalas reported serving Meta's Llama 3.1 8B at 16,960 tokens per second on a single HC1 chip. At the time, that was 48 times faster than Nvidia's GPUs and 8.5 times faster than Cerebras' waferscale accelerators for the same model.</p>
+
+            <h2>One transistor holds four bits and does the multiply</h2>
+
+            <p>The trick Taalas pulled off is that each transistor in the mask ROM stores four bits of weight data and performs the multiply operation inline. You do not move the weight to a separate arithmetic unit. The weight is computed where it lives.</p>
+
+            <p>Bajic described it as "a clever trick that nobody saw because nobody went down this path." He said the design used hand layout and transistor-level work, calling the effort "a throwback to the 1970s." The company filed 14 patents around the technique.</p>
+
+            <p>This matters because in conventional inference, the bottleneck is not doing the math. The bottleneck is moving weights from memory into compute. GPUs spend enormous effort on HBM bandwidth, caching, and data movement to keep tensor cores fed. If your weights are already wired into the logic that uses them, you skip the entire memory subsystem. The chip becomes dense because you do not need HBM, and it becomes fast because you do not wait on memory.</p>
+
+            <h2>The numbers in context</h2>
+
+            <p>Taalas published benchmarks comparing HC1 against an Nvidia B200 for Llama 3.1 8B and DeepSeek R1 671B. The charts show HC1 delivering orders of magnitude lower latency and lower cost per token than the B200, with the gap widening as you scale to larger models.</p>
+
+            <p>These are self-reported numbers, not independent benchmarks. They come from the company that wants to sell you the chips. Treat them as directional rather than final. But even if the real-world gap is half of what Taalas claims, it is still a massive change in what inference costs.</p>
+
+            <p>The second-generation HC2, due summer 2026, targets 20 billion parameters per chip. At that density, a trillion-parameter model needs 50 chips wired together with pipeline parallelism. Taalas says it will have frontier-class models running across multiple HC2 cards by the end of the year.</p>
+
+            <p>For comparison, Nvidia's LPX rack systems apparently need around 2,000 Groq LPUs to serve a single trillion-parameter model. Taalas needs 50 chips. Whether those 50 Taalas chips cost what 2,000 Groq LPUs cost is an open question, since neither company publishes pricing. Still, the density gap is the kind of thing that makes hardware people sit up.</p>
+
+            <h2>The catch: you are locked to the model</h2>
+
+            <p>Here is the part that should temper your excitement. Every time you want to change the model burned into an HC chip, you need a new chip run. That means redesigning part of the silicon and waiting for a fab cycle.</p>
+
+            <p>Taalas says this is not as bad as it sounds. Refreshing a model does not mean starting over. Only two layers of metal in the chip need to change, which is cheaper and faster than a full redesign. They built a "foundry optimal workflow" with TSMC that takes you from model weights to deployable PCIe cards in two months. And they claim etching a model into silicon costs roughly 100 times less than training the model in the first place, which reframes the economics. If you spent $100 million training a frontier model, spending a fraction of that to get a dedicated silicon serving layer is plausible.</p>
+
+            <p>Still, two months is not two minutes. New models ship on a faster cadence than that. If you are OpenAI or Anthropic iterating every few weeks, hardcoding weights into chips does not fit your release schedule. You would need to commit to a specific model version and accept that improvements during the chip's lifetime are software-only, limited to what the SRAM adapter layer can do.</p>
+
+            <p>This is probably why AMD plans to pair Taalas chips with Instinct GPUs in its Helios rack systems. The GPUs handle prefill, where model flexibility matters and compute dominates. The Taalas chips handle decode, where the weights are fixed and you want raw token speed. It is a disaggregated architecture. Think of it as using a general processor for the part that changes and a dedicated accelerator for the part that does not.</p>
+
+            <h2>Why AMD wanted this now</h2>
+
+            <p>Nvidia's $20 billion licensing deal with Groq in December 2025 established that hardware-based inference acceleration is worth real money. Groq's LPUs use dataflow architecture with SRAM-heavy compute. Cerebras does waferscale. Both approaches add large amounts of fast SRAM to work around the memory wall but still load weights from external memory.</p>
+
+            <p>Taalas goes further by eliminating external weight memory entirely. If the approach scales, it sits in a different performance and cost class from anything else on the market. AMD buying that technology outright, rather than licensing or partnering, signals they want to own the IP rather than rent it.</p>
+
+            <p>The acquisition also gives AMD a story for test-time scaling, the technique where models "think" longer to produce better answers. Test-time scaling burns more tokens per response, which makes it expensive on current hardware. If Taalas can deliver 10 to 20 times the tokens per second at lower cost, model developers can afford to let models reason longer without blowing up their inference bill. That changes what developers are willing to build.</p>
+
+            <h2>What the open model community should watch</h2>
+
+            <p>Taalas initially focused on etching open source models, specifically Llama and potentially DeepSeek, into its HC chips. That makes the early use cases relevant to people who run open models. If AMD ships Taalas-powered inference at cloud scale, the cost of serving open weights drops hard. That could pull open model inference closer to or below what proprietary API providers charge per token.</p>
+
+            <p>There is a flip side. If the economics of etching models into silicon favor only a few large providers with enough volume to justify custom chip runs, then open model hosting concentrates further into the hands of companies that can afford the fab costs. The models stay open but the cheap serving routes shrink.</p>
+
+            <p>The middle ground is the adapter flow. Since the SRAM layer supports LoRA-style fine-tuning at runtime, you could ship a base model etched in silicon and adapt it per-customer or per-task without respinning the chip. That limits the flexibility penalty. The question is whether the adapter layer is expressive enough for the kinds of customization people actually want.</p>
+
+            <h2>My read</h2>
+
+            <p>I think the technology is genuinely interesting, and the performance claims, even discounted for self-reporting bias, are worth taking seriously. The one-transistor multiply-trick is the kind of idea that either works at scale or does not, and AMD just bet the acquisition price that it does.</p>
+
+            <p>The lock-in problem is real but maybe overstated for the specific use case AMD is targeting. Premium inference for well-known, stable models is exactly where hardcoding weights makes sense. You do not ship a new Llama every week. If the HC2 delivers on 20 billion parameters per chip and AMD's rack-scale systems handle the plumbing, the combination of Instinct for flexibility and Taalas for speed could be a real differentiator against Nvidia.</p>
+
+            <p>But I keep coming back to the cadence problem. The AI industry has spent three years treating model agility as a competitive advantage. Whoever ships the better model first wins. Hardcoding weights into silicon is a bet that this race is slowing down and that specific models will stick around long enough to justify a fab run. The industry might be heading there. It might also be heading the other direction, toward faster iteration and shorter model lifecycles. AMD is betting on the first scenario.</p>
+
+            <p>The deal is expected to close in Q4 2026, pending regulatory approval. Whether the bet pays off, we will know in a year or two.
+            </p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
