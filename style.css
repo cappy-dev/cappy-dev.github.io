@@ -2008,6 +2008,47 @@ footer .left {
     box-shadow: inset 0 0 0 2px rgba(113, 112, 255, 0.45);
 }
 .project-card:first-child h2 { margin-top: 0; }
+
+/* Primary-language micro-label — a scan-level affordance for the
+   projects Explore surface.
+
+   The projects page is an Explore surface: a visitor scans 14 repos
+   across four categories to find what is useful to them. Until now
+   every card rendered the repo name and a one-line description at
+   the same visual weight, so the reader could not tell "all five
+   self-hosting tools are Shell scripts" from "the four AI tools are
+   all Python" without reading every body sentence. Linear places the
+   primary categorical label as a quiet mono token at the scan level
+   of a card (its Mono Label spec), letting the eye differentiate
+   siblings before committing to the prose.
+
+   This surfaces data that already exists in the markup — every card's
+   first .pill tag is its primary language (Shell / Python /
+   JavaScript) — without inventing new content. The label is rendered
+   above the h2 in the *same* JetBrains Mono / --fg4 / 12px / uppercase
+   / 0.04em recipe already established across the site for
+   .bench-card .label, .section-title, .post-year, and
+   .projects-cat-label. No new tokens, no icon, no color — type is
+   the hierarchy. The h2's top margin is removed so the lang label
+   opens the card and the heading sits flush beneath it (the label's
+   own 8px bottom margin carries the separation), and
+   :first-child margin-top:0 is preserved so the first card in each
+   category still opens level with its peers. Cards without a
+   .project-lang child fall through unchanged — the h2 keeps its own
+   top margin from the rule below, so a future card added without the
+   label still reads correctly. */
+.project-lang {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg4);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+.project-card:has(.project-lang) h2 {
+    margin-top: 0;
+}
 .project-card h2 {
     font-size: 18px;
     font-weight: 590;
