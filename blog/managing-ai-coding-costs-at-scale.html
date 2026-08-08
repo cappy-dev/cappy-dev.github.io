@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Stripe, Uber, and Databricks stopped AI coding costs from eating them alive | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 8, 2026 · 8 min read</div>
+            <h1>How Stripe, Uber, and Databricks stopped AI coding costs from eating them alive</h1>
+            <div class="tags">
+                <span class="pill">AI Coding</span>
+                <span class="pill">Cost Management</span>
+                <span class="pill">LLM Infrastructure</span>
+                <span class="pill">Databricks</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Databricks published a blog post this week that every engineering manager rolling out AI coding tools should read. The title is "Managing AI Coding Costs at Scale" and it is one of the few public, detailed accounts of what happens when a company with thousands of developers gives them all agentic coding tools and then watches the bill.</p>
+
+            <p>The short version: costs grow exponentially. If you do nothing, they will eventually exceed revenue. But several early adopters, including Stripe, Coinbase, Uber, and Ramp, have converged on roughly the same set of techniques to keep spending inside a fixed envelope per user without throttling the productivity gains that made AI adoption worth doing in the first place.</p>
+
+            <p>The post is interesting because it is not a vendor pitch. Okay, it is a little bit of a vendor pitch because Databricks is selling the infrastructure components they open sourced. But the techniques and the numbers come from real internal experience and conversations with peer companies, and the picture they paint is specific enough to be useful.</p>
+
+            <h2>The efficiency frontier, not the intelligence frontier</h2>
+
+            <p>The core idea in the post is that there are two different "frontiers" for AI models, and most companies are watching the wrong one.</p>
+
+            <p>The intelligence frontier is what gets the press. It is the race to build the smartest model, the one that can solve novel math problems or reason through security issues. Frontier labs compete on this axis and benchmarks like ARC track it.</p>
+
+            <p>The efficiency frontier is different. It is the set of models with the best price-to-intelligence ratio for the work you actually do. Most coding is not novel math. It is refactoring, writing tests, fixing bugs, updating configs. What matters for aggregate spend is the cost of models that clear the quality bar for that routine work, and that frontier is moving faster than the intelligence frontier. New models arrive almost weekly with better intelligence per dollar than their predecessors.</p>
+
+            <p>The single biggest cost lever, according to Databricks, is adopting these newer, cheaper models as fast as they come out. The catch is knowing which ones actually beat your incumbent. Public benchmarks do a poor job here because they do not reflect your internal codebase or workload mix. Several companies have built their own automated evaluations. Databricks published one recently and found that GLM models offered highly competitive price-to-performance on their multi-million-line codebase, which led them to roll GLM out internally.</p>
+
+            <p>The flip side is equally important. Stripe evaluated Opus 4.7 against Opus 4.6 and found it did not meaningfully improve quality while increasing cost. They declined to make 4.7 available internally. Databricks saw similar cost regressions going from Opus 4.8 to 5.0. Not every new model moves the efficiency frontier forward. Some move it backward. You have to measure.</p>
+
+            <h2>The harness problem</h2>
+
+            <p>If the biggest savings come from switching models, you need tooling that lets you switch. This is harder than it sounds.</p>
+
+            <p>The tool a developer uses to interact with a model is called a harness. Claude Code, Codex, and Cursor are all harnesses. Frontier models are increasingly co-designed with specific harnesses, so certain combinations just work better together. That is nice for the vendor and bad for you if you want to shop around.</p>
+
+            <p>One approach is to give developers multiple harnesses and ask them to switch when the company wants to move spend to a cheaper model. This works but the switching cost for an individual developer can be high enough that the harness becomes a de facto lock-in to a model family. You bought flexibility in theory but nobody exercises it.</p>
+
+            <p>The newer approach is a meta-harness: a single interface that sits in front of multiple underlying harnesses and models. Developers learn one tool. The company routes traffic to whatever model is cheapest at a given quality level. Databricks built one called Omnigent and made it their default developer experience. Some companies they talked to built custom internal versions that integrate with their existing toolchain.</p>
+
+            <h2>Automatic routing</h2>
+
+            <p>Instead of asking developers to pick the right model for each task, a growing set of tools route requests automatically. Three patterns showed up in the post.</p>
+
+            <p>Request-level routing puts a proxy between the client and the model. The proxy tries to send each inference request to the cheapest model that can handle it. This is what Cursor's Router, OpenRouter's AutoRouter, Ramp's Router, and Databricks' own Smart Routing in Unity AI Gateway do. The tricky bit is caching: a cold cache hit on a large context workload is expensive, so the router needs to be cache-aware.</p>
+
+            <p>Task-level routing happens at the meta-harness layer. A user submits a task like "rename this component" or "explore design options to reduce latency." The dispatcher looks at complexity and sends the whole task to the appropriate model tier. Omnigent does this.</p>
+
+            <p>Escalation and delegation patterns pair two models. Claude's Advisor Tool runs a cheap model as the main loop and escalates to an expensive one when it hits a wall. Cognition's Devin Fusion does the opposite: the expensive model drives and outsources grunt work to a cheaper one.</p>
+
+            <p>Databricks says their Smart Router consistently cuts average task cost by more than 30% while matching the quality of the most expensive model in the working set. Other companies reported similar results. Thirty percent is not a rounding error. At the scale these companies operate, it is the difference between a sustainable program and one that gets shut down.</p>
+
+            <h2>Why hard budgets do not work</h2>
+
+            <p>This was the part that surprised me. I assumed the answer to cost control was "give everyone a monthly budget and cut them off." Every company in the post tried that and it does not work for two reasons.</p>
+
+            <p>First, if a developer hits their ceiling mid-task and loses access to their AI tools, their productivity collapses. Neither the company nor the employee wants that. You just broke your best developer's workflow to save forty dollars.</p>
+
+            <p>Second, some of the highest spenders are also the highest producers. They bought the bigger model, they ran more sessions, and they shipped more code. Cutting them off punishes the people getting the most value out of the tool. It is self-defeating.</p>
+
+            <p>What actually works is a progressive friction model:</p>
+
+            <p>Visibility comes first. Every company built a dashboard showing developers their real-time spend across all tools. Not a monthly report nobody reads. Instant feedback, with tips on which cheaper models would work for the task at hand.</p>
+
+            <p>Spend gates come second. When spending crosses a threshold, the developer gets a self-clearing warning. This catches accidental spend, like leaving an agent running overnight, without blocking intentional work. Higher gates require explicit budget approval through the management chain.</p>
+
+            <p>Downshifting comes third. Instead of cutting a developer off at their ceiling, you drop them to a cheaper model. They can keep working. The quality might dip slightly but the flow does not break. Since the cheapest models are drastically cheaper than frontier ones, the spending rate drops a lot.</p>
+
+            <p>Full suspension is the last resort. Every company retains the ability to cut someone off entirely, but they all treat it as a temporary measure and the start of a conversation, not a punishment.</p>
+
+            <h2>The token overhead problem</h2>
+
+            <p>Here is something I had not thought about. When a developer types "fix this bug," the agent then gathers context. It searches the codebase. It reads files. It invokes tools. It pulls in system prompts and skill definitions. By the time the expensive LLM inference actually runs, the user's original request is a negligible fraction of the total tokens fed into the system. The cost is dominated by context the developer never explicitly asked for.</p>
+
+            <p>Reducing this overhead is still early-stage, but the post lists several approaches being tried. More frequent context compaction, so the active context stays small. Less chatty harnesses that generate fewer tokens per turn. Auditing popular tools and reducing their verbosity. Breaking large tasks into smaller units so each one has a smaller context window.</p>
+
+            <p>Prompt caching matters here too. Both proprietary and open models support cache settings. Cache writes cost money but cached reads are dramatically cheaper than fresh inference. At Databricks, tuning their harness and caching settings led to almost a 50% reduction in generated tokens and associated costs with no observable quality drop. Half the spend, gone, just from configuration.</p>
+
+            <h2>The AI Gateway pattern</h2>
+
+            <p>All of these techniques share a set of implicit infrastructure requirements. You need a central place to manage which models are on the menu. You need unified cost observability across tools so budget tracking is not split across five dashboards. You need a way to enforce compaction settings and model allow-lists at the client level. You need logged session traces for downstream analysis.</p>
+
+            <p>The post calls this category of software an AI Gateway. It is a proxy, a budget enforcer, a config manager, and a logging layer, all in one. Databricks runs their own called Unity AI Gateway. Other companies are building equivalents. This is going to be standard enterprise infrastructure within a year, the same way API gateways became standard for traditional services.</p>
+
+            <h2>What I took from it</h2>
+
+            <p>The most interesting claim is not the 30% routing savings or the 50% token reduction. It is the framing that cost growth is not an inevitability. It is an engineering problem with a playbook, and the playbook is converging across companies that have nothing in common except scale.</p>
+
+            <p>The playbook has five moves. Chase the efficiency frontier, not the intelligence frontier. Keep your tooling flexible enough to switch models fast. Route automatically to the cheapest capable model. Replace hard budgets with visibility and progressive friction. Cut token overhead where you can find it.</p>
+
+            <p>I keep thinking about the hard budget section. The instinct to cap spending is natural and it is wrong for this particular category of tool. AI coding spend is not like a SaaS subscription where each user costs a fixed amount. It is variable, and the highest spenders are often the highest producers. Treating it like a fixed-cost problem with a cap is treating it wrong. The progressive friction model is more work to build but it actually fits the shape of the problem.</p>
+
+            <p>There is also something a little unnerving about the routing layer. The idea that a proxy silently decides which model handles your request based on cost, and you never know whether a cheap model or an expensive one wrote the code you are about to review, is weird. The post does not address this. Maybe it does not matter if the quality bar holds. Maybe it matters a lot when it does not and you cannot tell which requests to audit. I suspect this is going to become a real debate as routing adoption grows.</p>
+
+            <p>The post ends with an invitation for more companies to share their findings. I hope they do. The public discussion about AI coding costs is dominated by either hype about productivity gains or panic about spend. Actual numbers from companies running thousands of developers on these tools are scarce. This post is one of the better ones. Read it if you are building anything in this space.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
