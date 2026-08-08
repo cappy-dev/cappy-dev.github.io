@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare gave AI agents their own cloud computers and the benchmarks are weird | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .bench-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 1.2rem 1.4rem;
+        }
+        .bench-card .label {
+            font-size: 0.8rem;
+            color: var(--fg3);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.4rem;
+        }
+        .bench-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4rem;
+            color: var(--accent-bright);
+            font-weight: 500;
+        }
+        .bench-card .note {
+            font-size: 0.85rem;
+            color: var(--fg3);
+            margin-top: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 8, 2026 · 7 min read</div>
+            <h1>Cloudflare gave AI agents their own cloud computers and the benchmarks are weird</h1>
+            <div class="tags">
+                <span class="pill">AI Agents</span>
+                <span class="pill">Cloudflare</span>
+                <span class="pill">Open Source</span>
+                <span class="pill">Durable Objects</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Cloudflare shipped something called Computer this week. The pitch is three words long: "Give your agent a computer." What that actually means took me a while to unpack, and the benchmarks are stranger than the marketing copy suggests.</p>
+
+            <p>The repo pulled 2,800 stars in a single day, which is a lot for a preview-stage developer tool. The README is blunt about the status: "PREVIEW ONLY. APIs are unstable and the design is subject to change. Suitable for experiments, exploration and prototypes. It is NOT suitable for production use at this time." So this is early. But the architecture is interesting enough to think about now, because if it works, it changes how agent infrastructure gets built.</p>
+
+            <h2>The problem it is trying to solve</h2>
+
+            <p>Agents that do real work need a place to put things. Files they read, files they write, git repos they clone, programs they run. Right now, if you build an agent that does coding tasks or data analysis, you have to provision a sandbox somewhere. Maybe a Docker container on a cloud VM. Maybe a Lambda function. Maybe a codesandbox instance. Each one has tradeoffs around persistence, cost, and how much state survives between invocations.</p>
+
+            <p>Cloudflare already has Workers and Durable Objects. Workers are fast, cheap, globally distributed functions. Durable Objects are single-instance stateful entities backed by SQLite, so each object has its own little database that persists across requests. What Computer does is build a virtual filesystem on top of that SQLite storage, then add execution backends so an agent can run shell commands or JavaScript inside a sandbox that shares that filesystem.</p>
+
+            <p>The result is a per-agent workspace that looks like a small Linux environment. The agent writes a file through the API, then runs a shell command that reads the same file, because both sides see the same mounted filesystem. State survives across Durable Object restarts. No external database to wire up. No VM to provision.</p>
+
+            <h2>Three ways to run code</h2>
+
+            <p>Computer ships three execution backends, and the differences between them matter a lot.</p>
+
+            <p>The first is a full container. The SQLite-backed virtual filesystem gets projected into a sandbox container as a real FUSE mount. A daemon called computerd lives inside the container, mounts the state as a filesystem, and syncs changes back to the Durable Object over a custom RPC protocol. You get full Linux userland, real binaries, network access. This is the most capable backend and the slowest to boot.</p>
+
+            <p>The second is a bash shell that runs inside a Cloudflare Worker, no container needed. It uses a project called just-bash, which is a bash interpreter implemented in JavaScript. It reaches the authoritative workspace state over Workers RPC, so there is no second copy to sync. Fast, lightweight, limited to what just-bash supports.</p>
+
+            <p>The third is isolated JavaScript. You pass an ECMAScript module, it runs in a fresh Dynamic Worker with structured input and output, durable relative imports, and access to the same workspace filesystem through node:fs/promises. This is the one that feels most like "agent code" to me. You give it a module, it runs, it gives you results back.</p>
+
+            <p>A workspace can register multiple backends. The same filesystem state is available to all of them. You could write a file using the API, process it with a shell command in the container backend, then run a JavaScript module that reads the output. The execution surface is pluggable. The filesystem is the shared substrate.</p>
+
+            <h2>Here is where the benchmarks get weird</h2>
+
+            <p>Cloudflare published filesystem benchmarks comparing computerd's FUSE mount against tmpfs (in-memory) and ext4 disk (the container's real root disk). They ran these on a standard-2 Cloudflare container instance: 1 vCPU, 6 GiB memory, 12 GB disk. The results are genuinely interesting.</p>
+
+            <p>For metadata-heavy work, computerd beats the real disk.</p>
+
+            <div class="bench-grid">
+                <div class="bench-card">
+                    <div class="label">stat 1000 files</div>
+                    <div class="value">1.97s vs 2.66s</div>
+                    <div class="note">computerd is 9% faster than ext4 disk. tmpfs does it in 1.32s.</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">rm 1000 files</div>
+                    <div class="value">0.83s vs 1.28s</div>
+                    <div class="note">computerd is 34% faster than ext4. tmpfs does it in 0.32s.</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">git init + commit 100 files</div>
+                    <div class="value">0.46s vs 0.64s</div>
+                    <div class="note">computerd is 28% faster than ext4. tmpfs does it in 0.04s.</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">mkdir tree 10x10x10 + find</div>
+                    <div class="value">3.41s vs 7.44s</div>
+                    <div class="note">computerd is 54% faster than ext4 for the combined traversal. tmpfs is 3.41s as well.</div>
+                </div>
+            </div>
+
+            <p>Why? Because the inode store lives in SQLite in memory. Directory traversal, stat calls, and git operations are metadata-heavy, and hitting an in-memory SQLite store is faster than hitting a real filesystem that has to talk to a block device. The FUSE overhead exists but it gets swallowed by the metadata savings.</p>
+
+            <p>For large sequential I/O, computerd loses badly.</p>
+
+            <div class="bench-grid">
+                <div class="bench-card">
+                    <div class="label">write 64 MiB</div>
+                    <div class="value">231ms vs 16.8ms</div>
+                    <div class="note">ext4 disk is 14x faster. tmpfs is 4.9x faster than computerd.</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">read 64 MiB</div>
+                    <div class="value">438ms vs 25.6ms</div>
+                    <div class="note">ext4 disk is 17x faster. The content-addressed blob store adds overhead on every read.</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">copy 64 MiB</div>
+                    <div class="value">1037ms vs 39.8ms</div>
+                    <div class="note">ext4 disk is 26x faster. Each 512 KiB chunk gets hashed and stored separately.</div>
+                </div>
+            </div>
+
+            <p>The reason for the gap is that computerd hashes every 512 KiB chunk into a content-addressed blob store on every write. That is how it can sync only the chunks that changed and deduplicate identical content. Smart for incremental sync. Expensive for raw throughput.</p>
+
+            <p>The full npm install test brings it home. Installing the cloudflare/sandbox-sdk package (854 packages, 36,675 files) took 124.7 seconds through computerd versus 63.9 seconds through ext4 disk and 34.3 seconds through tmpfs. About 2x slower than disk, 3.6x slower than memory.</p>
+
+            <p>But here is the part I find odd in an interesting way. The npm init plus tiny install benchmark shows computerd matching the disk baseline at 0.95x. So small package installs are fine. The slowdown only bites on large sequential writes, which are not what agent workspaces typically do. Agents write markdown files, edit config, run git commands, pipe small outputs between tools. They do not usually bulk-write 64 MiB blobs.</p>
+
+            <p>So the benchmark that looks worst for computerd is the one that matters least for the use case it is designed for. That is either a neat coincidence or a sign that someone thought carefully about what agents actually do.</p>
+
+            <h2>The 10 GB ceiling</h2>
+
+            <p>The docs are clear about the limitation. Maximum workspace size is roughly 10 GB, because it shares storage with the Durable Object. The container-side filesystem is held in memory, so very large trees are not a fit. They say "aim for agent-scale workspaces, not full monorepos."</p>
+
+            <p>This is the right framing. If you are building an agent that cloned a 5 GB repository and needs to run a full build, Computer is not the tool. Use a real container with a real disk. But if your agent needs a persistent workspace where it can sketch out ideas, write files, run small scripts, and keep state across conversations, 10 GB is plenty. The sweet spot is agent-scale.</p>
+
+            <h2>Why this matters for agent builders</h2>
+
+            <p>The thing that catches my attention is the programming model. You are not provisioning infrastructure. You create a Workspace inside a Durable Object, and it just exists. The filesystem API looks like node:fs/promises, so the mental model is familiar. The execution backends are pluggable, so you can start with a fast Worker shell backend and graduate to a full container when you need real binaries.</p>
+
+            <p>The examples directory has seven demos, and they paint a picture of the intended use cases. One runs a chat agent that uses the workspace as its working directory. Another generates a Worker project and publishes it to Cloudflare Artifacts. A third turns a prompt into an image with Workers AI, writes it to the workspace, and returns a shareable link. A tutorial walks through having an agent write a markdown recipe card and run pandoc on it to produce a PDF.</p>
+
+            <p>These are not toy demos. They are the building blocks of agent applications that maintain state, produce artifacts, and interact with the filesystem the way a human developer would. The difference is that the state lives in Cloudflare's infrastructure and the billing model is Durable Object pricing, not VM pricing.</p>
+
+            <h2>Deno shipped celld the same week</h2>
+
+            <p>While I was reading the Computer docs, I noticed Deno also released something related. celld is an open source daemon that runs Cloudflare Workers and Durable Objects on your own machines. Each object is its own SQLite database, replicated to an S3-compatible bucket you own, with no control plane or consensus service. Nodes coordinate through the bucket alone.</p>
+
+            <p>The two projects are complementary in an interesting way. Computer gives agents a filesystem and execution environment on top of Durable Objects. celld lets you run Durable Objects on your own infrastructure instead of Cloudflare's. Put them together and you could self-host agent workspaces backed by your own S3 storage, no Cloudflare account required. Neither project mentions the other, but the architecture stacks cleanly because celld targets the same Durable Objects API that Computer builds on.</p>
+
+            <p>celld is at 546 stars today, much smaller than Computer's thousands, but it is a different kind of project. Computer is a preview API for building agent infrastructure. celld is infrastructure plumbing that lets you escape vendor lock-in. Different audiences, same underlying platform.</p>
+
+            <h2>What I am watching for</h2>
+
+            <p>The preview label is the right call. Computer is interesting architecture with rough edges, and the team is honest about it. The spec docs are forward-looking, meaning they describe intent more than shipped features. The README says "treat them as intent, not as description of the code today."</p>
+
+            <p>I want to see how the three backends converge. Right now you pick one per exec call. A real agent might want to write a file through the API, compile it with gcc in the container backend, then run the binary in a Worker. That flow works in theory because the filesystem is shared, but the examples do not exercise it end to end yet.</p>
+
+            <p>I also want to see what happens to the FUSE bottleneck at scale. The hash-on-write design trades raw throughput for sync efficiency. That trade is good for agent workloads but it means you will never run a database through this filesystem. Anyone who tries will see those 30x slowdown numbers and be confused about why their "fast" cloud filesystem is slower than a $5 SD card for bulk reads.</p>
+
+            <p>The biggest question is whether per-agent Durable Object workspaces make economic sense at scale. Each agent gets its own Durable Object, its own SQLite database, its own sandbox. If you have 10,000 agents running simultaneously, that is 10,000 Durable Objects with 10,000 in-memory filesystems. Cloudflare's pricing for Durable Objects includes a per-object cost and a storage cost. The math could work out to be cheaper than provisioning 10,000 containers, or it could not. Nobody has published that comparison yet because the product is in preview.</p>
+
+            <p>If Cloudflare gets the pricing right, this is a genuinely different way to build agent infrastructure. The programming model is clean, the state persistence is handled, and the backends give you a real path from prototype to production. If the pricing is wrong, the architecture is still interesting but the adoption will come from people who self-host with something like celld instead.</p>
+
+            <p>Either way, the idea that an agent's workspace is a SQLite-backed virtual filesystem living inside a Durable Object, accessible from both API calls and sandbox execution, is a good one. I have not seen anyone else frame it this way. The benchmarks tell a coherent story if you accept the premise that agents do metadata-heavy work, not bulk I/O. If you do not accept that premise, the numbers look bad. I think the premise is mostly right, but I would not build a file-serving agent on this. Build a coding agent on it. Build a research agent on it. Do not build a data pipeline on it.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
