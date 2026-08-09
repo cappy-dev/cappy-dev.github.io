@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google DeepMind gave cyclone forecasters an extra day of warning and open sourced the model | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .bench-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 1.2rem 1.4rem;
+        }
+        .bench-card .label {
+            font-size: 0.8rem;
+            color: var(--fg3);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.4rem;
+        }
+        .bench-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4rem;
+            color: var(--accent-bright);
+            font-weight: 500;
+        }
+        .bench-card .note {
+            font-size: 0.85rem;
+            color: var(--fg3);
+            margin-top: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 9, 2026 · 6 min read</div>
+            <h1>Google DeepMind gave cyclone forecasters an extra day of warning and open sourced the model</h1>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">DeepMind</span>
+                <span class="pill">Weather</span>
+                <span class="pill">Open Source</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Tropical cyclones have killed more than 700,000 people and caused $1.4 trillion in economic damage over the last 50 years. Forecasting them better is not an academic exercise. Every extra hour of warning is time people use to evacuate, board up windows, move boats, and decide whether to ride it out or run.</p>
+
+            <p>So when Google DeepMind says its new weather model gives forecasters a full extra day of predictive accuracy, that number is not a benchmark flex. It is roughly a decade of normal meteorological progress, compressed into one model release. And this week, they put the code and weights on GitHub for anyone to use.</p>
+
+            <p>The paper landed in <em>Nature</em> on August 6. The model is called WeatherNext Cyclones. Here is what it actually does and why it surprised the people who built it.</p>
+
+            <h2>The tradeoff that haunted cyclone forecasting</h2>
+
+            <p>Predicting a cyclone has always forced a choice between two modeling techniques, and you could not get both in one system.</p>
+
+            <p>A cyclone's track, meaning where it goes, is driven by massive global atmospheric currents. Those are best modeled by coarse global weather models that run at low spatial resolution but cover the whole planet. A cyclone's intensity, meaning how strong it gets, is driven by fine-scale thermodynamic processes right at the storm's core. Those need specialized high-resolution local models to capture. You either got good track predictions or good intensity predictions, and bolted the two together awkwardly.</p>
+
+            <p>WeatherNext Cyclones is a single model that does both. Track, intensity, and wind structure all come out of the same neural network. On historical cyclones from 2023 and 2024, it beat the top operational weather models on all three metrics.</p>
+
+            <div class="bench-grid">
+                <div class="bench-card">
+                    <div class="label">Lead time gained</div>
+                    <div class="value">+24 hours</div>
+                    <div class="note">Three-day forecasts now match what prior models gave for two days. Roughly a decade of progress.</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">3-day track error</div>
+                    <div class="value">~100 km</div>
+                    <div class="note">Versus ECMWF-ENS (yellow line in the paper's Figure 3) over 2023 to 2025.</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">3-day intensity error</div>
+                    <div class="value">~11 kt</div>
+                    <div class="note">Beats HWRF, the operational intensity model, over the same period.</div>
+                </div>
+                <div class="bench-card">
+                    <div class="label">Input resolution</div>
+                    <div class="value">28x28 km</div>
+                    <div class="note">100x coarser than traditional high-res models. Nobody expected this to work.</div>
+                </div>
+            </div>
+
+            <h2>The resolution puzzle</h2>
+
+            <p>Here is the part that confused the researchers themselves. For years, the belief in the operational forecasting world was that higher spatial resolution is the main lever for better intensity forecasts. You need to see the fine structure of the storm to predict how it intensifies. That is why specialized cyclone models run at 1 to 3 km resolution, burning enormous compute to resolve the eye wall and rain bands.</p>
+
+            <p>WeatherNext Cyclones runs at 28x28 km. That is 100 times coarser than traditional models. A smaller variant, WeatherNext 2-mini, runs at 111x111 km and still performs well. The DeepMind team openly says in the blog post that this "has surprised scientists, and it remains an open research question to fully understand how our models produce such accurate predictions at this resolution."</p>
+
+            <p>I find that honesty refreshing. A lot of AI weather papers would frame the low-resolution success as an intentional design win. DeepMind frames it as a thing they cannot fully explain yet and want the community to help figure out. The model learned something about cyclone physics from 20 terabytes of global atmospheric data and the IBTrACS database of nearly 5,000 historical storms, and it does not need 1 km pixels to do it. Why? Nobody is sure.</p>
+
+            <h2>The ensemble that caught Hurricane Melissa</h2>
+
+            <p>The model already has a real-world success story, and it is a dramatic one. During the 2025 hurricane season, WeatherNext helped the US National Hurricane Center make what they call a historic forecast for Hurricane Melissa. The model predicted the storm's rapid intensification and its landfall in Jamaica early enough that the NHC could issue an advance warning and give teams on the ground time to prepare.</p>
+
+            <p>Rapid intensification is the specific nightmare scenario for forecasters. A storm that goes from Category 1 to Category 4 in 24 hours gives almost no time to react if you do not see it coming. WeatherNext's ensemble approach is what caught it. Last year the system produced 50 predictions at a time. This year they scaled the ensemble to 1,000 members, which lets the model capture rare tail-risk scenarios that a 50-member ensemble would miss. Melissa's rapid intensification was exactly that kind of rare event.</p>
+
+            <p>The ensemble generation is fast. A single 15-day forecast takes less than a minute on one TPU. That speed is what makes the 1,000-member ensemble feasible. You can run 1,000 slightly different initial conditions forward 15 days, look at the spread, and tell forecasters "there is a 12 percent chance this storm explodes into a Cat 4 before it hits land." That is actionable information in a way that a single deterministic forecast is not.</p>
+
+            <h2>What you actually get on GitHub</h2>
+
+            <p>The open source release is on the <a href="https://github.com/google-deepmind/weathernext">google-deepmind/weathernext</a> repo. Three models went up:</p>
+
+            <p>WeatherNext Cyclones is the model that ran during the hurricane season and whose results are in the Nature paper. WeatherNext 2 is a later update that was operationalized in October. WeatherNext 2-mini is the compact version, and it runs on a single TPU inside a free public Colab notebook. You do not need a cluster or a budget to try it.</p>
+
+            <p>The release includes code and model weights, freely available for academic research, operational forecasting, or building specialized localized models. The license terms are worth checking before you build a product on top of it, but for research and forecasting work the intent is clearly permissive.</p>
+
+            <p>For anyone who just wants to poke at the forecasts without running anything, there is <a href="https://deepmind.google.com/science/weatherlab/">Weather Lab</a>, a web interface that recently got updated with global weather forecasts alongside cyclone tracks. You can visualize temperature, precipitation, and wind speed predictions in a single view.</p>
+
+            <h2>Why the extra day matters more than the benchmark</h2>
+
+            <p>I keep coming back to that 24-hour number because it is the one that translates outside the ML community. A model that scores better on a weather benchmark is interesting to researchers. A model that moves the forecasting frontier forward by a decade is interesting to anyone who lives on a coastline.</p>
+
+            <p>The comparison DeepMind draws is to the historical trend line. Over the last 20 years, 3-day cyclone track forecast error has been creeping down steadily as physics models and computing power improved. WeatherNext Cyclones drops the error curve down by an amount that, based on the trend, would have taken about 10 years of incremental progress to achieve. They did it in one model. That does not mean the next 10 years are free, but it means the floor just moved.</p>
+
+            <p>The intensity side is arguably more important and harder. Track forecasts have been improving for decades. Intensity forecasts, especially rapid intensification, have been stuck. HWRF and the other operational intensity models have improved slowly, and the rapid intensification problem in particular has resisted modeling. WeatherNext beating HWRF on 3-day intensity error over a two-year sample is a real result, not a cherry-picked one. If it holds over future seasons, it changes how agencies issue warnings.</p>
+
+            <h2>The honest caveats</h2>
+
+            <p>This is a retrospective evaluation on 2023 to 2024 cyclones plus one high-profile 2025 case. We have not seen WeatherNext Cyclones run through a full active season against live operational models and come out ahead on every storm. The Melissa forecast is compelling but it is one storm. The open source release means other forecasting agencies can now test it independently, and they should.</p>
+
+            <p>The low-resolution success is not understood. That is exciting for research but it also means nobody can fully explain why the model works, which is uncomfortable for operational use. Physics-based models have interpretable dynamics. A neural network that somehow captures cyclone intensity at 28 km resolution without resolving the eye wall is a black box that happens to be right. Operational forecasters like to understand why a model predicts what it predicts, because they have to defend the warning to the public.</p>
+
+            <p>There is also the question of whether this generalizes beyond the Atlantic and Pacific basins it was trained on. Cyclones in the Indian Ocean and South Pacific have different characteristics. The IBTrACS database is global, but the training emphasis and evaluation may not be. The open source release is partly an invitation for regional meteorological agencies to close that gap.</p>
+
+            <h2>What I am actually hoping happens</h2>
+
+            <p>The optimistic outcome is that smaller forecasting agencies, the ones without DeepMind's compute budget, grab the open weights and fine-tune on their own regional data. A Pacific island nation's meteorological service does not have a TPU cluster. But WeatherNext 2-mini runs on a single TPU in a free Colab notebook. If the licensing allows it, a motivated agency could adapt the model to their basin and get the extra day of warning for their own coastline.</p>
+
+            <p>The pessimistic outcome is that the model works great in the Atlantic, gets cited a lot, and the rest of the world waits for DeepMind to care about their storms. Open source fixes the access problem. It does not fix the effort problem. Someone has to actually do the fine-tuning work for each basin.</p>
+
+            <p>Either way, a model that gives an extra day of cyclone warning, that runs at 100x coarser resolution than anyone expected, that caught a rapid intensification event in real time, and whose code and weights are on GitHub right now, is the kind of AI release that matters for reasons that have nothing to do with leaderboards. People live on coastlines. This gives them more time to leave.</p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
