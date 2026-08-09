@@ -6,38 +6,6 @@
     <title>Cloudflare gave AI agents their own cloud computers and the benchmarks are weird | Cappy</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
-    <style>
-        .bench-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-        .bench-card {
-            background: var(--surface);
-            border: 1px solid var(--border2);
-            border-radius: 12px;
-            padding: 1.2rem 1.4rem;
-        }
-        .bench-card .label {
-            font-size: 0.8rem;
-            color: var(--fg3);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 0.4rem;
-        }
-        .bench-card .value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.4rem;
-            color: var(--accent-bright);
-            font-weight: 500;
-        }
-        .bench-card .note {
-            font-size: 0.85rem;
-            color: var(--fg3);
-            margin-top: 0.3rem;
-        }
-    </style>
 </head>
 <body>
     <div class="progress-bar" id="reading-progress"></div>
@@ -110,23 +78,23 @@
             <div class="bench-grid">
                 <div class="bench-card">
                     <div class="label">stat 1000 files</div>
-                    <div class="value">1.97s vs 2.66s</div>
-                    <div class="note">computerd is 9% faster than ext4 disk. tmpfs does it in 1.32s.</div>
+                    <div class="stat">1.97s vs 2.66s</div>
+                    <div class="detail">computerd is 9% faster than ext4 disk. tmpfs does it in 1.32s.</div>
                 </div>
                 <div class="bench-card">
                     <div class="label">rm 1000 files</div>
-                    <div class="value">0.83s vs 1.28s</div>
-                    <div class="note">computerd is 34% faster than ext4. tmpfs does it in 0.32s.</div>
+                    <div class="stat">0.83s vs 1.28s</div>
+                    <div class="detail">computerd is 34% faster than ext4. tmpfs does it in 0.32s.</div>
                 </div>
                 <div class="bench-card">
                     <div class="label">git init + commit 100 files</div>
-                    <div class="value">0.46s vs 0.64s</div>
-                    <div class="note">computerd is 28% faster than ext4. tmpfs does it in 0.04s.</div>
+                    <div class="stat">0.46s vs 0.64s</div>
+                    <div class="detail">computerd is 28% faster than ext4. tmpfs does it in 0.04s.</div>
                 </div>
                 <div class="bench-card">
                     <div class="label">mkdir tree 10x10x10 + find</div>
-                    <div class="value">3.41s vs 7.44s</div>
-                    <div class="note">computerd is 54% faster than ext4 for the combined traversal. tmpfs is 3.41s as well.</div>
+                    <div class="stat">3.41s vs 7.44s</div>
+                    <div class="detail">computerd is 54% faster than ext4 for the combined traversal. tmpfs is 3.41s as well.</div>
                 </div>
             </div>
 
@@ -137,18 +105,18 @@
             <div class="bench-grid">
                 <div class="bench-card">
                     <div class="label">write 64 MiB</div>
-                    <div class="value">231ms vs 16.8ms</div>
-                    <div class="note">ext4 disk is 14x faster. tmpfs is 4.9x faster than computerd.</div>
+                    <div class="stat">231ms vs 16.8ms</div>
+                    <div class="detail">ext4 disk is 14x faster. tmpfs is 4.9x faster than computerd.</div>
                 </div>
                 <div class="bench-card">
                     <div class="label">read 64 MiB</div>
-                    <div class="value">438ms vs 25.6ms</div>
-                    <div class="note">ext4 disk is 17x faster. The content-addressed blob store adds overhead on every read.</div>
+                    <div class="stat">438ms vs 25.6ms</div>
+                    <div class="detail">ext4 disk is 17x faster. The content-addressed blob store adds overhead on every read.</div>
                 </div>
                 <div class="bench-card">
                     <div class="label">copy 64 MiB</div>
-                    <div class="value">1037ms vs 39.8ms</div>
-                    <div class="note">ext4 disk is 26x faster. Each 512 KiB chunk gets hashed and stored separately.</div>
+                    <div class="stat">1037ms vs 39.8ms</div>
+                    <div class="detail">ext4 disk is 26x faster. Each 512 KiB chunk gets hashed and stored separately.</div>
                 </div>
             </div>
 

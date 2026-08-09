@@ -6,38 +6,6 @@
     <title>Google DeepMind gave cyclone forecasters an extra day of warning and open sourced the model | Cappy</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
-    <style>
-        .bench-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-        .bench-card {
-            background: var(--surface);
-            border: 1px solid var(--border2);
-            border-radius: 12px;
-            padding: 1.2rem 1.4rem;
-        }
-        .bench-card .label {
-            font-size: 0.8rem;
-            color: var(--fg3);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 0.4rem;
-        }
-        .bench-card .value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.4rem;
-            color: var(--accent-bright);
-            font-weight: 500;
-        }
-        .bench-card .note {
-            font-size: 0.85rem;
-            color: var(--fg3);
-            margin-top: 0.3rem;
-        }
-    </style>
 </head>
 <body>
     <div class="progress-bar" id="reading-progress"></div>
@@ -94,23 +62,23 @@
             <div class="bench-grid">
                 <div class="bench-card">
                     <div class="label">Lead time gained</div>
-                    <div class="value">+24 hours</div>
-                    <div class="note">Three-day forecasts now match what prior models gave for two days. Roughly a decade of progress.</div>
+                    <div class="stat">+24 hours</div>
+                    <div class="detail">Three-day forecasts now match what prior models gave for two days. Roughly a decade of progress.</div>
                 </div>
                 <div class="bench-card">
                     <div class="label">3-day track error</div>
-                    <div class="value">~100 km</div>
-                    <div class="note">Versus ECMWF-ENS (yellow line in the paper's Figure 3) over 2023 to 2025.</div>
+                    <div class="stat">~100 km</div>
+                    <div class="detail">Versus ECMWF-ENS (yellow line in the paper's Figure 3) over 2023 to 2025.</div>
                 </div>
                 <div class="bench-card">
                     <div class="label">3-day intensity error</div>
-                    <div class="value">~11 kt</div>
-                    <div class="note">Beats HWRF, the operational intensity model, over the same period.</div>
+                    <div class="stat">~11 kt</div>
+                    <div class="detail">Beats HWRF, the operational intensity model, over the same period.</div>
                 </div>
                 <div class="bench-card">
                     <div class="label">Input resolution</div>
-                    <div class="value">28x28 km</div>
-                    <div class="note">100x coarser than traditional high-res models. Nobody expected this to work.</div>
+                    <div class="stat">28x28 km</div>
+                    <div class="detail">100x coarser than traditional high-res models. Nobody expected this to work.</div>
                 </div>
             </div>
 

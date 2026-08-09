@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oracle says AI writes all their code but banned it from OpenJDK | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 9, 2026 · 6 min read</div>
+            <h1>Oracle says AI writes all their code but banned it from OpenJDK</h1>
+            <div class="tags">
+                <span class="pill">Oracle</span>
+                <span class="pill">OpenJDK</span>
+                <span class="pill">Policy</span>
+                <span class="pill">AI Coding</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>On August 3, Oracle posted a new policy on the OpenJDK website under a page tagged "legal." The rule is straightforward: no AI-generated contributions. No source code, no text, no images produced by large language models or diffusion models or any similar deep-learning system. If a machine wrote it, it does not go into OpenJDK. Not in Git, not in pull requests, not in email, not in wiki pages, not in bug reports.</p>
+
+            <p>You can still use LLMs privately to understand, debug, and review OpenJDK code. You just cannot submit anything those tools produced. Oracle cited three concerns: the review burden on maintainers, safety and security risks, and intellectual property problems.</p>
+
+            <p>Here is the thing that makes this weird. Three months earlier, Oracle's own CTO Larry Ellison said this at Oracle AI World 2025: "The code that Oracle is writing, Oracle isn't writing. Our AI models are writing. We just tell the model what we want the program to do, and then the AI comes up with a step-by-step process to actually do it."</p>
+
+            <p>So AI-generated code is good enough for Oracle's commercial products, the ones paying customers run their businesses on, but too dangerous for an open source project that Oracle itself stewards. The Register asked Oracle to explain the contradiction. As of publication, no response.</p>
+
+            <h2>What the policy actually says</h2>
+
+            <p>The interim policy, posted at <a href="https://openjdk.org/legal/ai">openjdk.org/legal/ai</a>, covers the entire OpenJDK community. The language is broad. "Content" includes source code, text, and images in Git repositories, GitHub pull requests, email messages, wiki pages, and Java Bug System issues. There is no de minimis exception. If an LLM wrote any part of your contribution, it is out.</p>
+
+            <p>The policy does carve out private use. You can use ChatGPT, Claude, Copilot, or whatever else to help you understand a piece of code, trace a bug, or research approaches. The line is at contribution. Whatever you submit has to be your own work, written by a human, not a machine.</p>
+
+            <p>Oracle's stated reasoning has three parts. First, AI-generated code creates extra review work for maintainers who already have limited time. Second, "plausible-looking but incorrect code" threatens the safety and security of OpenJDK, which Oracle notes is "the primary Java implementation for many organizations and underpins mission-critical systems worldwide." Third, intellectual property. If an LLM trained on copyrighted code reproduces that code in a contribution, the legal exposure falls on OpenJDK.</p>
+
+            <p>None of these reasons are wrong. The IP concern is real and unresolved across the industry. The safety concern is legitimate for a runtime that powers banking systems. The review burden is a genuine practical problem. But the contrast with Oracle's internal rhetoric is what got this story 483 points on Hacker News.</p>
+
+            <h2>What Ellison and Sicilia actually said</h2>
+
+            <p>Ellison's quote at Oracle AI World 2025 was not a slip of the tongue. He was making a deliberate point about how Oracle builds software now. "We don't write the procedure," he said. "We declare our intent, but the model writes the step-by-step procedure, that thing we commonly think of as a computer program."</p>
+
+            <p>Earlier this year, co-CEO Mike Sicilia told The Register that AI coding tools inside Oracle are "enabling smaller engineering teams to deliver more complete solutions to our customers more quickly." He framed AI adoption as existential: "AI tools and their coding capabilities would be a threat if we weren't adopting them, but we are and very rapidly."</p>
+
+            <p>Then in June, Oracle cut 21,000 jobs. The company's explanation, in a statement, was that "deployment of AI technologies across our operations have resulted, and may continue to result, in reductions to our workforce." So Oracle is firing people, citing AI, and simultaneously telling us that AI is writing the code that Oracle's remaining engineers used to write. And now they are saying that same AI-generated code is too risky to accept in the open source project they manage.</p>
+
+            <p>I genuinely do not know how to reconcile these positions. Maybe Oracle has an internal review process for AI-generated code that is so rigorous it eliminates the risks they cite for OpenJDK. If so, they have not shared it. Maybe the commercial code Oracle ships is lower stakes than OpenJDK, which seems unlikely given that Oracle products run enterprise databases and ERPs. Or maybe Oracle simply does not see the contradiction and nobody internally flagged it before publishing the policy.</p>
+
+            <h2>The $70 billion context</h2>
+
+            <p>Oracle's OpenJDK policy does not exist in a vacuum. The company announced $70 billion in datacenter investment for the coming year, up from $55.7 billion in fiscal 2026. S&P downgraded Oracle's credit rating to BBB-, one notch above junk, citing "an uncertain path to making money from the investments." Oracle is borrowing heavily, running negative cash flow, and its credit default swap spreads have spiked, meaning the market thinks insuring against an Oracle default has gotten more expensive.</p>
+
+            <p>This is a company going all-in on AI infrastructure. Ellison is betting that if Oracle builds enough datacenter capacity, the AI workloads will come and the revenue will follow. The AI coding story is part of that narrative: Oracle is so committed to AI that even Oracle's own code is AI-written now. It is a marketing message as much as an engineering claim.</p>
+
+            <p>The OpenJDK ban complicates that message. If AI-generated code is safe enough for Oracle's products, why is it unsafe for Java? If it is unsafe for Java, why is it safe for everything else? The most generous reading is that Oracle is being cautious with an open source project that has a large contributor base and a long history of careful review, while internally applying whatever quality gates it has developed. The less generous reading is that the policy reflects fear of legal liability rather than technical concern, and the internal AI coding claims are partly sales narrative.</p>
+
+            <h2>Other open source projects have done the same</h2>
+
+            <p>Oracle is not alone in this. Several major open source projects have banned or restricted AI-generated contributions in the past year. The concerns are always the same: IP contamination, review burden, and code quality. What is different here is the sheer size of the contradiction between the ban and the company's own public statements about AI coding.</p>
+
+            <p>The IP question is the one most likely to end up in court. If an LLM reproduces code from a GPL-licensed project in its output, and that output ends up in a project with a different license, the legal situation is messy. Major projects have decided the risk is not worth taking. Others accept AI contributions with disclosure requirements. The industry has not converged on a standard, and Oracle's blanket ban is one of the stricter approaches.</p>
+
+            <p>The review burden argument is harder to dismiss. OpenJDK maintainers are already overloaded. If AI-generated contributions flood in, the reviewers would have to not only check the code but also verify the contributor actually understands what the code does. AI tools can produce code that looks correct but contains subtle bugs or security issues that only surface under specific conditions. A maintainer who rubber-stamps a clean-looking PR without deep review is the failure mode everyone is trying to avoid.</p>
+
+            <h2>Why this matters beyond Oracle</h2>
+
+            <p>The tension Oracle has exposed is going to surface everywhere. Companies want to tell investors and customers that they are AI-first, that their code is AI-generated, that they are more productive than ever. At the same time, the open source projects those same companies steward need code that is reviewable, attributable, and legally clean. AI-generated code fails at least two of those three tests right now.</p>
+
+            <p>The Databricks post from this week about managing AI coding costs at scale, which hit 254 points on Hacker News, is interesting in this context. Databricks is deploying AI coding tools across hundreds of engineers and seeing real productivity gains. But their internal infrastructure includes meta-routing tools, AI gateways, cost tracking, and model routing. They built an entire platform around AI coding governance. Oracle's OpenJDK ban suggests that even companies deeply invested in AI coding have not figured out how to make AI-generated code safe enough for open contribution. Their internal processes apparently work for internal code. But external contribution is a different problem.</p>
+
+            <p>The difference might come down to accountability. Inside a company, if AI-generated code causes a bug, the company owns the bug and fixes it. In open source, if AI-generated code introduces a subtle vulnerability, the contributor might not even understand what the code does well enough to help debug it. The maintainer is left holding the bag. Oracle's policy effectively says: if you cannot explain the code line by line, do not submit it. That is a reasonable bar for a mission-critical runtime.</p>
+
+            <h2>My read</h2>
+
+            <p>I think the OpenJDK ban is defensible on its merits. The IP risk is real, the review burden is real, and the safety argument for a runtime that powers banking and enterprise systems is hard to argue with. If I were running OpenJDK, I would probably want strong guardrails too.</p>
+
+            <p>What bothers me is the silence about the contradiction. Oracle is not saying "AI-generated code is risky everywhere and we have special internal processes to mitigate it." They are saying "AI writes our code" to investors while saying "AI code is too dangerous for our open source project" to contributors. Those are different audiences getting different messages, and nobody at Oracle has explained why the same code is safe in one context and not the other.</p>
+
+            <p>The most likely explanation is boring. The OpenJDK policy was probably written by lawyers and engineering leads who care about IP and code quality. Ellison's AI coding claims were probably marketing positioning aimed at investors and customers. These two groups inside Oracle may not have coordinated, and the policy went out without anyone checking whether it contradicted the CEO's public statements. Large companies are not monoliths. Different departments say different things.</p>
+
+            <p>But that is not reassuring either. If Oracle's left hand does not know what its right hand is doing about AI coding policy, how confident should OpenJDK contributors be about the governance of the project? Oracle stewards Java. Java runs a lot of the world's infrastructure. The question of whether AI-generated code is safe for that infrastructure deserves a consistent answer, not two contradictory ones from the same company.</p>
+
+            <p>The Register asked Oracle for comment. They have not gotten one. The full policy is at <a href="https://openjdk.org/legal/ai">openjdk.org/legal/ai</a>. Read it yourself and decide which Oracle message you believe.
+            </p>
+        </div>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
