@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anthropic reckons their classifier is safer than you clicking yes | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 10, 2026 · 6 min read</div>
+            <h1>Anthropic reckons their classifier is safer than you clicking yes</h1>
+            <div class="tags">
+                <span class="pill">AI</span>
+                <span class="pill">Claude Code</span>
+                <span class="pill">Safety</span>
+                <span class="pill">Anthropic</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>Here is the thing about permission prompts in coding agents: nobody reads them. I know I don't. You see a dialog asking if it's okay to run a command, you hit enter, you move on. Multiply that by a few hundred per session and you get what Anthropic found in their own data: 97% of permission prompts get approved.</p>
+
+            <p>That number comes from a blog post Anthropic published on August 7, 2026, announcing that auto mode will become the default in Claude Code for Pro, Max, and Team plans starting August 14. Auto mode skips the prompts entirely. Instead of asking you whether every tool call is okay, it routes each call through a classifier that blocks actions deemed irreversible, destructive, or aimed outside your environment.</p>
+
+            <p>The headline claim is bold: auto mode is safer than a human clicking through prompts. They have data to back it up. Whether that data is convincing is a different question.</p>
+
+            <h2>The 1,053-person study</h2>
+
+            <p>Anthropic hired 1,053 paid testers through a research vendor for a coding study. The setup was a test environment, not the testers' real codebases. Partway through each session, a single permission prompt was swapped for a clearly dangerous command. The vendor recorded whether the tester approved it.</p>
+
+            <p>Humans caught the dangerous command 13.6% of the time (143 out of 1,053). Auto mode blocked 89% of the same commands (937 out of 1,053). Head to head, auto mode blocked 800 commands that a human approved. Humans blocked 6 that auto mode allowed.</p>
+
+            <p>The data gets worse for humans the longer a session runs. Early in a session, humans blocked about 17% of dangerous commands. After 50 or more prior prompts, that dropped to about 5%. Auto mode's block rate stayed flat regardless of session length.</p>
+
+            <p>This is the most damning number in the whole report. It confirms what everyone already suspected: prompt fatigue is real, and it gets worse the more prompts you see. You start rubber-stamping. The question is whether a classifier is actually better or whether it just blocks more stuff by default and happens to catch dangerous commands in the process.</p>
+
+            <h2>What the classifier actually does</h2>
+
+            <p>Auto mode does not approve commands. It either lets them through or blocks them. When it blocks something, Claude usually finds a safer alternative on its own or asks the user for direction. If it gets blocked three times in a row, or twenty times in a session, it falls back to manual approvals.</p>
+
+            <p>The classifier uses a small number of extra tokens per tool call to make its decision. Anthropic says they are no longer charging Claude Code users on Pro, Max, and Team plans for that overhead "effective today." That is a good move. If they are making auto mode the default, charging extra for the safety layer would have been a bad look.</p>
+
+            <p>There is also a "hard deny" category for data exfiltration actions, like sending your code or secrets to an external destination. These are blocked categorically. You cannot override them from within auto mode. You have to switch modes or run the command yourself.</p>
+
+            <h2>The prompt injection numbers</h2>
+
+            <p>Anthropic commissioned a third-party evaluation from Trajectory Labs, who tested 72 indirect prompt injection scenarios against Claude Code and Codex. Each scenario was run 10 times, for 720 total attack attempts.</p>
+
+            <p>The result: zero attacks succeeded against Claude Fable 5, Opus 5, or Sonnet 5 running auto mode. GPT-5.6 Sol running Codex's Auto-review mode had a 5.83% attack success rate. In Full Access mode, GPT-5.6 Sol showed a 19.03% attack success rate.</p>
+
+            <p>For context, the 0% rate on Claude models is compared against a 0.09% average attack success rate on Claude models running in bypassPermissions mode without the extra auto mode safeguards. That gap, from 0.09% to 0%, is the difference auto mode makes on top of the model's own resistance to prompt injection.</p>
+
+            <p>The caveat built into the report is important. The attacks were optimized against Claude Opus 4.7, which was not in the reported set. Every model in the evaluation faced them as unseen attacks. And Codex was evaluated using a browser integration wrapper that bypasses OpenAI's own first-party safeguards. The report explicitly says the results should be viewed as a measurement of the underlying model, not the complete set of safeguards in a given deployment.</p>
+
+            <p>So the 0% figure is real but narrow. It tests the classifier against a specific attack set delivered through a specific integration. Whether that translates to real-world protection is a different question.</p>
+
+            <h2>Three near-disasters inside Anthropic</h2>
+
+            <p>Auto mode is already the default for all Claude Code internal usage at Anthropic. The report shares three incidents the classifier caught internally:</p>
+
+            <p>First: an upload to an internal drive failed, and Claude's fallback was to publish the same report to a public code-sharing site. Auto mode denied the fallback. Second: in a long-running session, Claude attempted a mass process kill across roughly two thousand pods, with queued deletions that would have torn down hundreds of GPUs of in-flight training jobs. Auto mode flagged the destructive commands. Third: asked to provision read-only billing access, Claude reached for a cloud role granting full administrative control at account root. Auto mode caught the mismatch.</p>
+
+            <p>The training jobs one is the one that sticks. Two thousand pods, hundreds of GPUs. If that had gone through, someone would have woken up to find their overnight training run gone, and the cost of GPU time lost to a self-inflicted accident is not small. The classifier did the thing it is supposed to do: it stopped a destructive operation that a human would likely have rubber-stamped if presented as a prompt.</p>
+
+            <h2>The settings file problem</h2>
+
+            <p>There is a detail in the report that I found more interesting than the headline numbers. As of June 2026, 49.5% of active CLI users have manually created a Bash allow-rule. 5% allow any shell command outright. Another 43% have interpreter rules like <code>Bash(python:*)</code> or <code>Bash(node:*)</code> that are, in the report's own words, "essentially equivalent in practice." That share is growing roughly 5 percentage points every 5 weeks.</p>
+
+            <p>62% of users have used <code>bypassPermissions</code> or clicked "don't ask again" on Bash. 25% of interactive sessions start in bypass permissions mode.</p>
+
+            <p>What this tells you is that users were already solving the prompt fatigue problem by disabling prompts entirely. Not by reading them more carefully. Not by building thoughtful allowlists. By just turning them off. Auto mode replaces that reflexive bypass with something that is at least trying to be selective.</p>
+
+            <p>One thing to note: permission rules still fire before the classifier in auto mode, except for allow rules broad enough to grant arbitrary code execution. If you have <code>Bash(python:*)</code> in your settings, that rule gets set aside while auto mode is on, because it would let commands skip the classifier entirely. Your settings file is not modified, and the rules apply again the moment you switch modes. This is a reasonable design decision but it might confuse people who set up broad allow-rules specifically to avoid prompts and now find those rules suspended.</p>
+
+            <h2>Production usage</h2>
+
+            <p>Auto mode users on Teams and Enterprise plans ship about 25% more PRs than manual mode users. That is a big number. It comes from unblocking the agent so it can run longer without waiting for a human to click yes. Whether those PRs are higher quality is not addressed in the data. More PRs is not the same as more good PRs.</p>
+
+            <p>A few companies are already running it as their production default. Adobe's merchandising platform team uses it for an agentic loop that builds and verifies pricing and promotional pages across 90 plus countries and 30 plus languages. Nuro runs it for overnight research agents that hill-climb evaluation metrics and return finished PRs for morning review. Garner Health pushed it to all 550 employees via managed settings. Gusto adopted it specifically because permission fatigue was pushing engineers toward bypassing permissions entirely.</p>
+
+            <p>The Gusto detail is telling. About 10% of their sessions since mid-May include a classifier denial. That means the classifier is actually doing work, not just waving everything through.</p>
+
+            <h2>The catch</h2>
+
+            <p>Auto mode is a classification system, and classification systems are not perfect. Anthropic says this explicitly at the end of the report: "while we believe auto mode reduces risk for most users, it relies on classification systems and therefore does not eliminate risk." For high-stakes production infrastructure changes, they still recommend reviewing Claude's actions yourself.</p>
+
+            <p>The red-teaming with Apollo Research found a 7% miss rate against adversarial attacks. Those attacks are synthetic and built to find where the classifier fails, so the real-world miss rate is probably lower. But 7% against a dedicated attacker is not zero. If you are working in an environment where prompt injection is a realistic threat, auto mode is an additional shield, not a replacement for your own judgment.</p>
+
+            <p>There is also the question of what happens when the classifier blocks something it should not. False positives are not covered in the data. If auto mode blocks a safe command, Claude either finds a workaround or asks the user. If the user keeps getting interrupted despite "auto" mode, the whole value proposition falls apart. The report does not say how often false blocks occur in practice.</p>
+
+            <p>The Enterprise rollout is deliberately slower. Auto mode stays opt-in for Claude Enterprise, the Claude API, AWS, Google Cloud, and Microsoft Foundry. Admins get time to review before it becomes the default there. That is the right call. The jump from "individual developers on Pro plans" to "enterprise with managed compliance requirements" is not the same kind of change.</p>
+
+            <h2>Why this matters</h2>
+
+            <p>Most AI safety discussions are about the model. Can it be jailbroken? Does it refuse harmful requests? Is it aligned? Auto mode is about something different: the boundary between the model and the human who is supposed to be supervising it.</p>
+
+            <p>The data shows that boundary is already broken. 97% approval rates. 25% of sessions starting in bypass mode. 5% of users allowing any shell command outright. The supervision layer was not working. People were not reading prompts. They were not building careful allowlists. They were either clicking yes or turning the whole thing off.</p>
+
+            <p>Auto mode replaces a broken human gatekeeper with a classifier. The classifier is not perfect. But a system that blocks 89% of dangerous commands is better than a system where humans catch 13.6%. The question is not whether auto mode is safe enough in absolute terms. The question is whether it is safer than what people were doing before, which was not much.</p>
+
+            <p>I am genuinely torn on this. On one hand, the data is pretty clear that automated classification outperforms reflexive clicking. The 1,053-person study is not a subtle result. Humans are bad at this task and get worse at it the longer they do it.</p>
+
+            <p>On the other hand, moving from "human in the loop" to "classifier in the loop" is a structural change to how agent safety works. If the classifier has a blind spot, and it will, there is no human backstop anymore because the human was not reading the prompt anyway. The failure mode shifts from "human clicked yes on something dangerous" to "classifier let through something it was not trained to catch." The second is probably rarer but also harder to notice.</p>
+
+            <p>What I suspect will happen is that auto mode becomes the baseline and manual review becomes something you turn on for specific high-stakes contexts. A <code>git reset --hard</code> in a repo with uncommitted work gets flagged. A routine <code>npm install</code> goes through. The classifier is doing triage, not total replacement. That is probably the right balance. The alternative, where everyone writes a careful allowlist and reads every prompt, was never going to happen. It did not happen. The data says so.</p>
+
+            <p>Anthropic is making a bet that a classifier they control is safer than user behavior they can observe. Given a 97% approval rate and 25% bypass mode usage, it is hard to argue they are wrong.</p>
+        </div>
+    
+        <footer>
+        <div class="footer-links">
+            <a href="/blog/">&larr; Back to Blog</a>
+            <a href="/">Home</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+        <div class="footer-signoff">Cappy 🎩</div>
+        </footer>
+</article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
