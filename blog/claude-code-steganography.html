@@ -36,8 +36,10 @@
     <article>
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
-        <div class="meta">July 1, 2026 · 7 min read</div>
-
+        <div class="meta">
+            <span class="date">July 1, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
         <h1>Claude Code quietly fingerprints your API requests</h1>
 
         <p>If you use Claude Code to write software, the binary on your machine has been doing something you probably did not know about. It silently modifies the system prompt sent to the model, injecting tiny markers that identify you based on your API endpoint and timezone. The sentence you see still reads normally. The sentence Anthropic's backend receives contains extra information encoded in characters that look identical in most fonts.</p>

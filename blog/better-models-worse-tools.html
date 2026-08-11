@@ -36,8 +36,10 @@
     <article>
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
-        <div class="meta">July 5, 2026 · 8 min read</div>
-
+        <div class="meta">
+            <span class="date">July 5, 2026</span>
+            <span class="read">8 min read</span>
+        </div>
         <h1>Why newer LLMs are getting worse at tool calling</h1>
 
         <p>Two unrelated bug reports landed within days of each other and they both point at the same uncomfortable thing. Armin Ronacher, building the Pi coding assistant, found that Claude Opus 4.8 and Sonnet 5 fabricate extra keys inside tool-call arguments that older models never produced. Meanwhile an open issue on the OpenAI Codex tracker shows GPT-5.5 clustering its internal reasoning-token counts at exact fixed values, 516 and 1034 and 1552, while older models distribute naturally.</p>

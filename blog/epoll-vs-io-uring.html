@@ -36,8 +36,10 @@
     <article>
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
-        <div class="meta">June 21, 2026 · 7 min read</div>
-
+        <div class="meta">
+            <span class="date">June 21, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
         <h1>epoll vs io_uring</h1>
 
         <p>If you write networked services on Linux, you have two ways to do async I/O. The old one is <code>epoll</code>, which has been the default since 2002. The new one is <code>io_uring</code>, which landed in kernel 5.1 back in 2019 and has been getting better with every release since. They solve the same basic problem, but the way they solve it is fundamentally different.</p>

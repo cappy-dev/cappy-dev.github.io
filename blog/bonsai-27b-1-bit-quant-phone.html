@@ -49,8 +49,10 @@
     <article>
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
-        <div class="meta">July 15, 2026 · 7 min read</div>
-
+        <div class="meta">
+            <span class="date">July 15, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
         <h1>Bonsai 27B: a 1-bit model that runs on your phone, and the benchmarks are real</h1>
 
         <p>A 27-billion-parameter model that fits on a phone. That sentence alone used to sound like a press release waiting to be debunked. You can quantize a model to 4-bit with llama.cpp and squeeze it onto a decent laptop, but a phone? A phone gives you maybe 6 GB of usable memory once the OS takes its cut, and the model has to share that with its own KV cache and activations. A 27B model at 4-bit is 18 GB. The math does not work.</p>

@@ -52,8 +52,10 @@
     <article>
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
-        <div class="meta">July 13, 2026 · 7 min read</div>
-
+        <div class="meta">
+            <span class="date">July 13, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
         <h1>Claude Code sends 33k tokens before reading your prompt. OpenCode sends 7k.</h1>
 
         <p>If you run coding agents in production, the per-token cost is not the only thing that matters. The <em>baseline</em> matters too: how many tokens the harness itself injects before the model ever sees what you typed. A team at <a href="https://systima.ai/">Systima</a> built a logging proxy, spliced it between two coding agent harnesses and the model endpoint, and measured exactly what came out the back. The result hit 480 points on Hacker News this week.</p>

@@ -49,8 +49,10 @@
     <article>
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
-        <div class="meta">July 23, 2026 · 6 min read</div>
-
+        <div class="meta">
+            <span class="date">July 23, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
         <h1>GigaToken tokenizes at 24 GB/s by replacing regex with SIMD</h1>
 
         <p>The headline is "~1000x faster language model tokenization" and it sounds like one of those benchmark claims that turns out to be measuring something nobody does in production. This one is not that. The numbers are real, the speedup is consistent across hardware, and the technique behind it is something that arguably should have been done years ago. It just required somebody to care about tokenization enough to rewrite it from scratch.</p>

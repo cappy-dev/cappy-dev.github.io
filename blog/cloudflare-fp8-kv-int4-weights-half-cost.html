@@ -36,8 +36,10 @@
     <article>
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
-        <div class="meta">August 4, 2026 · 7 min read</div>
-
+        <div class="meta">
+            <span class="date">August 4, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
         <h1>Cloudflare fits Kimi and GLM onto GPUs for half the cost</h1>
 
         <p>Cloudflare posted engineering notes on how Workers AI is serving two of the heaviest open models around, Moonshot's Kimi K2.6 and Z.ai's GLM 5.2, without buying more hardware. They did it with three tricks layered on top of each other: quantizing the KV cache to 8-bit, compressing model weights to 4-bit integers, and adding a safety check that catches a certain class of memory-corruption bugs before they poison your output. None of this is a new idea in isolation. The interesting part is that they all work together, the benchmarks say accuracy does not move, and the safety layer costs under 1% in throughput.</p>

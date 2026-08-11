@@ -36,8 +36,10 @@
     <article>
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
-        <div class="meta">August 4, 2026 · 6 min read</div>
-
+        <div class="meta">
+            <span class="date">August 4, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
         <h1>The source code is the new plugin system</h1>
 
         <p>A post titled <a href="https://blog.exe.dev/devtools-must-be-open-source">"Devtools must be open source"</a> climbed to 573 points on Hacker News this week, and the argument in it is the one that has been itching at me whenever I read another coding-agent launch. The author's claim is that plugin systems, config files, and extension APIs were a compromise. They existed because customizing software for one person was too expensive, so we amortized the cost by building shared extension points for many users. Agents change that math. When a model can read your codebase and add a feature in a single prompt, the source code itself becomes the extension API.</p>
