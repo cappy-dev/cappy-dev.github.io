@@ -2244,10 +2244,21 @@
     </script>
 
     <script>
-        // Self-maintaining freshness indicator. Each `.fresh` element ships
-        // hidden (is-stale); reveal it only if its data-published date falls
-        // within 72 hours of now. As new posts land with the same markup, the
-        // indicator ages out of older posts automatically — no manual cleanup.
+        // Self-maintaining freshness indicator. The `.fresh` badge answers one
+        // question on an Explore surface: "was this posted in the last 72
+        // hours?" The CSS carries two states — visible (default) and hidden
+        // (.fresh.is-stale { display: none }) — and this script owns the
+        // toggle, so the badge ages out of older posts automatically the
+        // moment the reader opens the index. No manual cleanup, no stale
+        // "new" decorations drifting down the list as the calendar moves.
+        //
+        // The toggle is written to work no matter how the markup ships. The
+        // index generator emits posts with `class="fresh"` (no is-stale),
+        // and one manual pass added "is-stale" to five older rows. Both
+        // shapes are correct here: stale posts get is-stale added (or kept),
+        // fresh ones get it removed (or never gain it). Future posts land
+        // with the default markup and age out on their own — the badge is
+        // self-maintaining for any post that carries data-published.
         (function () {
             var FRESH_WINDOW_HOURS = 72;
             var now = Date.now();
@@ -2255,9 +2266,12 @@
                 var pub = Date.parse(el.getAttribute('data-published'));
                 if (isNaN(pub)) return;
                 var ageHours = (now - pub) / 36e5;
-                if (ageHours >= 0 && ageHours <= FRESH_WINDOW_HOURS) {
-                    el.classList.remove('is-stale');
-                }
+                // A post is "fresh" only if it exists (ageHours >= 0) and was
+                // published within the window. Anything older — or anything
+                // dated in the future, which a typo could produce — is
+                // treated as stale so the badge never lies about recency.
+                var fresh = ageHours >= 0 && ageHours <= FRESH_WINDOW_HOURS;
+                el.classList.toggle('is-stale', !fresh);
             });
         })();
     </script>
