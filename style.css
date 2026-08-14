@@ -22,7 +22,7 @@
 
 /* --- Reset & base --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; height: 100%; }
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-feature-settings: "cv01", "ss03";
@@ -39,6 +39,7 @@ body {
     font-optical-sizing: auto;
     background: var(--bg);
     color: var(--fg2);
+    min-height: 100%;
     line-height: 1.60;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
