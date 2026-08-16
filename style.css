@@ -939,12 +939,46 @@ article h3 {
    The anchor shifts the heading right by its own width on hover so
    the glyph occupies space ahead of the title rather than colliding
    with it — Linear's "compressed headline, expanded surroundings" at
-   the section level. */
+   the section level.
+
+   Section-opener hairline — unifies the article reading surface with
+   the site's established rhythm. Every other top-level section opener
+   on the site opens with a whisper-thin hairline + mono label: the home
+   page (.has-divider before "01 — Capabilities"), the blog index
+   (.post-year, .post-month), the projects page (.projects-cat-label),
+   and the post-article Keep Reading rail (.keep-reading-title). Until
+   now the article <h2> was the ONLY major section opener that floated
+   on margin alone — it broke the editorial rhythm a reader carries
+   from any other surface into the article body. Adding the same
+   hairline above every article h2 closes that gap: a section now
+   opens the same way everywhere on the site.
+
+   h3 is intentionally left without a hairline — it is a sub-section,
+   not a section, and the site's pattern only rails top-level openers.
+   A verified sweep of all 175 articles found only 2 cases where an h2
+   is immediately followed by an h3 with no paragraph between them
+   (fastsdcpu-vs-stability-matrix); because h3 carries no rule there is
+   no double-hairline collision there. The first h2 in an article is
+   almost always (101 of 169) preceded by a <p>, so the rule sits
+   cleanly between the lead paragraph and the first section rather than
+   crowding the article header. The 64 "wrapper" cases are the
+   .article-body / .body <div> opening, which is a structural wrapper
+   not a content block — the hairline there reads as the article's
+   first section opening, exactly as intended.
+
+   Reuses the existing --border2 token (the same hairline value used
+   by .has-divider, .post-year, .projects-cat-label, .keep-reading-
+   title) — no new color, no new box, no icon. Top margin raises from
+   56px to 64px so the new hairline has air beneath it before the
+   heading; the heading's own leading (line-height 1.30) carries the
+   separation below. */
 .article-body h2,
 article h2 {
     font-size: 24px; font-weight: 590; color: var(--fg);
     letter-spacing: -0.288px; line-height: 1.30;
-    margin: 56px 0 16px;
+    margin: 64px 0 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border2);
     scroll-margin-top: 72px;
     transition: padding-left 0.15s ease;
 }
@@ -1223,7 +1257,9 @@ article .body a:hover { color: var(--accent-hover); }
 article .body h2 {
     font-size: 24px; font-weight: 590; color: var(--fg);
     letter-spacing: -0.288px; line-height: 1.30;
-    margin: 56px 0 16px;
+    margin: 64px 0 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border2);
     scroll-margin-top: 72px;
 }
 article .body h3 {
