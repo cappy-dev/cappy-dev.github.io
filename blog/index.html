@@ -128,7 +128,7 @@
             <div class="post-date">Aug 17<span class="fresh" data-published="2026-08-17"><span class="fresh-dot"></span>new</span></div>
             <div class="post-content">
                 <h2 class="post-title">Models Are Getting Dumber on Purpose</h2>
-                <p class="post-excerpt">Why the biggest AI models trade factual knowledge for reasoning skill — and what that means for anyone building on top of them.</p>
+                <p class="post-excerpt">Why the biggest AI models trade factual knowledge for reasoning skill .  and what that means for anyone building on top of them.</p>
                 <div class="post-tags">
                     <span class="pill">AI</span>
                     <span class="pill">Inference</span>
@@ -2368,12 +2368,12 @@
     </section>
 
     <script>
-        // Topic filter for the blog index — an Explore-surface affordance.
+        // Topic filter for the blog index .  an Explore-surface affordance.
         // Reads data-topics on each .post-row, narrows the list to the
         // selected topic, dimming year/month dividers that lose all rows
         // and showing a muted count + "All" reset. Reuses the .topics /
         // .topic-chip / .topic-count / [data-divider].is-dimmed /
-        // .filter-empty CSS already in style.css — no new styles invented.
+        // .filter-empty CSS already in style.css .  no new styles invented.
         (function () {
             var rows = Array.prototype.slice.call(
                 document.querySelectorAll('.posts .post-row[data-topics]')
@@ -2456,7 +2456,7 @@
                 });
             }
 
-            // Initial count only — no active filter.
+            // Initial count only .  no active filter.
             if (count) count.textContent = rows.length + ' posts';
         })();
     </script>
@@ -2464,8 +2464,8 @@
     <script>
         // Self-maintaining freshness indicator. The `.fresh` badge answers one
         // question on an Explore surface: "was this posted in the last 72
-        // hours?" The CSS carries two states — visible (default) and hidden
-        // (.fresh.is-stale { display: none }) — and this script owns the
+        // hours?" The CSS carries two states .  visible (default) and hidden
+        // (.fresh.is-stale { display: none }) .  and this script owns the
         // toggle, so the badge ages out of older posts automatically the
         // moment the reader opens the index. No manual cleanup, no stale
         // "new" decorations drifting down the list as the calendar moves.
@@ -2475,7 +2475,7 @@
         // and one manual pass added "is-stale" to five older rows. Both
         // shapes are correct here: stale posts get is-stale added (or kept),
         // fresh ones get it removed (or never gain it). Future posts land
-        // with the default markup and age out on their own — the badge is
+        // with the default markup and age out on their own .  the badge is
         // self-maintaining for any post that carries data-published.
         (function () {
             var FRESH_WINDOW_HOURS = 72;
@@ -2485,8 +2485,8 @@
                 if (isNaN(pub)) return;
                 var ageHours = (now - pub) / 36e5;
                 // A post is "fresh" only if it exists (ageHours >= 0) and was
-                // published within the window. Anything older — or anything
-                // dated in the future, which a typo could produce — is
+                // published within the window. Anything older .  or anything
+                // dated in the future, which a typo could produce .  is
                 // treated as stale so the badge never lies about recency.
                 var fresh = ageHours >= 0 && ageHours <= FRESH_WINDOW_HOURS;
                 el.classList.toggle('is-stale', !fresh);
