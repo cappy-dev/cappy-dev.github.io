@@ -48,13 +48,13 @@
         </header>
 
         <div class="article-body">
-            <p>There's a peculiar pattern everyone's noticed in the last year. The biggest, most expensive models keep getting cheaper per token while their scores on benchmarks keep climbing. Math. Code. Reasoning. The leaderboards look impressive. But ask the same models a simple factual question — who won the 1987 World Series? What's the capital of Belize? When was the Dead Sea Scrolls discovered? — and the picture changes fast. The best recall still misses half the questions on SimpleQA. The small models barely register.</p>
+            <p>There's a peculiar pattern everyone's noticed in the last year. The biggest, most expensive models keep getting cheaper per token while their scores on benchmarks keep climbing. Math. Code. Reasoning. The leaderboards look impressive. But ask the same models a simple factual question .  who won the 1987 World Series? What's the capital of Belize? When was the Dead Sea Scrolls discovered? .  and the picture changes fast. The best recall still misses half the questions on SimpleQA. The small models barely register.</p>
 
             <p>I've been thinking about why this trade-off exists. And the more I look, the more it feels deliberate.</p>
 
             <h2>Facts take space. Procedures compress.</h2>
 
-            <p>Research on knowledge capacity — the cleanest measurements come from the "Physics of Language Models" series — puts it on the order of two bits of factual knowledge per parameter. If you want a model that knows the birth year of every minor Wikipedia figure, the population of every Dutch municipality, and the argument order of every npm function, you pay for that in weights. It's a big part of why frontier models grew to trillions of parameters.</p>
+            <p>Research on knowledge capacity .  the cleanest measurements come from the "Physics of Language Models" series .  puts it on the order of two bits of factual knowledge per parameter. If you want a model that knows the birth year of every minor Wikipedia figure, the population of every Dutch municipality, and the argument order of every npm function, you pay for that in weights. It's a big part of why frontier models grew to trillions of parameters.</p>
 
             <p>Reasoning compresses much better than facts. It's a small set of procedures applied over and over: break the problem into parts, track intermediate state, check your own work, backtrack when a step fails. Distillation and reinforcement learning on verifiable tasks turn out to transfer those procedures into small models remarkably well. Phi-4 is 14 billion parameters, trained heavily on synthetic textbook-style data, and it's good at math and bad at trivia. That mix used to look like a limitation of the synthetic-data approach. It now looks like the design goal.</p>
 
@@ -84,7 +84,7 @@
 
             <p>I find this the most promising part. When a fact lives in weights, a wrong fact is unfindable and unfixable. You can't grep the weights, you can't diff them against last month, and correcting one error means a fine-tune that might break who knows what else. The model states the wrong fact with the same fluent confidence as a right one, and there's no artifact to check it against.</p>
 
-            <p>When the fact lives outside the model, a wrong answer has an address. The model cites a document, so you can open the document. If the document is wrong, you edit the document, and every future query gets the correction. Beats waiting for the next training run by roughly a year. Retrieval doesn't get you to zero — a model can still misread a source or stitch two of them together wrong — but a claim with a source is checkable and a claim from weights isn't. A wrong fact in a knowledge base is an ordinary data bug, the kind we already know how to trace, fix, and write a regression test for.</p>
+            <p>When the fact lives outside the model, a wrong answer has an address. The model cites a document, so you can open the document. If the document is wrong, you edit the document, and every future query gets the correction. Beats waiting for the next training run by roughly a year. Retrieval doesn't get you to zero .  a model can still misread a source or stitch two of them together wrong .  but a claim with a source is checkable and a claim from weights isn't. A wrong fact in a knowledge base is an ordinary data bug, the kind we already know how to trace, fix, and write a regression test for.</p>
 
             <p>There's a version of this future where the model card stops listing a knowledge cutoff at all, because what's left in the weights goes stale on a scale of years instead of weeks. The model just gets handed the world's current state at runtime, the same way a CPU gets handed a program.</p>
 

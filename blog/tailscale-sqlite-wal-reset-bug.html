@@ -51,7 +51,7 @@
 
             <h2>The setup</h2>
 
-            <p>Tailscale's control plane runs on SQLite. Each shard — an internal coordination server — gets its own SQLite database with a single Go process writing to it. That is the textbook way to use SQLite. One writer, no contention, no surprises.</p>
+            <p>Tailscale's control plane runs on SQLite. Each shard .  an internal coordination server .  gets its own SQLite database with a single Go process writing to it. That is the textbook way to use SQLite. One writer, no contention, no surprises.</p>
 
             <p>They had been running this way since 2022 without issues. Then August 2025 hit. A backup pipeline reading from S3 reported corruption. SQLite's <code>PRAGMA integrity_check</code> confirmed it. They repaired the database, scratched their heads, and moved on.</p>
 
@@ -59,7 +59,7 @@
 
             <h2>Why this was weird</h2>
 
-            <p>SQLite corruption is rare. The documentation lists specific ways to corrupt a database: broken POSIX locks, memory mismanagement, threading violations. Tailscale checked all of them. Their code hadn't changed in years. The corruption had no pattern — not tied to a specific shard, customer, time of day, or load level.</p>
+            <p>SQLite corruption is rare. The documentation lists specific ways to corrupt a database: broken POSIX locks, memory mismanagement, threading violations. Tailscale checked all of them. Their code hadn't changed in years. The corruption had no pattern .  not tied to a specific shard, customer, time of day, or load level.</p>
 
             <p>They could not reproduce it. The only way forward was to instrument their live production shards and wait for the next crash.</p>
 
@@ -81,13 +81,13 @@
 
             <h2>The tmstmpvfs shim</h2>
 
-            <p>The SQLite developers built a debugging tool: a virtual filesystem wrapper called <code>tmstmpvfs</code> that traces every filesystem operation. SQLite's architecture splits into three layers — parser, pager, and virtual filesystem. The shim wraps the filesystem layer to log what actually hits the disk.</p>
+            <p>The SQLite developers built a debugging tool: a virtual filesystem wrapper called <code>tmstmpvfs</code> that traces every filesystem operation. SQLite's architecture splits into three layers .  parser, pager, and virtual filesystem. The shim wraps the filesystem layer to log what actually hits the disk.</p>
 
             <p>Tailscale deployed the shim and waited. The next corruption incident came quickly.</p>
 
             <h2>The WAL-Reset bug</h2>
 
-            <p>The logs revealed a data race between a checkpoint and a write transaction. If a write occurs at a precise moment during checkpointing, the checkpoint process gets confused. It thinks some pages have been copied from the WAL to the database file, but they have not. Those pages are lost forever. The database file becomes corrupt because other pages — indexes, for example — reference pages that never made it.</p>
+            <p>The logs revealed a data race between a checkpoint and a write transaction. If a write occurs at a precise moment during checkpointing, the checkpoint process gets confused. It thinks some pages have been copied from the WAL to the database file, but they have not. Those pages are lost forever. The database file becomes corrupt because other pages .  indexes, for example .  reference pages that never made it.</p>
 
             <p>The SQLite team named it the "WAL-Reset bug" and estimated it had existed for at least 16 years. It survived that long because the race window is vanishingly small. The SQLite developers had to add code to deliberately trigger it in their test suite just to verify the fix.</p>
 

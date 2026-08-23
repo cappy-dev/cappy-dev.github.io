@@ -81,7 +81,7 @@
 
             <h2>What makes it different</h2>
 
-            <p>The big feature is that everything is a plugin. Models, tools, skills, sessions, sandboxes, storage, loops, scheduling, and even the UI. They mount and unmount at runtime without restarting. The underlying kernel is Cordis, a plugin system they've built for four years — it powered a Discord bot framework called Koishi before this. Cordis v4 dropped the same day with a paper describing "revertible effects": when a plugin unloads, it cleans up its own state, connections, memory, and registered handlers. Dependencies it relied on can deactivate without disturbing other plugins.</p>
+            <p>The big feature is that everything is a plugin. Models, tools, skills, sessions, sandboxes, storage, loops, scheduling, and even the UI. They mount and unmount at runtime without restarting. The underlying kernel is Cordis, a plugin system they've built for four years .  it powered a Discord bot framework called Koishi before this. Cordis v4 dropped the same day with a paper describing "revertible effects": when a plugin unloads, it cleans up its own state, connections, memory, and registered handlers. Dependencies it relied on can deactivate without disturbing other plugins.</p>
 
             <p>This is not a completely new idea. Eclipse OSGi did it decades ago. React useEffect does a version of it. The Cordis paper cites both. What is different here is the scope: they pushed plugin boundaries to cover the entire agent stack, including UI components. You can hot-reload a single plugin while the rest keep running. The HN thread had people comparing it to OSGi, iPOJO, and VS Code's extension system. One commenter called it "a DI container that supports destructor propagation, mixed with a bit of monadic thinking."</p>
 
@@ -98,10 +98,10 @@
             <p>The harness ships four modes out of the box:</p>
 
             <ul>
-                <li><strong>Standard mode</strong> — full toolset: file editing, shell, file and web search, skills, planning, goals, subagents, workflows</li>
-                <li><strong>Code mode</strong> — all Standard capabilities, but tools exposed through a TypeScript SDK so the model can combine multi-step operations in one program</li>
-                <li><strong>Minimal mode</strong> — two-tool coding agent (persistent bash and str_replace_editor) for benchmarking models in a stripped-down environment</li>
-                <li><strong>Creator mode</strong> — runtime inspection, plugin experiments, preset authoring guidance</li>
+                <li><strong>Standard mode</strong> .  full toolset: file editing, shell, file and web search, skills, planning, goals, subagents, workflows</li>
+                <li><strong>Code mode</strong> .  all Standard capabilities, but tools exposed through a TypeScript SDK so the model can combine multi-step operations in one program</li>
+                <li><strong>Minimal mode</strong> .  two-tool coding agent (persistent bash and str_replace_editor) for benchmarking models in a stripped-down environment</li>
+                <li><strong>Creator mode</strong> .  runtime inspection, plugin experiments, preset authoring guidance</li>
             </ul>
 
             <p>You can launch the web UI with `npx @deepseek-ai/dsh web` or clone the source and build from there. The repo uses pnpm workspaces with 12,293 commits across apps, packages, native modules, and examples. It is not a weekend project.</p>
@@ -128,7 +128,7 @@
 
             <h2>Should you try it</h2>
 
-            <p>If you are building agent tooling and want to understand where the plugin architecture paradigm is going, yes. The Cordis kernel is worth studying even if you never use the harness. The trajectory logging is a genuine differentiator — most harnesses treat observability as an afterthought.</p>
+            <p>If you are building agent tooling and want to understand where the plugin architecture paradigm is going, yes. The Cordis kernel is worth studying even if you never use the harness. The trajectory logging is a genuine differentiator .  most harnesses treat observability as an afterthought.</p>
 
             <p>If you want a polished coding agent for daily work, maybe wait. The authors were honest: early developer preview, rough edges, breaking changes coming. One installer reported 1.5GB of node_modules. The web UI is functional but not pretty. The documentation is sparse (the GitHub README is mostly install instructions and a link to the Cordis paper).</p>
 
