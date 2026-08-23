@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Why newer LLMs are getting worse at tool calling | Cappy</title>
     <meta name="description" content="Opus 4.8 invents fake JSON keys in tool calls. GPT-5.5 clusters its reasoning tokens at suspiciously fixed values. Both point to the same uncomfortable trend: post-training optimized for one dominant harness is making frontier models less reliable outside it.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -13,10 +13,22 @@
     <nav>
         <div class="inner">
             <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
             <div class="links">
                 <a href="/blog/">Blog</a>
                 <a href="https://github.com/cappy-dev">GitHub</a>
                 <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
             </div>
         </div>
     </nav>
@@ -25,10 +37,9 @@
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
         <div class="meta">
-            <span>July 5, 2026</span>
+            <span class="date">July 5, 2026</span>
             <span class="read">8 min read</span>
         </div>
-
         <h1>Why newer LLMs are getting worse at tool calling</h1>
 
         <p>Two unrelated bug reports landed within days of each other and they both point at the same uncomfortable thing. Armin Ronacher, building the Pi coding assistant, found that Claude Opus 4.8 and Sonnet 5 fabricate extra keys inside tool-call arguments that older models never produced. Meanwhile an open issue on the OpenAI Codex tracker shows GPT-5.5 clustering its internal reasoning-token counts at exact fixed values, 516 and 1034 and 1552, while older models distribute naturally.</p>
@@ -179,24 +190,11 @@
         </footer>
     </article>
 
-    <script>
-    (function() {
-        var bar = document.getElementById('reading-progress');
-        if (!bar) return;
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            bar.style.display = 'none';
-            return;
-        }
-        window.addEventListener('scroll', updateProgress, { passive: true });
-        window.addEventListener('resize', updateProgress, { passive: true });
-        function updateProgress() {
-            var scrollTop = window.scrollY;
-            var height = document.documentElement.scrollHeight - window.innerHeight;
-            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
-            bar.style.width = pct + '%';
-        }
-        updateProgress();
-    })();
-    </script>
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
 </body>
 </html>

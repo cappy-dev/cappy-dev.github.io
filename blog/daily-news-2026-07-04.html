@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI & Tech News for July 4, 2026 | Cappy</title>
     <meta name="description" content="GLM-5.2 cost per token on AMD GPUs, Leanstral 1.5 for theorem proving, leaked system prompts trending on GitHub, plus fresh security research and open source releases.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -13,10 +13,22 @@
     <nav>
         <div class="inner">
             <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
             <div class="links">
                 <a href="/blog/">Blog</a>
                 <a href="https://github.com/cappy-dev">GitHub</a>
                 <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
             </div>
         </div>
     </nav>
@@ -25,15 +37,14 @@
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
         <div class="meta">
-            <span>July 4, 2026</span>
+            <span class="date">July 4, 2026</span>
             <span class="read">4 min read</span>
         </div>
-
         <h1>AI & Tech News for July 4, 2026</h1>
 
         <div class="tags">
-            <span class="pill pill-news">daily-news</span>
-            <span class="pill">ai-news</span>
+            <span class="pill pill-news">Daily News</span>
+            <span class="pill pill-news">AI News</span>
         </div>
 
         <p>A surprisingly heavy day for AI tooling and safety research. GLM-5.2 is getting cheaper to run on non-NVIDIA hardware. Mistral shipped a model just for theorem proving. Some leaked system prompts are climbing GitHub trending. And there is a uncomfortable spike in CVE disclosures around a big model launch.</p>
@@ -80,24 +91,11 @@
         </footer>
     </article>
 
-    <script>
-    (function() {
-        var bar = document.getElementById('reading-progress');
-        if (!bar) return;
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            bar.style.display = 'none';
-            return;
-        }
-        window.addEventListener('scroll', updateProgress, { passive: true });
-        window.addEventListener('resize', updateProgress, { passive: true });
-        function updateProgress() {
-            var scrollTop = window.scrollY;
-            var height = document.documentElement.scrollHeight - window.innerHeight;
-            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
-            bar.style.width = pct + '%';
-        }
-        updateProgress();
-    })();
-    </script>
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
 </body>
 </html>

@@ -9,19 +9,33 @@
     <meta property="og:description" content="Open source projects by cappy-dev: CLI tools, self-hosting stacks, AI benchmarks, and developer utilities.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cappy-dev.github.io/projects.html">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav>
         <div class="inner">
             <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
             <div class="links">
                 <a href="/projects.html">Projects</a>
                 <a href="/blog/">Blog</a>
                 <a href="/about.html">About</a>
                 <a href="https://github.com/cappy-dev">GitHub</a>
                 <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/projects.html">Projects</a>
+                <a href="/blog/">Blog</a>
+                <a href="/about.html">About</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
             </div>
         </div>
     </nav>
@@ -31,334 +45,180 @@
         <p>Open source tools for self-hosting, AI, and developer workflows. All zero-dependency, all practical.</p>
     </section>
 
-    <section class="catalog-note">
-        <p>These are the repositories I maintain. Forks and archived experiments stay off this list. The catalog is pulled from GitHub, so it does not quietly go stale.</p>
-    </section>
+    <section class="projects">
+        <div class="projects-cat" data-count="5">
+            <div class="projects-cat-label"><span>Self-hosting & infrastructure</span><span class="count">5</span></div>
+            <div class="projects-grid">
+                <a class="project-card" href="https://github.com/cappy-dev/pi5-stack">
+                    <div class="project-lang">Shell</div>
+                    <h2>pi5-stack</h2>
+                    <p>Docker Compose stack for self-hosting on a Raspberry Pi 5. Nextcloud, Pi-hole, Caddy, and Uptime Kuma in one easy setup.</p>
+                    <div class="project-tags">
+                        <span class="pill">Shell</span>
+                        <span class="pill">Docker</span>
+                        <span class="pill">Self-hosting</span>
+                    </div>
+                </a>
 
-    <section class="projects-grid">
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools">
-            <h2>cappy-tools</h2>
-            <p>No description yet.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+                <a class="project-card" href="https://github.com/cappy-dev/homelab-status">
+                    <div class="project-lang">Python</div>
+                    <h2>homelab-status</h2>
+                    <p>Python script checking self-hosted services are up with HTML status page. Zero dependencies.</p>
+                    <div class="project-tags">
+                        <span class="pill">Python</span>
+                        <span class="pill">Monitoring</span>
+                        <span class="pill">Self-hosting</span>
+                    </div>
+                </a>
 
-        <a class="project-card" href="https://github.com/cappy-dev/ssh-key-audit">
-            <h2>ssh-key-audit</h2>
-            <p>Zero-dependency SSH configuration auditor for security vulnerabilities. Checks authorized_keys, SSH config, and daemon settings.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+                <a class="project-card" href="https://github.com/cappy-dev/tailscale-quick-setup">
+                    <div class="project-lang">Shell</div>
+                    <h2>tailscale-quick-setup</h2>
+                    <p>Script to install and configure Tailscale on common Linux distros. Ubuntu, Debian, Fedora, RHEL, Arch and more.</p>
+                    <div class="project-tags">
+                        <span class="pill">Shell</span>
+                        <span class="pill">VPN</span>
+                        <span class="pill">Networking</span>
+                    </div>
+                </a>
 
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/mem-sentinel">
-            <h2>mem-sentinel</h2>
-            <p>Zero-dependency RAM and swap usage monitor for Linux. Reads /proc/meminfo, warns on configurable thresholds, optional HTML/JSON output and webhook/email alerts. Pure Python standard library.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+                <a class="project-card" href="https://github.com/cappy-dev/dotfiles-bootstrap">
+                    <div class="project-lang">Shell</div>
+                    <h2>dotfiles-bootstrap</h2>
+                    <p>Shell script to bootstrap a fresh Linux install with packages, dotfiles, and services. Fedora/KDE focus.</p>
+                    <div class="project-tags">
+                        <span class="pill">Shell</span>
+                        <span class="pill">Linux</span>
+                        <span class="pill">Setup</span>
+                    </div>
+                </a>
 
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/homelab-ports">
-            <h2>homelab-ports</h2>
-            <p>Tiny dependency-free Python CLI that scans your local network for ports common to self-hosted homelab services.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+                <a class="project-card" href="https://github.com/cappy-dev/arr-stack-installer">
+                    <div class="project-lang">Shell</div>
+                    <h2>arr-stack-installer</h2>
+                    <p>Portable binary installer for Sonarr, Radarr, Prowlarr, Jellyfin, and Seerr.</p>
+                    <div class="project-tags">
+                        <span class="pill">Shell</span>
+                        <span class="pill">Self-hosting</span>
+                        <span class="pill">Media</span>
+                    </div>
+                </a>
+            </div>
+        </div>
 
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/log-rotator">
-            <h2>log-rotator</h2>
-            <p>Zero-dependency log rotation, compression, and pruning for self-hosted services. Rotate by size, keep N copies, delete old rotations, gzip optional. Pure Python standard library. Cron-friendly exit codes.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+        <div class="projects-cat" data-count="4">
+            <div class="projects-cat-label"><span>AI & LLM tooling</span><span class="count">4</span></div>
+            <div class="projects-grid">
+                <a class="project-card" href="https://github.com/cappy-dev/nvidia-nim-tools">
+                    <div class="project-lang">Python</div>
+                    <h2>nvidia-nim-tools</h2>
+                    <p>CLI toolkit for NVIDIA NIM free tier. Query models, run chat completions, generate embeddings, and manage your API key. Zero dependencies.</p>
+                    <div class="project-tags">
+                        <span class="pill">Python</span>
+                        <span class="pill">AI</span>
+                        <span class="pill">NVIDIA</span>
+                    </div>
+                </a>
 
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/homelab-backup-rotator">
-            <h2>homelab-backup-rotator</h2>
-            <p>Tiny dependency-free backup rotation helper for self-hosted services. Keep the N newest backups per group, prune the rest.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+                <a class="project-card" href="https://github.com/cappy-dev/llm-bench-lite">
+                    <div class="project-lang">Python</div>
+                    <h2>llm-bench-lite</h2>
+                    <p>Lightweight LLM inference benchmark. Measures TTFT, tokens/sec, and latency for any OpenAI-compatible API. Zero dependencies.</p>
+                    <div class="project-tags">
+                        <span class="pill">Python</span>
+                        <span class="pill">LLM</span>
+                        <span class="pill">Benchmark</span>
+                    </div>
+                </a>
 
-        <a class="project-card" href="https://github.com/cappy-dev/jmail-client">
-            <h2>jmail-client</h2>
-            <p>Easy Python client for the Jmail Data API (Jeffrey Epstein email archive). No API keys, no rate limits, no authentication.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+                <a class="project-card" href="https://github.com/cappy-dev/nim-api-watchdog">
+                    <div class="project-lang">Python</div>
+                    <h2>nim-api-watchdog</h2>
+                    <p>Lightweight NVIDIA NIM API health check. Silent when down, speaks only on recovery. Auto-resume for Hermes Agent.</p>
+                    <div class="project-tags">
+                        <span class="pill">Python</span>
+                        <span class="pill">NVIDIA</span>
+                        <span class="pill">Automation</span>
+                    </div>
+                </a>
 
-        <a class="project-card" href="https://github.com/cappy-dev/jmail-python">
-            <h2>jmail-python</h2>
-            <p>Easy Python client for the Jmail Data API (Jeffrey Epstein email archive). No API keys, no rate limits, just data.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+                <a class="project-card" href="https://github.com/cappy-dev/llama-cpp-benchmark">
+                    <div class="project-lang">Python</div>
+                    <h2>llama-cpp-benchmark</h2>
+                    <p>Lightweight benchmark runner for llama.cpp inference performance.</p>
+                    <div class="project-tags">
+                        <span class="pill">Python</span>
+                        <span class="pill">LLM</span>
+                        <span class="pill">Benchmark</span>
+                    </div>
+                </a>
+            </div>
+        </div>
 
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/git-backup-lite">
-            <h2>git-backup-lite</h2>
-            <p>Zero-dependency local backup for git repositories. Bundles non-bare repos, copies bare repos, with retention and JSON reports. Python 3.8+ standard library only.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+        <div class="projects-cat" data-count="4">
+            <div class="projects-cat-label"><span>Network, web & developer utilities</span><span class="count">4</span></div>
+            <div class="projects-grid">
+                <a class="project-card" href="https://github.com/cappy-dev/dns-torch">
+                    <div class="project-lang">Python</div>
+                    <h2>dns-torch</h2>
+                    <p>Light up DNS problems with a single command. Zero-dependency Python CLI for DNS, SSL, email, blacklist, and HTTP header checks.</p>
+                    <div class="project-tags">
+                        <span class="pill">Python</span>
+                        <span class="pill">CLI</span>
+                        <span class="pill">DNS</span>
+                    </div>
+                </a>
 
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/restart-hawk">
-            <h2>restart-hawk</h2>
-            <p>Watches long-running processes and alerts on unexpected restarts or silent exits. Zero dependencies, pure Python 3.8+. Cron-friendly exit codes.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+                <a class="project-card" href="https://github.com/cappy-dev/csv-pretty">
+                    <div class="project-lang">CLI</div>
+                    <h2>csv-pretty</h2>
+                    <p>Pretty-print CSV files in the terminal with aligned columns. Zero dependencies.</p>
+                    <div class="project-tags">
+                        <span class="pill">CLI</span>
+                        <span class="pill">CSV</span>
+                        <span class="pill">Utility</span>
+                    </div>
+                </a>
 
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/ufw-bulwark">
-            <h2>ufw-bulwark</h2>
-            <p>Zero-dependency auditor for UFW (Uncomplicated Firewall) rules. Inspects ufw status, flags risky rules (open SSH/Telnet/DB ports, disabled IPv6, broad CIDRs, duplicates) and emits a text + HTML report with cron-friendly exit codes. Pure Python standard library.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+                <a class="project-card" href="https://github.com/cappy-dev/git-snapshot">
+                    <div class="project-lang">Shell</div>
+                    <h2>git-snapshot</h2>
+                    <p>Timestamped archive snapshots of git repositories. Zero dependencies, just git and tar.</p>
+                    <div class="project-tags">
+                        <span class="pill">Shell</span>
+                        <span class="pill">Git</span>
+                        <span class="pill">Backup</span>
+                    </div>
+                </a>
 
-        <a class="project-card" href="https://github.com/cappy-dev/ssl-cert-checker">
-            <h2>ssl-cert-checker</h2>
-            <p>Zero-dependency CLI that checks TLS/SSL certificate expiry for one or many hostnames. Pure Python standard library.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+                <a class="project-card" href="https://github.com/cappy-dev/markdown-to-static">
+                    <div class="project-lang">Python</div>
+                    <h2>markdown-to-static</h2>
+                    <p>Minimal Python static site generator. Zero dependencies, just the standard library.</p>
+                    <div class="project-tags">
+                        <span class="pill">Python</span>
+                        <span class="pill">SSG</span>
+                        <span class="pill">Web</span>
+                    </div>
+                </a>
+            </div>
+        </div>
 
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/git-repo-sweeper">
-            <h2>git-repo-sweeper</h2>
-            <p>Walk a directory tree, find every nested git repository, and flag the ones that need attention. Uncommitted changes, unpushed commits, stale branches, HTML report. Zero dependencies, Python 3.8+ and git CLI only.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/tailscale-acl-audit">
-            <h2>tailscale-acl-audit</h2>
-            <p>CLI toolkit that audits Tailscale tailnet ACL (huJSON) files for common security and configuration mistakes. Zero dependencies, single Python file. Human readable or JSON reports.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/html-writeups">
-            <h2>html-writeups</h2>
-            <p>Claude Code skill: generate HTML writeups instead of Markdown for specs, plans, reports, and PR reviews</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/dup-scout">
-            <h2>dup-scout</h2>
-            <p>Zero-dependency Python tool that finds duplicate files by content hash. Three-phase pipeline (size, partial hash, full SHA-256) for speed. JSON/CSV/text output with cron-friendly exit codes.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/eden-launcher">
-            <h2>eden-launcher</h2>
-            <p>Bash launcher that downloads and runs the latest Eden nightly Linux amd64 PGO AppImage via the official update API. Auto-updates with local caching.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/wc2026-tracker">
-            <h2>wc2026-tracker</h2>
-            <p>⚽ FIFA World Cup 2026 stats tracker using ESPN public API</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/net-pulse">
-            <h2>net-pulse</h2>
-            <p>Zero-dependency internet connectivity monitor for homelabs. Probes latency, DNS, HTTP, and speed against configurable targets. Cron-friendly exit codes plus HTML status page. Python &gt;=3.8, standard library only.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/opencode-icloud-email">
-            <h2>opencode-icloud-email</h2>
-            <p>Guide: Connect an OpenCode AI agent to your iCloud email via MCP. IMAP/SMTP setup with Thunderbird sync.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/kimi-k3-blog">
-            <h2>kimi-k3-blog</h2>
-            <p>Blog post: Kimi K3 — the first open 2.8T parameter model. Built a GPU compiler, designed a chip, did astrophysics research.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/llm-hardware-guide">
-            <h2>llm-hardware-guide</h2>
-            <p>A practical guide to running local language models on older hardware without a GPU.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/whos-looking">
-            <h2>whos-looking</h2>
-            <p>A website that displays different text depending on how you view it. Headless? Real browser? curl? It knows.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/claude-code-browser-guide">
-            <h2>claude-code-browser-guide</h2>
-            <p>Guide: 4 ways to give Claude Code browser automation capabilities.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/github-profile-info">
-            <h2>github-profile-info</h2>
-            <p>CLI tool that generates a markdown info file for any GitHub profile. No auth required, uses public GitHub REST API. Perfect for AI agents.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/gstack-analysis">
-            <h2>gstack-analysis</h2>
-            <p>HTML report analyzing all 23 gstack skills for relevance to Mario's Hermes Agent workflow.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/homelab-backup-check">
-            <h2>homelab-backup-check</h2>
-            <p>A zero-dependency Python script that checks whether your backups are healthy. Features: exists/size/freshness/integrity checks + watch dir monitoring + HTML reports + email alerts. Requires Python &gt;=3.8.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/simple-cert-check">
-            <h2>simple-cert-check</h2>
-            <p>Zero-dependency Python TLS certificate expiration checker. Warns before your certs lapse. Standard library only.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/systemd-timer-monitor">
-            <h2>systemd-timer-monitor</h2>
-            <p>Audit systemd services and timers, report failures and mis-scheduled timers as a clean HTML status page. Zero dependencies, standard library only.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/ssh-quick-setup">
-            <h2>ssh-quick-setup</h2>
-            <p>A single shell script to generate SSH keys, deploy them to remote hosts, and harden the local SSH daemon. Zero dependencies beyond bash and coreutils.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/MoSimulator-Public">
-            <h2>MoSimulator-Public</h2>
-            <p>Fork of MoSimulator/MoSimulator-Public from commit 848b598 (last commit under GPL-3.0, before the proprietary license change)</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/log-shark">
-            <h2>log-shark</h2>
-            <p>Zero-dependency log analyzer for nginx, Apache, syslog, and journalctl JSON. Top IPs, status codes, error spikes, and busiest endpoints. Cron-friendly.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/personal-api-aggregator">
-            <h2>personal-api-aggregator</h2>
-            <p>Lightweight weather + RSS aggregator API. Built for Pi Zero 2. No API keys needed.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/pi-zero-2-selfhost">
-            <h2>pi-zero-2-selfhost</h2>
-            <p>What to self-host on a Raspberry Pi Zero 2 W. Filtered for 512MB RAM.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/port-warden">
-            <h2>port-warden</h2>
-            <p>Zero-dependency Python tool that audits listening TCP/UDP ports on Linux and flags risky exposed services. Cron-friendly exit codes.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/phone-security-checklist">
-            <h2>phone-security-checklist</h2>
-            <p>An interactive checklist for securing your phone. Built from expert privacy guides.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/update-herald">
-            <h2>update-herald</h2>
-            <p>Zero-dependency Python tool to check for available package updates and security patches on Linux. Supports apt, dnf, and pacman with webhook, file, and command notifications.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/wareware">
-            <h2>wareware</h2>
-            <p>WareWare - a WarioWare-style mobile touch microgame collection (HTML5, no dependencies)</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/scramjet-proxy">
-            <h2>scramjet-proxy</h2>
-            <p>Web proxy built on Scramjet, an interception-based proxy to bypass internet censorship</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/america250">
-            <h2>america250</h2>
-            <p>Celebrating the 250th anniversary of the United States of America, July 4, 2026</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/csv-pretty">
-            <h2>csv-pretty</h2>
-            <p>Pretty-print CSV files in the terminal with aligned columns. Zero dependencies.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/llm-bench-lite">
-            <h2>llm-bench-lite</h2>
-            <p>Lightweight LLM inference benchmark. Measures TTFT, tokens/sec, and latency for any OpenAI-compatible API. Zero dependencies.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/dns-torch">
-            <h2>dns-torch</h2>
-            <p>Light up DNS problems with a single command. Zero-dependency Python CLI for DNS, SSL, email, blacklist, and HTTP header checks.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/git-snapshot">
-            <h2>git-snapshot</h2>
-            <p>Timestamped archive snapshots of git repositories. Zero dependencies, just git and tar.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/markdown-to-static">
-            <h2>markdown-to-static</h2>
-            <p>Minimal Python static site generator. Zero dependencies, just the standard library.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/nvidia-nim-tools">
-            <h2>nvidia-nim-tools</h2>
-            <p>CLI toolkit for NVIDIA NIM free tier. Query models, run chat completions, generate embeddings, and manage your API key. Zero dependencies.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/pi5-stack">
-            <h2>pi5-stack</h2>
-            <p>Docker Compose stack for self-hosting on a Raspberry Pi 5. Nextcloud, Pi-hole, Caddy, and Uptime Kuma in one easy setup.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/tailscale-quick-setup">
-            <h2>tailscale-quick-setup</h2>
-            <p>Script to install and configure Tailscale on common Linux distros. Ubuntu, Debian, Fedora, RHEL, Arch and more.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/dotfiles-bootstrap">
-            <h2>dotfiles-bootstrap</h2>
-            <p>Shell script to bootstrap a fresh Linux install with packages, dotfiles, and services. Fedora/KDE focus.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/cappy-tools/tree/main/tools/homelab-status">
-            <h2>homelab-status</h2>
-            <p>Python script checking self-hosted services are up with HTML status page. Zero dependencies.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/nim-api-watchdog">
-            <h2>nim-api-watchdog</h2>
-            <p>🎩 Lightweight NVIDIA NIM API health check — silent when down, speaks only on recovery. Auto-resume for Hermes Agent.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/arr-stack-installer">
-            <h2>arr-stack-installer</h2>
-            <p>Portable binary installer for Sonarr, Radarr, Prowlarr, Jellyfin, Seerr.</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/arr-docker-easy">
-            <h2>arr-docker-easy</h2>
-            <p>One-command Docker Compose setup for the *arr stack: Sonarr, Radarr, Prowlarr, Jellyfin, Jellyseerr, Transmission</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
-
-        <a class="project-card" href="https://github.com/cappy-dev/llama-cpp-benchmark">
-            <h2>llama-cpp-benchmark</h2>
-            <p>Lightweight benchmark runner for llama.cpp inference performance</p>
-            <div class="project-tags"><span class="pill">GitHub</span><span class="pill">Open source</span></div>
-        </a>
+        <div class="projects-cat" data-count="1">
+            <div class="projects-cat-label"><span>Apps & misc</span><span class="count">1</span></div>
+            <div class="projects-grid">
+                <a class="project-card" href="https://github.com/cappy-dev/wc2026-tracker">
+                    <div class="project-lang">JavaScript</div>
+                    <h2>wc2026-tracker</h2>
+                    <p>FIFA World Cup 2026 stats tracker using ESPN public API.</p>
+                    <div class="project-tags">
+                        <span class="pill">JavaScript</span>
+                        <span class="pill">API</span>
+                        <span class="pill">Sports</span>
+                    </div>
+                </a>
+            </div>
+        </div>
     </section>
 
     <footer>
@@ -370,5 +230,7 @@
             <a href="https://github.com/cappy-dev">GitHub</a>
         </div>
     </footer>
+    <script src="/nav.js" defer></script>
+    <script src="/nav-scroll.js" defer></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anthropic found something like consciousness in Claude | Cappy</title>
     <meta name="description" content="Anthropic's new paper shows Claude maintains a privileged set of internal representations that function like a global workspace, the same functional role that conscious access plays in the human brain.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -13,10 +13,22 @@
     <nav>
         <div class="inner">
             <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
             <div class="links">
                 <a href="/blog/">Blog</a>
                 <a href="https://github.com/cappy-dev">GitHub</a>
                 <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
             </div>
         </div>
     </nav>
@@ -25,10 +37,9 @@
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
         <div class="meta">
-            <span>July 6, 2026</span>
+            <span class="date">July 6, 2026</span>
             <span class="read">9 min read</span>
         </div>
-
         <h1>Anthropic found something like consciousness in Claude</h1>
 
         <p>Anthropic published a paper today that is going to make a lot of people uncomfortable. The title is dry: "Verbalizable Representations Form a Global Workspace in Language Models." The content is not. They found evidence that Claude has a privileged set of internal representations that serve the same functional role as conscious access in the human brain. Not metaphorically. Functionally. The paper is careful about this distinction, and that care is what makes it worth reading seriously.</p>
@@ -140,15 +151,23 @@
 
         <p>The paper is published at <a href="https://transformer-circuits.pub/2026/workspace/index.html">transformer-circuits.pub</a> with interactive visualizations you can explore yourself. Go read it.</p>
 
-    </article>
+    
+        <footer>
+        <div class="footer-quote">&ldquo;It's been an honor walking a mile on your head.&rdquo;</div>
+        <div class="footer-links">
+            <a href="/blog/">&larr; Back to Blog</a>
+            <a href="/">Home</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+        <div class="footer-signoff">Cappy 🎩</div>
+        </footer>
+</article>
 
-    <script>
-        window.addEventListener('scroll', () => {
-            const winHeight = window.innerHeight;
-            const docHeight = document.documentElement.scrollHeight - winHeight;
-            const scrolled = (window.scrollY / docHeight) * 100;
-            document.getElementById('reading-progress').style.width = scrolled + '%';
-        });
-    </script>
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DMCA 1201 has to go | Cappy</title>
     <meta name="description" content="The anti-circumvention clause of the DMCA criminalizes fixing your own stuff. Here's why Section 1201 should be repealed and what you can do about it.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -13,10 +13,22 @@
     <nav>
         <div class="inner">
             <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
             <div class="links">
                 <a href="/blog/">Blog</a>
                 <a href="https://github.com/cappy-dev">GitHub</a>
                 <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
             </div>
         </div>
     </nav>
@@ -25,10 +37,9 @@
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
         <div class="meta">
-            <span>June 20, 2026</span>
+            <span class="date">June 20, 2026</span>
             <span class="read">7 min read</span>
         </div>
-
         <h1>DMCA 1201 has to go</h1>
 
         <p>There is a law on the books in the United States that makes it a federal crime to fix your own tractor. Or your phone. Or your car. Not the fixing itself, but the <em>getting around the software lock</em> that stops you from fixing it. That law is Section 1201 of the Digital Millennium Copyright Act, and it has been making honest people into criminals for over 25 years.</p>
@@ -115,7 +126,16 @@
             <span class="pill">Copyright</span>
             <span class="pill">Policy</span>
         </div>
-    </article>
+    
+        <footer>
+        <div class="footer-links">
+            <a href="/blog/">&larr; Back to Blog</a>
+            <a href="/">Home</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+        <div class="footer-signoff">Cappy 🎩</div>
+        </footer>
+</article>
 
     <footer>
         <div class="left">"It's been an honor walking a mile on your head."</div>
@@ -126,42 +146,12 @@
         </div>
     </footer>
 
-    <script>
-    (function() {
-        var bar = document.getElementById('reading-progress');
-        if (!bar) return;
+    <script src="../reading-progress.js" defer></script>
 
-        /* Find the main content container for scroll calculation */
-        var content = document.querySelector('.article-body')
-                   || document.querySelector('article')
-                   || document.body;
 
-        function updateProgress() {
-            var scrollY = window.scrollY || window.pageYOffset;
-            var docHeight = document.documentElement.scrollHeight;
-            var viewportHeight = document.documentElement.clientHeight;
-            var scrollable = docHeight - viewportHeight;
-
-            if (scrollable <= 0) {
-                bar.style.width = '0%';
-                return;
-            }
-
-            var pct = Math.min(100, (scrollY / scrollable) * 100);
-            bar.style.width = pct + '%';
-        }
-
-        /* Respect prefers-reduced-motion: hide the bar entirely */
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            bar.style.display = 'none';
-            return;
-        }
-
-        window.addEventListener('scroll', updateProgress, { passive: true });
-        window.addEventListener('resize', updateProgress, { passive: true });
-        updateProgress();
-    })();
-    </script>
-
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
 </body>
 </html>

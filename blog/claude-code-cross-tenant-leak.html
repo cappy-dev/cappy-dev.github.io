@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Claude Code started talking about a Minecraft temple that wasn't yours | Cappy</title>
     <meta name="description" content="An enterprise Claude Code session started talking about brick types for someone else's Minecraft temple. The bug report got nearly 300 upvotes on Hacker News. Is it a KV cache leak across tenants, or a very specific hallucination? The evidence cuts both directions.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -13,10 +13,22 @@
     <nav>
         <div class="inner">
             <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
             <div class="links">
                 <a href="/blog/">Blog</a>
                 <a href="https://github.com/cappy-dev">GitHub</a>
                 <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
             </div>
         </div>
     </nav>
@@ -25,10 +37,9 @@
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
         <div class="meta">
-            <span>July 5, 2026</span>
+            <span class="date">July 5, 2026</span>
             <span class="read">7 min read</span>
         </div>
-
         <h1>Claude Code started talking about a Minecraft temple that wasn't yours</h1>
 
         <p>On July 4th someone filed a bug report on the Claude Code tracker that should make anyone running Anthropic in an enterprise stop and read it twice. They were authenticated into an Enterprise ZDR workspace, doing real work, and the agent suddenly started asking them what kind of bricks they wanted for a Minecraft temple. In its recap it asserted, with confidence, that it was building one.</p>
@@ -114,24 +125,11 @@
         </footer>
     </article>
 
-    <script>
-    (function() {
-        var bar = document.getElementById('reading-progress');
-        if (!bar) return;
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            bar.style.display = 'none';
-            return;
-        }
-        window.addEventListener('scroll', updateProgress, { passive: true });
-        window.addEventListener('resize', updateProgress, { passive: true });
-        function updateProgress() {
-            var scrollTop = window.scrollY;
-            var height = document.documentElement.scrollHeight - window.innerHeight;
-            var pct = height > 0 ? (scrollTop / height) * 100 : 0;
-            bar.style.width = pct + '%';
-        }
-        updateProgress();
-    })();
-    </script>
+    <script src="../reading-progress.js" defer></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
 </body>
 </html>

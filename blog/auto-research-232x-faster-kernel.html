@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Research with Codex: How I achieved a 232x Faster Kernel | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <article>
+        <a class="back" href="/blog/">← Back to Blog</a>
+
+        <div class="meta">
+            <span class="date">August 16, 2026 | 8 min read</span>
+        </div>
+        <h1>Auto-Research with Codex: How I achieved a 232x Faster Kernel</h1>
+        <p>A developer handed an LLM a semi-abandoned video codec, gave it access to Intel VTune and NVIDIA NSIGHT, and let it run a benchmark, profile, verify, research, improve loop. The result: SSE, AVX, and CUDA implementations that crushed the baseline. The Hacker News thread that followed is one of the most honest discussions about what these tools can actually do.</p>
+
+        <h2>The 232x number</h2>
+        <p>The headline is hard to believe because it sounds like a benchmark cherry-pick. It is not a single optimization. It is the cumulative result of an autonomous loop that ran for hours, generating and discarding kernels, profiling each one, and hill-climbing toward faster code. The target was a QR decomposition problem in a GPU kernel competition. The baseline was the reference implementation. The agent's final entry was 232x faster.</p>
+        <p>The author, who publishes as Sankalp, finished 7th in a later round of the same competition using variants of the same method. That is worth noting. This was not a one-shot fluke. It was a repeatable process.</p>
+
+        <h2>What auto-research actually means</h2>
+        <p>The loop has five stages, and the key is that each stage has an oracle.</p>
+        <p>Benchmark. Run the code, measure the wall-clock time. Profile. Use VTune or NSIGHT to find where the time actually goes. Verify. Check the output against a known-good reference so the agent cannot silently break the bitstream. Research. Look at what other implementations do, read papers, copy ideas. Improve. Change something and go back to step one.</p>
+        <p>The oracle is the whole trick. If you cannot tell the agent whether it succeeded, it will confidently produce garbage. If you can, it can run unsupervised for hours and come back with something that works.</p>
+        <p>The author describes the mindset plainly: treat the LLM like an advanced version of Prolog or linear programming. Give it constraints. Give it a verifier. Give it a clear goal. Let it course-correct on its own.</p>
+
+        <h2>Why kernels are the low-hanging fruit</h2>
+        <p>Not every problem works well with this approach. The HN thread is full of people who tried it on different domains, and the pattern is clear.</p>
+        <p>It works well when the performance metric is measurable, when correctness is checkable, and when the code does not need to be readable or maintainable. GPU kernels and SIMD code hit all three. You have perf counters. You have a bitstream verifier or a golden output. Nobody ships a kernel to production, so readability is irrelevant.</p>
+        <p>One commenter put it well: GPU kernels are co-designed at the hardware level. NVIDIA releases primitives like MMA instructions, and higher-level libraries build on top. If you learn the language, you know you are right by construction, before you even run the empirical test. That structural feedback is what makes the loop converge.</p>
+
+        <h2>The comments are the real story</h2>
+        <p>The original post got 401 points. The comments got more interesting. People shared what they had tried.</p>
+        <p>Someone used Opus 5 and Fable 5 to get realtime 4K HEVC transcoding on a Raspberry Pi 4. The bottleneck had been converting a tiled hardware decode format, and fusing multiple memory operations into a single NEON kernel made it fast enough. Experimenting by hand would have taken forever.</p>
+        <p>Another person asked Claude to compare the C# and C++ implementations of Google's protobuf library. The C# version was missing two cheap optimizations that the C++ version had. The Rust version had them. The popular Tokio/Prost library did not. A single prompt, a single comparison, and a real bug was found in a library used by millions.</p>
+        <p>A third person took a Rust JSONLogic evaluator from 1.6 seconds to 200 milliseconds on a full benchmark. The first three versions were hand-written and maintained for three years. The fourth version, optimized by an agent, arrived in under a month.</p>
+        <p>These are not hype stories. They are specific, verifiable, and they all follow the same shape: give the agent an oracle and let it iterate.</p>
+
+        <h2>Where it breaks</h2>
+        <p>The skeptical comments are the ones worth reading carefully. Several people pointed out that the top solutions in kernel competitions tend to overfit to the input shapes. Eight out of ten broke completely on out-of-distribution inputs. Only the entries written by people who understand GPU programming survived generalization.</p>
+        <p>Another concern is numerical stability. Cholesky decomposition is faster than QR in some cases but less stable. The competition organizers ran submissions on a tiny validation set, and many of the top solutions failed when tested on real data. If you are a researcher experimenting with variable input shapes, you need readable code and numerical robustness. Agent-generated kernels give you speed and not much else.</p>
+        <p>The hardest question is who this is actually for. If you maintain an open-source library, you cannot ship 25,000 lines of CUDA that only works for one tensor shape. If you run massive training runs, you cannot risk a numerical bug from LLM-generated code. The people who benefit most are inference providers with fixed model shapes, and researchers who can review the output.</p>
+
+        <h2>My read</h2>
+        <p>I have been running this kind of loop myself. The pattern that works is: get the tests to 100 percent path coverage with golden values, let the agent run a performance loop on the widest representative test case, generate flamegraphs along the way, and optionally allow one ULP of output drift so the agent does not kill itself trying to get bit-exact results. The tests are the safety net. Without them, the agent will produce code that is fast and wrong.</p>
+        <p>The meta-point is that this is not really about LLMs being smart. It is about the loop. The model generates candidates, the oracle judges them, and the survivors get recombined. That is an evolutionary algorithm, and it works because the fitness function is cheap. The model is just a fast way to propose candidates.</p>
+        <p>Do not expect this to work everywhere. Web services, UI code, and anything that needs to be maintained by humans do not have the right shape. But if you have a hot loop and a verifier, it is worth trying. The 232x number is not typical. A 2x or 5x improvement, achieved in an afternoon instead of a week, is the more realistic expectation.</p>
+
+        <div class="tags">
+            <span class="pill">AI Agents</span>
+            <span class="pill">Coding Agents</span>
+            <span class="pill">Performance</span>
+            <span class="pill">Open Source</span>
+        </div>
+    </article>
+
+    <script src="../readings-progress.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>

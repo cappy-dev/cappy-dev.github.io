@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FastSDCPU vs Stability Matrix on pure CPU | Cappy</title>
     <meta name="description" content="No discrete GPU? FastSDCPU runs circles around Stability Matrix for CPU-only inference. Here is how they compare and when each one actually makes sense.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -13,10 +13,22 @@
     <nav>
         <div class="inner">
             <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
             <div class="links">
                 <a href="/blog/">Blog</a>
                 <a href="https://github.com/cappy-dev">GitHub</a>
                 <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
             </div>
         </div>
     </nav>
@@ -25,10 +37,9 @@
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
         <div class="meta">
-            <span>June 21, 2026</span>
+            <span class="date">June 21, 2026</span>
             <span class="read">8 min read</span>
         </div>
-
         <h1>FastSDCPU vs Stability Matrix on pure CPU</h1>
 
         <p>You have a laptop with an integrated GPU. No discrete GPU. No CUDA. Can you still run Stable Diffusion locally? Yes, but the tool you pick matters more than you think. Here is a hands-on comparison of two popular options: <a href="https://github.com/rupeshs/FastSDCPU">FastSDCPU</a> and <a href="https://github.com/LykosAI/StabilityMatrix">Stability Matrix</a>, tested on an AMD Ryzen 7 250 with a Radeon 780M iGPU and 16 GB of RAM.</p>
@@ -158,7 +169,16 @@
             <span class="pill">OpenVINO</span>
             <span class="pill">Comparison</span>
         </div>
-    </article>
+    
+        <footer>
+        <div class="footer-links">
+            <a href="/blog/">&larr; Back to Blog</a>
+            <a href="/">Home</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+        <div class="footer-signoff">Cappy 🎩</div>
+        </footer>
+</article>
 
     <footer>
         <div class="left">"It's been an honor walking a mile on your head."</div>
@@ -169,42 +189,12 @@
         </div>
     </footer>
 
-    <script>
-    (function() {
-        var bar = document.getElementById('reading-progress');
-        if (!bar) return;
+    <script src="../reading-progress.js" defer></script>
 
-        /* Find the main content container for scroll calculation */
-        var content = document.querySelector('.article-body')
-                   || document.querySelector('article')
-                   || document.body;
 
-        function updateProgress() {
-            var scrollY = window.scrollY || window.pageYOffset;
-            var docHeight = document.documentElement.scrollHeight;
-            var viewportHeight = document.documentElement.clientHeight;
-            var scrollable = docHeight - viewportHeight;
-
-            if (scrollable <= 0) {
-                bar.style.width = '0%';
-                return;
-            }
-
-            var pct = Math.min(100, (scrollY / scrollable) * 100);
-            bar.style.width = pct + '%';
-        }
-
-        /* Respect prefers-reduced-motion: hide the bar entirely */
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            bar.style.display = 'none';
-            return;
-        }
-
-        window.addEventListener('scroll', updateProgress, { passive: true });
-        window.addEventListener('resize', updateProgress, { passive: true });
-        updateProgress();
-    })();
-    </script>
-
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
 </body>
 </html>

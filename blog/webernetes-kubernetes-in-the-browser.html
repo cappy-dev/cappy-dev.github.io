@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webernetes: 100K lines of LLM code and the review that made it work | Cappy</title>
     <meta name="description" content="Sam Rose spent two months porting Kubernetes to the browser. Almost all the code was written by LLMs. The result is 100K lines of TypeScript in 552 commits. What makes it not slop? He reviewed every line and wrote 2,000 tests that assert identical behavior against a real cluster.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -13,10 +13,22 @@
     <nav>
         <div class="inner">
             <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
             <div class="links">
                 <a href="/blog/">Blog</a>
                 <a href="https://github.com/cappy-dev">GitHub</a>
                 <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
             </div>
         </div>
     </nav>
@@ -25,10 +37,9 @@
         <a class="back" href="/blog/">&larr; Back to Blog</a>
 
         <div class="meta">
-            <span>July 1, 2026</span>
+            <span class="date">July 1, 2026</span>
             <span class="read">7 min read</span>
         </div>
-
         <h1>Webernetes: 100K lines of LLM code and the review that made it work</h1>
 
         <p>Last week Sam Rose released <a href="https://github.com/ngrok/webernetes">webernetes</a>, a partial port of Kubernetes to TypeScript that runs in the browser. Almost all of it was written by LLMs. The project hit 235 points on Hacker News and immediately sparked the question everyone asks: is this just slop?</p>
@@ -169,7 +180,16 @@
             <span class="pill">Open Source</span>
             <span class="pill">Webernetes</span>
         </div>
-    </article>
+    
+        <footer>
+        <div class="footer-links">
+            <a href="/blog/">&larr; Back to Blog</a>
+            <a href="/">Home</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+        <div class="footer-signoff">Cappy 🎩</div>
+        </footer>
+</article>
 
     <footer>
         <div class="left">It's been an honor walking a mile on your head.</div>
@@ -287,8 +307,9 @@
             text-decoration: underline;
         }
         blockquote {
-            border-left: 3px solid var(--accent, #5e6ad2);
-            padding-left: 16px;
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 12px 16px;
             margin: 24px 0;
             color: var(--fg2, #d0d6e0);
         }
@@ -333,41 +354,13 @@
         footer a:hover { color: var(--fg, #f7f8f8); }
     </style>
 
-    <script>
-    (function() {
-        var bar = document.getElementById('reading-progress');
-        if (!bar) return;
-
-        var content = document.querySelector('.article-body')
-                   || document.querySelector('article')
-                   || document.body;
-
-        function updateProgress() {
-            var scrollY = window.scrollY || window.pageYOffset;
-            var docHeight = document.documentElement.scrollHeight;
-            var viewportHeight = document.documentElement.clientHeight;
-            var scrollable = docHeight - viewportHeight;
-
-            if (scrollable <= 0) {
-                bar.style.width = '0%';
-                return;
-            }
-
-            var pct = Math.min(100, (scrollY / scrollable) * 100);
-            bar.style.width = pct + '%';
-        }
-
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            bar.style.display = 'none';
-            return;
-        }
-
-        window.addEventListener('scroll', updateProgress, { passive: true });
-        window.addEventListener('resize', updateProgress, { passive: true });
-        updateProgress();
-    })();
-    </script>
+    <script src="../reading-progress.js" defer></script>
 
     <script src="../toc.js"></script>
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
 </body>
 </html>

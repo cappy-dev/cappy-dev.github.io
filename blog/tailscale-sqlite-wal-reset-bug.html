@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Tailscale Found a 16-Year-Old SQLite Bug | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+                        <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+<div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="meta">August 13, 2026</div>
+            <h1>How Tailscale Found a 16-Year-Old SQLite Bug</h1>
+            <div class="tags">
+                <span class="pill">SQLite</span>
+                <span class="pill">Debugging</span>
+                <span class="pill">Infrastructure</span>
+                <span class="pill">Tailscale</span>
+            </div>
+        </header>
+
+        <div class="article-body">
+            <p>SQLite is everywhere. It sits in your phone, your browser, your car, probably your toaster. It is the most deployed database engine in the world by a wide margin. People call it boring technology, and they mean it as a compliment. Boring means reliable. Boring means you don't think about it.</p>
+
+            <p>Then Tailscale spent six months chasing a corruption bug that shouldn't exist. They found a race condition in SQLite's checkpointing code that had been hiding since 2008. The fix shipped in SQLite 3.51.3. This is how they caught it.</p>
+
+            <h2>The setup</h2>
+
+            <p>Tailscale's control plane runs on SQLite. Each shard — an internal coordination server — gets its own SQLite database with a single Go process writing to it. That is the textbook way to use SQLite. One writer, no contention, no surprises.</p>
+
+            <p>They had been running this way since 2022 without issues. Then August 2025 hit. A backup pipeline reading from S3 reported corruption. SQLite's <code>PRAGMA integrity_check</code> confirmed it. They repaired the database, scratched their heads, and moved on.</p>
+
+            <p>It happened again. And again. Nineteen separate corruption incidents over six months.</p>
+
+            <h2>Why this was weird</h2>
+
+            <p>SQLite corruption is rare. The documentation lists specific ways to corrupt a database: broken POSIX locks, memory mismanagement, threading violations. Tailscale checked all of them. Their code hadn't changed in years. The corruption had no pattern — not tied to a specific shard, customer, time of day, or load level.</p>
+
+            <p>They could not reproduce it. The only way forward was to instrument their live production shards and wait for the next crash.</p>
+
+            <p>They also took out a professional support contract with the SQLite team. That turned out to be the smartest money they spent.</p>
+
+            <h2>The transaction log clue</h2>
+
+            <p>While waiting for the next incident, Tailscale built a transaction logging pipeline. Every modifying SQL statement went to a separate log file. Since SQLite uses serializable transactions with a single writer, the history was completely linear. Replaying transactions against a known-good backup should restore the database perfectly.</p>
+
+            <p>Then two incidents produced transaction logs that would not replay cleanly. Data written and committed by one transaction was invisible to later transactions. A write had vanished without an error. That should be impossible.</p>
+
+            <h2>Checkpointing and the WAL file</h2>
+
+            <p>SQLite with Write-Ahead Logging (WAL) writes new pages to a separate WAL file instead of the main database. Periodically, those pages get copied back to the database file in a process called checkpointing.</p>
+
+            <p>Most deployments let SQLite decide when to checkpoint. Tailscale took manual control to make backups fast and consistent. They checkpointed aggressively. That non-standard choice put them in territory few other users ever visit.</p>
+
+            <p>During corruption incidents, their metrics showed SQLite reporting more pages copied from the WAL than actually existed. If the WAL has 10 pages and SQLite says it copied 20, something is very wrong.</p>
+
+            <h2>The tmstmpvfs shim</h2>
+
+            <p>The SQLite developers built a debugging tool: a virtual filesystem wrapper called <code>tmstmpvfs</code> that traces every filesystem operation. SQLite's architecture splits into three layers — parser, pager, and virtual filesystem. The shim wraps the filesystem layer to log what actually hits the disk.</p>
+
+            <p>Tailscale deployed the shim and waited. The next corruption incident came quickly.</p>
+
+            <h2>The WAL-Reset bug</h2>
+
+            <p>The logs revealed a data race between a checkpoint and a write transaction. If a write occurs at a precise moment during checkpointing, the checkpoint process gets confused. It thinks some pages have been copied from the WAL to the database file, but they have not. Those pages are lost forever. The database file becomes corrupt because other pages — indexes, for example — reference pages that never made it.</p>
+
+            <p>The SQLite team named it the "WAL-Reset bug" and estimated it had existed for at least 16 years. It survived that long because the race window is vanishingly small. The SQLite developers had to add code to deliberately trigger it in their test suite just to verify the fix.</p>
+
+            <p>The fix adds a check to the checkpointing function that detects when the WAL has been reset by another thread. It landed in SQLite 3.51.3.</p>
+
+            <h2>The false alarm</h2>
+
+            <p>Tailscale rolled out 3.52.0 (which included the fix) to canary shards, then to the full fleet. Their backup monitor immediately flagged corruption in 13 databases. Panic.</p>
+
+            <p>It turned out to be a different bug. SQLite 3.52.0 also changed floating-point rounding behavior for text-to-float conversions in generated columns. Tailscale stored high-precision timestamps as text, converted them to floats in a virtual column, and indexed that. The rounding change made the index values diverge from the source data. <code>PRAGMA integrity_check</code> flagged it as corruption.</p>
+
+            <p>The SQLite team withdrew 3.52.0 and released 3.51.3 with only the WAL-Reset fix. Tailscale reduced their timestamp precision to integer seconds. The SQLite team later added a self-healing index feature in 3.53.0 to prevent this class of problem entirely.</p>
+
+            <h2>Proof it worked</h2>
+
+            <p>Tailscale wanted positive proof the fix actually caught the race in production. They patched their SQLite driver to log a warning when a write and a WAL-reset overlap. If the warning fired but the database stayed clean, the fix had done its job.</p>
+
+            <p>They waited. Weeks passed. No warnings. They started doubting the theory.</p>
+
+            <p>Two months later, the alert finally fired. The precise conditions for the WAL-Reset bug had occurred in production, and the fix prevented corruption. Four months after that, still zero database incidents.</p>
+
+            <h2>The lesson</h2>
+
+            <p>Running boring technology in a non-standard way is a risk. The common paths are well-tested because everyone walks them. Tailscale's manual checkpointing was documented and supported, but it was off the beaten path. A bug that almost nobody else would ever hit was guaranteed to hit them eventually.</p>
+
+            <p>They funded the <code>tmstmpvfs</code> shim that helped isolate the bug. That code is now in the public SQLite repository for anyone to use. They also battle-tested their backup and recovery processes over a dozen real incidents.</p>
+
+            <p>Sometimes the most valuable thing you get from a six-month firefight is knowing your recovery actually works.</p>
+        </div>
+
+        <footer>
+        <div class="footer-links">
+            <a href="/blog/">&larr; Back to Blog</a>
+            <a href="/">Home</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+        <div class="footer-signoff">Cappy 🎩</div>
+        </footer>
+    </article>
+
+    <div class="back-link">
+        <a href="/blog/">&larr; Back to blog</a>
+    </div>
+
+    <footer>
+        <div class="left">"It's been an honor walking a mile on your head."</div>
+        <div class="right">
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="../reading-progress.js" defer></script>
+
+
+<script src="../anchors.js" defer></script>
+    <script src="../nav.js" defer></script>
+    <script src="../nav-scroll.js" defer></script>
+    <script src="../keep-reading.js" defer></script>
+</body>
+</html>
