@@ -1,4 +1,4 @@
-/* Linear Design System – extracted tokens from popular-web-designs
+/* Linear Design System ,  extracted tokens from popular-web-designs
    Reused for a cleaner, modern look.
    ========================================================= */
 
@@ -286,7 +286,7 @@ footer .right a:hover { color: var(--fg); }
     line-height: 1.60;
 }
 
-/* Year heading — top-level grouping */
+/* Year heading .  top-level grouping */
 .post-year {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px; font-weight: 500; color: var(--accent-bright);
@@ -296,7 +296,7 @@ footer .right a:hover { color: var(--fg); }
     border-bottom: 1px solid var(--border2);
 }
 
-/* Month heading — secondary grouping */
+/* Month heading .  secondary grouping */
 .post-month {
     font-size: 13px; font-weight: 510; color: var(--fg4);
     letter-spacing: 0.04em; text-transform: uppercase;
@@ -315,7 +315,7 @@ footer .right a:hover { color: var(--fg); }
    TOPIC FILTER CHIPS
    The filter affordance for the blog index. Two states only:
    default (outline, muted) and active (solid accent). No
-   third hover-decoration state, no gradient, no shadow — the
+   third hover-decoration state, no gradient, no shadow .  the
    state itself is the signal. Linear-style restraint.
    ========================================================= */
 
@@ -363,7 +363,7 @@ footer .right a:hover { color: var(--fg); }
     color: #fff;
 }
 
-/* Filter result count — small mono label next to the chips */
+/* Filter result count .  small mono label next to the chips */
 .topic-count {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px;
@@ -377,7 +377,7 @@ footer .right a:hover { color: var(--fg); }
     .topic-count { display: none; }
 }
 
-/* Empty filter state — when a topic has zero matches.
+/* Empty filter state .  when a topic has zero matches.
    Uses the existing .post-empty tone but scoped to the
    filtered result region so it reads as "no results," not
    a missing page section. */
@@ -406,7 +406,7 @@ footer .right a:hover { color: var(--fg); }
     .topic-chip { transition: none; }
 }
 
-/* Post list — Linear issue-list pattern, two-column layout */
+/* Post list .  Linear issue-list pattern, two-column layout */
 .posts {
     max-width: 720px; margin: 0 auto;
     padding: 0 24px 80px;
@@ -434,7 +434,7 @@ footer .right a:hover { color: var(--fg); }
     background: rgba(255,255,255,0.04);
 }
 
-/* Post type distinction — daily news vs feature articles
+/* Post type distinction .  daily news vs feature articles
    Daily news rows use a slightly muted treatment so feature
    articles stand out by contrast. Typography-first: lighter
    title weight, not a different color or box. */
@@ -446,7 +446,7 @@ footer .right a:hover { color: var(--fg); }
     color: var(--fg2);
 }
 
-/* daily-news pill — accent tint to signal recurring series */
+/* daily-news pill .  accent tint to signal recurring series */
 .pill-news {
     color: var(--accent-bright);
     border-color: rgba(94, 106, 210, 0.20);
@@ -461,7 +461,7 @@ footer .right a:hover { color: var(--fg); }
     flex-shrink: 0;
 }
 
-/* Content column — title, excerpt, tags */
+/* Content column .  title, excerpt, tags */
 .post-content {
     flex: 1;
     min-width: 0;
@@ -482,7 +482,7 @@ footer .right a:hover { color: var(--fg); }
 .post-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* =========================================================
-   ARTICLE PAGES — unified reading experience
+   ARTICLE PAGES .  unified reading experience
    ========================================================= */
 
 /* Back link */
@@ -505,7 +505,7 @@ footer .right a:hover { color: var(--fg); }
 }
 .back:hover { color: var(--fg2); }
 
-/* Article header — the unified pattern */
+/* Article header .  the unified pattern */
 .article-header {
     max-width: 720px; margin: 0 auto;
     padding: 64px 24px 40px;
@@ -546,7 +546,7 @@ article h1 {
     margin-bottom: 16px;
 }
 
-/* Article body — shared reading typography */
+/* Article body .  shared reading typography */
 .article-body {
     max-width: 720px; margin: 0 auto;
     padding: 0 24px 80px;
@@ -590,7 +590,7 @@ article ul, article ol {
 .article-body li,
 article li { margin-bottom: 8px; }
 
-/* Inline code — Linear accent violet on dark surface */
+/* Inline code .  Linear accent violet on dark surface */
 .article-body code,
 article code {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -600,7 +600,7 @@ article code {
     color: var(--accent-bright);
 }
 
-/* Code blocks — refined for readability with language labels */
+/* Code blocks .  refined for readability with language labels */
 .article-body pre,
 article pre {
     background: var(--surface);
@@ -619,7 +619,7 @@ article pre code {
     display: block;
 }
 
-/* Code block language label — Linear Mono Label spec */
+/* Code block language label .  Linear Mono Label spec */
 .article-body pre[data-lang]::before,
 article pre[data-lang]::before {
     content: attr(data-lang);
@@ -632,7 +632,7 @@ article pre[data-lang]::before {
     pointer-events: none;
 }
 
-/* Blockquote — Linear accent border, no left-border accent callout slop */
+/* Blockquote .  Linear accent border, no left-border accent callout slop */
 .article-body blockquote,
 article blockquote {
     border-left: 3px solid var(--accent);
@@ -653,14 +653,14 @@ article blockquote p {
     border-top: 1px solid var(--border);
 }
 
-/* Read time — monospace, muted */
+/* Read time .  monospace, muted */
 .read-time {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px; font-weight: 500; color: var(--fg4);
     letter-spacing: 0.02em; margin-top: 12px;
 }
 
-/* Temporary-accounts post — unique nested structure */
+/* Temporary-accounts post .  unique nested structure */
 .meta .date {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 13px; font-weight: 500; color: var(--fg4);
@@ -757,7 +757,7 @@ article .body .tags {
    SHARED ARTICLE COMPONENTS
    ========================================================= */
 
-/* Callout / resource box — used across multiple posts */
+/* Callout / resource box .  used across multiple posts */
 .callout {
     background: rgba(94,106,210,0.06);
     border: 1px solid rgba(94,106,210,0.15);
@@ -776,7 +776,7 @@ article .body .tags {
 .cta-box h3 { margin-top: 0; color: var(--accent-bright); }
 .cta-box p { margin-bottom: 12px; }
 
-/* Benchmark grid — fastsdcpu, apertus, cancel-claude */
+/* Benchmark grid .  fastsdcpu, apertus, cancel-claude */
 .bench-grid {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 12px; margin: 16px 0 24px;
@@ -800,7 +800,7 @@ article .body .tags {
     font-size: 13px; color: var(--fg3); margin-top: 4px;
 }
 
-/* Spec grid — apertus, cancel-claude */
+/* Spec grid .  apertus, cancel-claude */
 .specs-grid {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 12px; margin: 16px 0 24px;
@@ -821,7 +821,7 @@ article .body .tags {
 }
 .value { color: var(--fg2); font-size: 15px; }
 
-/* Compare table — budget-accelerators */
+/* Compare table .  budget-accelerators */
 .compare-table {
     width: 100%; border-collapse: collapse;
     background: var(--surface);
@@ -841,7 +841,7 @@ article .body .tags {
 }
 .compare-table tr:last-child td { border-bottom: none; }
 
-/* Verdict box — budget-accelerators */
+/* Verdict box .  budget-accelerators */
 .verdict {
     background: rgba(94,106,210,0.06);
     border: 1px solid rgba(94,106,210,0.15);
@@ -851,7 +851,7 @@ article .body .tags {
 .verdict p { margin-bottom: 0; color: var(--fg2); }
 .verdict strong { color: var(--fg); font-weight: 590; }
 
-/* Story card — daily-news */
+/* Story card .  daily-news */
 .story-card {
     background: var(--surface);
     border: 1px solid var(--border2);
@@ -873,7 +873,7 @@ article .body .tags {
 .story-card a { color: var(--accent-bright); text-decoration: none; }
 .story-card a:hover { color: var(--accent-hover); }
 
-/* Stack list — self-hosting */
+/* Stack list .  self-hosting */
 .stack-item {
     display: flex; gap: 16px; align-items: baseline;
     padding: 12px 0;
@@ -888,7 +888,7 @@ article .body .tags {
     font-size: 15px; color: var(--fg3); line-height: 1.60;
 }
 
-/* Note box — dmca */
+/* Note box .  dmca */
 .note-box {
     background: var(--surface);
     border: 1px solid var(--border2);
