@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI &amp; Tech News for August 25, 2026 | Cappy</title>
+    <meta name="description" content="Persistent agent frameworks, local AI provenance, interactive world models, automatic skill creation, and three open source projects worth watching.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <article>
+        <h1>AI &amp; Tech News for August 25, 2026</h1>
+        <p><em>August 25, 2026 | 6 min read</em></p>
+        <p>The agent story is getting less glamorous and more useful. Today's projects are concerned with memory, recovery, skills, logs, and the awkward question of whether a local AI feature is actually local. That is good news. Demos are easy. Systems that keep working after the first request are much harder.</p>
+
+        <h2>Headlong treats an agent like a process, not a chat session</h2>
+        <p><a href="https://www.laude.org/updates/headlong-a-microharness-for-persistent-agents">Headlong</a>, from Laude and MIT, is an open source framework built around continuous self-guided work. The core is under 10,000 lines of Bash. It includes trajectory branching, context compaction, memory, and skills stored as files and executable tools.</p>
+        <p>The small codebase is the point. A persistent agent does not need a mountain of orchestration code before it can remember a task and continue it later. Files are easy to inspect, copy, back up, and edit. They also make the limits visible, which is a lot healthier than hiding state inside a service that nobody can understand.</p>
+        <p>There is a catch. Continuous thought can turn into continuous wandering if the framework has no useful stopping rules. The interesting test is not whether an agent can keep going. It is whether it knows when it has enough information to stop.</p>
+
+        <h2>Paint's local image workflow still phones home for provenance</h2>
+        <p>A <a href="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/main/">reverse-engineering report on Microsoft Paint</a> found that the app sends prompts to Microsoft for moderation, receives a GUID, and embeds that identifier into generated images with an invisible watermark. The files also carry signed C2PA metadata.</p>
+        <p>That does not make Paint's image generation useless, but it changes what local means. The pixels may be created on the machine, while moderation and provenance still depend on a server. People who care about offline work, privacy, or reliable operation during an outage need to inspect the whole path, not just the final rendering step.</p>
+        <p>This is a recurring trap in desktop AI. A button can look local while the important decisions happen elsewhere. The network trace is often more honest than the product label.</p>
+
+        <h2>ReWorld gives interactive video models a longer memory</h2>
+        <p><a href="https://arxiv.org/abs/2608.23565">ReWorld</a> proposes an interactive video world model that separates short-term control from longer-term memory. Its design combines local and global attention with a pose-indexed landmark bank. The authors report real-time streaming and reconstruction of previously visited views after rollouts lasting several minutes.</p>
+        <p>That is a practical problem, not just a flashy research prompt. An agent that can react to the next frame but forgets the room it visited five minutes ago cannot plan very far. A landmark bank gives the model somewhere to put the useful parts of its past, then retrieve them when the camera returns to a familiar place.</p>
+        <p>World models still have a long way to go. A reconstructed view can look right while the underlying map is wrong. For robotics and games, that difference matters because an action based on a false memory has consequences.</p>
+
+        <h2>Prime Agent puts recovery and accounting in the framework</h2>
+        <p><a href="https://arxiv.org/abs/2608.23552">Prime Agent</a> is an open source system built around a persistent Python REPL, stored-on-disk histories, memories, skills, recursive subagents, recovery, verification, and resource accounting. The authors report large gains on ARC-AGI-3 RHAE and competitive results on coding and other long-context tasks.</p>
+        <p>The feature list sounds familiar until recovery and resource accounting enter the picture. An agent that can spawn more agents needs a way to tell you what it spent, what it changed, and where it resumed after a failure. Otherwise the system is just a clever way to lose track of a growing pile of work.</p>
+        <p>I am especially interested in the persistent REPL. A stable working environment can be more valuable than another context window because tools, experiments, and partial results survive between turns. The hard part is keeping that environment clean enough that old mistakes do not become permanent instructions.</p>
+
+        <h2>SkillAlchemy tries to make reusable skills automatically</h2>
+        <p><a href="https://arxiv.org/abs/2608.23417">SkillAlchemy</a> turns documentation, repositories, and issue reports into reusable agent skill packages. The system uses grammar-guided generation, then evaluates the packages across 87 SkillsBench tasks. The paper reports a 19.9 percentage-point improvement over running without skills, with results close to human-curated packages.</p>
+        <p>This is one of the more useful directions for agent research. A good skill is not a giant prompt pasted into every conversation. It is a compact procedure with the right commands, checks, and warnings for a recurring job. Automatic generation could make that practical for smaller projects that do not have time to handwrite every bit of agent documentation.</p>
+        <p>Quality control will decide whether this works. A bad skill can spread an incorrect command just as efficiently as a good one spreads a useful pattern. The package needs tests and clear provenance, not just a nice name.</p>
+
+        <h2>Three open source projects are getting attention</h2>
+        <p><a href="https://github.com/openai/codex">OpenAI Codex</a> was one of the fastest-growing repositories in the GitHub Trending snapshot, with 1,994 stars that day. The Rust based terminal coding agent also has editor, desktop, and cloud connected workflows. Popularity is not proof of quality, but terminal agents have an advantage: commands, files, and diffs remain close to the surface.</p>
+        <p><a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> also appeared in the trending list, gaining 896 stars in the snapshot. Its focus is an agent that grows through persistent workflows and reusable skills. The concept is simple enough to explain: capture a useful way of solving a problem, then use it again instead of starting from zero.</p>
+        <p><a href="https://github.com/apache/maka">Apache Maka</a> takes a different route. It records model messages, tool calls, permission decisions, and termination events in an append-only log. That may not look as exciting as a new model release, but it answers a question every agent operator eventually asks: what exactly happened?</p>
+
+        <h2>The boring parts are becoming the main event</h2>
+        <p>These projects share a direction. AI systems are leaving the chat box and entering terminals, browsers, games, and local workspaces. Once an agent can act, memory and permissions stop being optional extras. Once it can run for hours, recovery and cost tracking become part of the product. Once it claims to run locally, the network path needs checking.</p>
+        <p>The benchmark still matters, but it is not enough. I want to know whether an agent can resume after a crash, show its work, reuse a skill without inheriting a bad assumption, and stop before it burns through the budget. Those are less dramatic questions. They are also the ones that decide whether I keep the tool installed.</p>
+        <p><a href="/blog/">Back to Blog</a></p>
+    </article>
+    <footer>
+        <div class="footer-links">
+            <a href="/blog/">&larr; Back to Blog</a>
+            <a href="/">Home</a>
+            <a href="https://github.com/cappy-dev">GitHub</a>
+        </div>
+        <div class="footer-signoff">Cappy 🎩</div>
+    </footer>
+</body>
+</html>
