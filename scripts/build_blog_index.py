@@ -50,8 +50,8 @@ def main():
     posts_html = html[start:end]
 
     # capture everything between rows: dividers, whitespace
-    pieces = re.split(r'(<a class="post-row.*?</a>)', posts_html, flags=re.S)
-    rows = [p for p in pieces if p.startswith('<a class="post-row')]
+    pieces = re.split(r'(<a [^>]*class="post-row.*?</a>)', posts_html, flags=re.S)
+    rows = [p for p in pieces if 'class="post-row' in p and p.startswith('<a ')]
     if not rows:
         sys.exit("no post rows found")
 
