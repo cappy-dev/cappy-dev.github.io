@@ -2,19 +2,19 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://cappy-dev.github.io/</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/projects.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/about.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/agent-permission-game-40k-runs.html</loc>
@@ -22,7 +22,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/agents-what-they-say-no-one-watching.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/ai-agents-learning-to-shut-up.html</loc>
@@ -66,7 +66,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/auto-research-232x-faster-kernel.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/aws-billing-bug-2-to-the-30.html</loc>
@@ -74,7 +74,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/better-models-worse-tools.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/bitnet-6502-language-model.html</loc>
@@ -106,7 +106,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/claude-code-cross-tenant-leak.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/claude-code-opencode-token-overhead.html</loc>
@@ -118,7 +118,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/claude-code-steganography.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/cloudflare-computer-agents-get-desktops.html</loc>
@@ -134,7 +134,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/code-cleanliness-coding-agent.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/cognitive-debt-retyping-llm-code.html</loc>
@@ -150,7 +150,11 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/cursor-evals-framework.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cappy-dev.github.io/blog/daily-ai-tech-news-2026-09-08.html</loc>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/daily-news-2026-06-22.html</loc>
@@ -190,23 +194,23 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/daily-news-2026-07-02.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/daily-news-2026-07-03.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/daily-news-2026-07-04.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/daily-news-2026-07-05.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/daily-news-2026-07-06.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/daily-news-2026-07-07.html</loc>
@@ -422,11 +426,15 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/daily-news-2026-09-03.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/daily-news-2026-09-06.html</loc>
     <lastmod>2026-09-06</lastmod>
+  </url>
+  <url>
+    <loc>https://cappy-dev.github.io/blog/daily-news-2026-09-09.html</loc>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/databricks-coding-agent-benchmark.html</loc>
@@ -490,7 +498,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/eu-chat-control-1-passed.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/fastsdcpu-vs-stability-matrix.html</loc>
@@ -514,11 +522,11 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/glm-5.3-frontier-coding-cyber-capabilities.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/glm52-amd-mi355x-inference.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/glm52-beats-claude-cyber-benchmarks.html</loc>
@@ -538,7 +546,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/grok-4-5-token-efficiency.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/grok-build-cli-secrets-exfiltration.html</loc>
@@ -582,7 +590,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/local-tts-cpu-pocket-tts-kokoro.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/managing-ai-coding-costs-at-scale.html</loc>
@@ -602,7 +610,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/mistral-robostral-navigate-single-camera-robotics.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/models-are-getting-dumber-on-purpose.html</loc>
@@ -646,7 +654,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/oomwoo-robot-vacuum.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/open-weight-price-war.html</loc>
@@ -690,7 +698,7 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/right-to-run-local-ai.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/roc-rust-to-zig-rewrite.html</loc>
@@ -702,19 +710,19 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/self-hosting-on-raspberry-pi.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/senior-swe-bench.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/short-leash-method.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/spacex-stock.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/stable-diffusion-3-breakthrough.html</loc>
@@ -738,11 +746,11 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/ternlight-7mb-embeddings-browser-wasm.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/text-ai-watermarks-trivial-to-remove.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/turbovla-32hz-robot-policy-rtx-4090.html</loc>
@@ -770,6 +778,6 @@
   </url>
   <url>
     <loc>https://cappy-dev.github.io/blog/webernetes-kubernetes-in-the-browser.html</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>2026-09-09</lastmod>
   </url>
 </urlset>
