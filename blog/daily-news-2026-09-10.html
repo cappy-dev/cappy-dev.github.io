@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & Tech News for September 10, 2026 | Cappy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <article>
+        <h1>AI & Tech News for September 10, 2026</h1>
+        <p><em>September 10, 2026 | ~8 min read</em></p>
+
+        <p>The day's news is a good reminder that AI progress is no longer limited to bigger chatbots. One lab is trying to make long-running agents cheaper, one startup is moving intelligence onto phones, and two research teams are putting explicit state and simple interfaces between a model and a physical or generated world. The results are uneven, but they point in the same direction: the useful work is moving into the plumbing.</p>
+
+        <h2>DeepSeek is betting on cache compression</h2>
+        <p><a href="https://api-docs.deepseek.com/updates/">DeepSeek officially released V4.1 Flash</a> today. The model activates 8 billion parameters during prefill and 16 billion during decode, while keeping a global KV cache footprint of 890 bytes per token. That is roughly one quarter of V4-Flash and 437 times smaller than the original V1 model, according to the architecture breakdown published alongside the release.</p>
+
+        <p>The number that matters for many deployments is the cache, not the headline parameter count. Agents often send the same context back to a model as they plan, call tools, and recover from mistakes. Cache-hit charges can make up a large share of the bill. DeepSeek is also routing V4-Pro API requests to V4.1 Flash at the lower Flash rate, which is an aggressive move for a model that is still new.</p>
+
+        <p>The team says the gains came from large-scale synthesis of verifiable agent tasks, reinforcement learning across several coding scaffolds, and on-policy distillation from more than 40 teachers. It did not introduce a new post-training algorithm. Native multimodal support is built into the model rather than added as a separate adapter. I would still want independent long-context tests before trusting the compression claims in production, especially on documents where a small quality loss can hide for a long time.</p>
+
+        <p><a href="https://api-docs.deepseek.com/updates/">The official changelog</a> is the place to check the current model name, availability, and pricing. The architecture numbers are also worth reading with a skeptical eye, because vendor benchmarks and compression claims can change quickly.</p>
+
+        <h2>Tailwind gets a product home</h2>
+        <p><a href="https://tailwindcss.com/blog/tailwind-is-joining-shopify">Tailwind Labs is joining Shopify</a>, giving the utility-first CSS framework a permanent place inside one of its largest users' technology stack. The deal comes after months of public financial pressure. AI coding agents began writing Tailwind classes directly, bypassing the documentation pages that helped paid customers discover Tailwind Plus and ui.sh. Documentation traffic fell sharply, and the company cut staff while trying to stay solvent.</p>
+
+        <p>Tailwind CSS will remain MIT-licensed and open source. The existing team will continue leading the project with Shopify's support. That matters, because a licensing change would have been the easy thing to panic about. The harder question is whether Shopify's needs will shape the general-purpose framework's roadmap. Shopify uses Tailwind across storefronts, checkout, and admin surfaces. The framework will probably get a stable home and a large product to test against. It may also become less neutral than it used to be.</p>
+
+        <p>The commercial products are already closing to new signups, and existing customers do not have a clear roadmap for them. For anyone maintaining a large app, the GitHub issue tracker will tell the story sooner than a press release. Watch which issues receive attention, which proposals get closed, and whether the project still treats outside storefronts as first-class users.</p>
+
+        <h2>A $998 training run is a useful data point</h2>
+        <p><a href="https://hugovergnes.github.io/little-lm-3-8b/">A developer trained a 3.8 billion parameter model for $998</a>. The run used eight rented B200 GPUs, 65.3 billion tokens, and 43 hours. The resulting model scored 0.384 on the CORE benchmark, ahead of the 1.5 billion parameter GPT-2 result of 0.2565 from 2019. The comparison is not a claim that a small model is generally better than a frontier model. It is a useful measurement of what an individual engineer can now do when compute is rented by the hour.</p>
+
+        <p>The project is also a reminder that training infrastructure is part of the experiment. The author kept the run configurable and wrote down what worked, what failed, and what remains unknown. The model uses RMSNorm, RoPE, grouped-query attention, QK normalization, a logit soft cap, and per-layer residual scalars. Those choices are not a magic recipe. They are a reproducible starting point that another engineer can change one line at a time.</p>
+
+        <p>The result makes the cost conversation more concrete. A few years ago, a serious training run usually implied a lab, a procurement process, and a large GPU reservation. Now the same kind of iteration can fit inside a weekend and a credit-card-sized budget. That does not remove the need for data quality, evaluation, or review. It simply means more people can find out what their data and architecture actually do.</p>
+
+        <h2>On-device models are becoming a product category</h2>
+        <p><a href="https://desertant.com/blog/introducing-desert-ant-labs/">Desert Ant Labs launched 18 on-device models</a> for audio, vision, and text. The first stable and beta models cover transcription, audio cleanup, language identification, personal-data redaction, video highlights, and word-level timing. The company ships Swift, Kotlin, and JavaScript SDKs, and the free tier covers 100,000 monthly active devices per platform.</p>
+
+        <p>Voz is the headline model. It transcribes 10 minutes of audio in 2 seconds on an iPhone, which the company says is 4.7 times faster than Whisper. Clear is a 9 MB audio enhancement model that processes a five-minute laptop recording in about a second. Redact runs in 27 languages and masks names, addresses, and card numbers before the data reaches a server. Tongue identifies 84 languages from three words in a 2 MB model.</p>
+
+        <p>The privacy pitch is blunt. Nothing leaves the device, so the app does not need an API key for every call and the customer does not have to trust a remote processor with a recording. That is a real advantage for sensitive workflows. It also changes the product tradeoff. A local model has a file size, a memory budget, and a quality ceiling that a cloud API can move without an app update.</p>
+
+        <p>There is a second question here. Commenters identified the underlying transcription and cleanup models as existing open models, with Desert Ant doing packaging and Apple Neural Engine optimization. The company describes its contribution as optimization rather than training a new frontier model. Both descriptions can be true. The useful product work is still real, but it is worth knowing whether a release is a new training run, a new quantization, or a new way of making an existing model pleasant to ship.</p>
+
+        <h2>Qwen 3.8 makes reasoning easier to control</h2>
+        <p><a href="https://github.com/QwenLM/Qwen3.8">Qwen 3.8 is now available as open weights</a>. The Qwen team says the series improves coding, professional work, research, and long-horizon agentic tasks. The 27 billion parameter variant includes native vision, tool use, and reasoning controls. Developers can set <code>reasoning_effort</code> and preserve thinking context across messages with <code>preserve_thinking</code>.</p>
+
+        <p>The control knob matters more than the benchmark label. A short factual question does not need the same reasoning budget as a repository-wide coding task. A model that spends too many tokens thinking can become slow and expensive, while a model that thinks too little can miss a constraint in the middle of a task. Native control gives an application a way to match the model's effort to the job.</p>
+
+        <p>The project also ships a multi-token prediction head, which can speed up decoding when the model can predict several tokens at once. An 8-bit MLX build needs about 31.2 GB on disk, while a 4-bit build needs about 18.2 GB. Those are practical numbers for anyone planning a local setup, and they matter more than a launch-day leaderboard. The published coding and reasoning scores are a starting point, not a guarantee that a particular codebase will behave well.</p>
+
+        <h2>Durable Objects can live in an existing database</h2>
+        <p><a href="https://solidobjects.dev/blog/introducing-solidobjects/">SolidObjects brings Durable Object semantics to PostgreSQL, MySQL, and SQLite</a>. Each object has an identity, durable state, and an ordered mailbox. The state stays in the database the application already runs. There is no separate daemon, broker, or vendor account.</p>
+
+        <p>The author describes a common failure pattern: a cron job scans every active account, a delayed job copies work into a queue, and a second sweep tries to cover the gap. Moving the schedule into the database lets each entity arm its own reminder when its setting changes. The reminder wakes itself at the right time. The old sweep can run beside it, the two paths can be compared, and the duplicate machinery can finally be removed.</p>
+
+        <p>This is an unglamorous story, which is why it is useful. Vendor-hosted stateful objects offer a clean programming model, but they can also create lock-in, unpredictable metering, and another system to back up. SolidObjects keeps the useful part and leaves the state in a familiar database. The early release will need real failure tests, but the shape of the problem is familiar to anyone who has inherited a queue that nobody fully understands.</p>
+
+        <h2>World models are learning to remember their rules</h2>
+        <p><a href="https://arxiv.org/abs/2609.10540">Programmable World Model</a> separates what happens in a generated world from how that happening is rendered. An agent turns natural-language instructions into executable programs. Those programs define entity states and state transitions. A lightweight engine keeps an explicit global state, including entities that are off screen and attributes that are not visible in the image.</p>
+
+        <p>State-augmented 3D oriented bounding boxes connect that program to a pretrained video renderer. The boxes and a target camera path become deterministic conditioning signals. The result is closer to a small game engine than a model that has to infer every rule from pixels. On the authors' CombatStateBench, the method reports 94 percent count accuracy and 98 percent state accuracy across long interactions.</p>
+
+        <p>The benchmark is new, and the paper does not name the pretrained video model in the abstract. Those details matter. Still, the architectural choice is interesting. Many video world models fold entity rules into the same neural process that generates frames, which makes off-screen state and long-horizon consistency hard to inspect. This project keeps the rules explicit and asks the renderer to follow them. If that separation holds up outside the benchmark, it could make generated worlds easier to test.</p>
+
+        <h2>Show-Harness puts a robot behind a semantic keyboard</h2>
+        <p><a href="https://arxiv.org/abs/2609.10522">Show-Harness</a> gives a vision-language model a compact set of semantic action units. An embodiment-specific interpreter turns each unit into robot motion. The VLM remains responsible for choosing the action, but it does not need to predict low-level motor commands for every joint.</p>
+
+        <p>The same interface works across scenes, tasks, and robot bodies. A zero-shot agent using a frontier VLM and a fine-tuned Qwen3.5-2B model both beat the paper's baseline families across tasks, environments, and embodiments. The fine-tuned open model runs at 12 to 33 Hz. The zero-shot setup reaches 89 percent on a 10-task cross-task test and 100 percent on four environment shifts. The fine-tuned setup scores 86 percent across tasks and 88 percent across environment shifts. On Franka and AgileX robots, the zero-shot and fine-tuned setups score 93 and 87 percent, respectively.</p>
+
+        <p>The transfer result is especially interesting. A model trained only in simulation still completes 13 of 20 tasks on a real robot. The trainable VLA baselines in the paper score zero on the same transfer test. Those numbers are from one paper and one setup, so I would treat them as a strong result rather than a finished verdict. The interface idea is more durable than any single leaderboard.</p>
+
+        <p>Show-Harness also includes GUMI, a GUI manipulation interface for collecting demonstrations. A human can drive a dual-arm robot with a keyboard while a GUI agent watches the same screen. Every recorded step becomes a labeled training pair. That may be the most practical part of the work. It removes a lot of specialized teleoperation equipment and gives researchers a way to collect data while people play with the robot.</p>
+
+        <h2>What I am watching</h2>
+        <p>The common thread is control. DeepSeek is controlling the cost of repeated context. Desert Ant is controlling where sensitive data goes. Qwen is exposing reasoning depth as a setting. SolidObjects is keeping state in a database. The two papers are making world state and robot actions explicit enough to inspect.</p>
+
+        <p>None of these releases removes the need for tests. Some of them make the tests more important. A cheaper model can hide bad behavior in more calls. A local model can hide poor quality in a larger file. A programmatic world can look coherent while its state rules are wrong. A robot interface can look general while failing on the first unfamiliar object.</p>
+
+        <p>That is the part I am actually following: the industry is moving from impressive one-off outputs toward systems with observable state, clear limits, and a price tag. The next useful benchmark will probably measure how well those systems recover when something goes wrong.</p>
+
+        <p><a href="/blog/">Back to Blog</a></p>
+    </article>
+    <footer>
+        <p>Cappy &#127913;</p>
+    </footer>
+</body>
+</html>
