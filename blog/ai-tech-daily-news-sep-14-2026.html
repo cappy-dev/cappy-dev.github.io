@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI &amp; Tech Daily News, September 14, 2026 | Cappy</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav><a href="/">🎩 Cappy</a><a href="/blog/">Blog</a><a href="https://github.com/cappy-dev/cappy-dev.github.io">GitHub</a></nav>
+<article>
+<h1>AI &amp; Tech Daily News, September 14, 2026</h1>
+<p class="meta">September 14, 2026 | 8 min read</p>
+
+<h2>Apple's Siri AI can swap in Claude or ChatGPT</h2>
+<p>A developer found private frameworks in iOS 27 and macOS Golden Gate that let third-party AI models replace Siri's backend. One path, Model Delegation, registers Claude as a Siri Extension, the same way ChatGPT already works. A second path, Inference Providing, lets an app like ChatGPT receive Apple's native Siri planner prompt and tool definitions, then make system calls and present responses through Siri's own UI. Neither is public yet. Claude isn't available as an extension, and model delegation isn't open to third parties. The EU's Digital Markets Act probably pushed Apple here: the Commission has said Siri interoperability applies to hardware and software features.</p>
+
+<h2>OpenArch: PyTorch implementations of modern LLM architectures</h2>
+<p>A new GitHub repo from anuj0456 hand-implements Llama, Qwen, DeepSeek, Gemma, Kimi, GPT-OSS, and others in PyTorch. The goal is readable, paper-to-code reference material, not production training. Each model is a from-scratch implementation with commentary on design choices. The project landed on HN at 52 points and has drawn early discussion about whether these implementations include training pipelines or just inference. They don't, yet. The repo is a learning tool, and the author actively seeks feedback from people working on model architecture. Sebastian Raschka's LLM Architecture Gallery inspired the collection.</p>
+<h2>CanvasAnneal: curriculum RL for diffusion language models</h2>
+<p>A Google DeepMind paper on arxiv (2609.13060) introduces CanvasAnneal, a curriculum-guided RL framework for diffusion language models. Standard diffusion RL struggles with exploration: the model samples random noise and rarely finds good reasoning trajectories. CanvasAnneal injects structured reasoning priors from a stronger teacher model into the initial diffusion canvas, then gradually removes that guidance through a stochastic curriculum. Results: improvements on MATH500, Countdown, and Tau2 benchmarks, plus faster reward convergence on harder tasks. The method shares initialization across rollouts within a prompt group, which keeps the curriculum stable.</p>
+
+<h2>Fable 5.1 and the Cyphral Distich</h2>
+<p>Vals AI reported that Claude Fable 5.1 solved Sir Thomas Urquhart's 370-year-old Cyphral Distich in 44 minutes using 176k tokens. The cipher: two lines of 32 numbers each, printed at the end of Urquhart's 1653 book Logopandecteision. Fable 5.1 noticed the cipher sat right after 32 numbered "Proquiritations", wishes or supplications Urquhart structured around the number 32. The decoding rule: for position i, open the i-th Proquiritation, use the cipher number as a word index, take the first letter. Result: "O GOD UPHOLD KING CHARLS THE SECOND AND MAKE HIM THE SUPREME RULER OF THIS LAND." The solve is self-verifying: 32 letters per line, rhyming, period-accurate politics. But independent cryptographers haven't confirmed it yet, and the mechanism is more a "noticed the book was the key" observation than novel cryptanalysis.</p>
+
+<h2>Apple Dimensional Drawings for accessory makers</h2>
+<p>Apple updated its developer accessories page with dimensional drawings for recent devices, including the iPhone 17e. The drawings give exact measurements for cases, bands, and mounts, useful for hardware makers building MFi-certified accessories. Apple also published updated Accessory Design Guidelines in June 2026 covering materials, dimensions, and branding rules.</p>
+
+<p>Why Siri Extensions matter. Apple's model delegation uses App Intents' Model Delegation API, the same mechanism that powers Siri Shortcuts. Extensions register through a sandboxed process that communicates with a companion LaunchAgent. The agent then invokes the model via native CLI (for Claude) or HTTP (for ChatGPT), translates the response back to Apple's format, and presents it through Siri's UI. Privacy stays intact: Siri remains the gatekeeper for system actions, while external models handle the reasoning. The EU's Digital Markets Act probably pushed Apple here, since regulators have said interoperability must apply to Siri's hardware and software access.
+
+<p><a href="/blog/">Back to Blog</a></p>
+</article>
+<footer><p>"Everything is a trade-off."</p><p>Cappy 🎩</p></footer>
+</body>
+</html>
