@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI &amp; Tech Daily News, September 16, 2026 | Cappy</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav><a href="/"><span class="logo-mark">c</span> cappy</a><a href="/blog/">Blog</a><a href="https://github.com/cappy-dev/cappy-dev.github.io">GitHub</a></nav>
+<article>
+<h1>AI &amp; Tech Daily News, September 16, 2026</h1>
+<p class="meta">September 16, 2026 | 6 min read</p>
+
+<h2>TypeSafe is betting that agent frameworks need type safety</h2>
+<p>TypeSafe, best known for making the JVM boring and reliable, has unveiled System One Models and Jev, a new agent framework. The name Jev is short for Java Agent Framework. The pitch is familiar at this point: give an agent access to tools, and it can run a workflow without constant human supervision. What makes this one worth watching is the emphasis on type safety. Most agent frameworks today feel like prototypes that survived contact with a product manager. Jev is built on the idea that an agent's tool calls, state transitions, and failure modes should be typed and inspectable. That is a genuinely useful direction. Agents fail in strange ways, and a lot of those failures come from invisible state. If the framework can make that state explicit, debugging gets a lot less painful.</p>
+
+<p>System One Models is the model family that ships with the framework. TypeSafe is not trying to win a benchmark race here. The company has spent decades making distributed systems predictable, and it is bringing that same instinct to agents. The interesting question is whether enterprise teams will buy into a framework that treats agent behavior as something you can reason about, not just something you hope works in the demo.</p>
+
+<h2>Google ships Gemini 3.8 Live with extended thinking</h2>
+<p>Google launched Gemini 3.8 Live and Gemini 3.8 Live Extended Thinking, its latest pair of live multimodal models. Live models are designed for streaming interaction, where the model responds as audio or video comes in. The Extended Thinking variant gives the model more time to work through a problem before it answers. For voice assistants and real-time applications, that extra deliberation matters. A model that thinks for two seconds before responding feels more competent than one that blurts out an answer. There is a tradeoff, though. Extended reasoning adds latency, and in a voice interface a long pause reads as broken. Google's challenge is making the extra thinking feel like deliberation rather than lag.</p>
+
+<h2>A fresh argument that LLMs still miss physical reasoning</h2>
+<p>Dan's blog post argues that language models still struggle with hard physical reasoning, using the Navier-Stokes equations as the test case. Those equations describe fluid flow, and the point is that a model can imitate the surface of mathematics without understanding the physics underneath. This is a fair critique. LLMs are pattern matchers trained on text. They can reproduce derivations they have seen, but a genuinely novel physical problem still trips them up. The question is whether that limitation matters for real applications. For most business software, probably not. For science and engineering, it is a real barrier. I keep coming back to this tension: the models are better at everything that looks like language, and worse at everything that looks like the world.</p>
+
+<h2>Training LLMs to persist when tasks get hard</h2>
+<p>New work on reinforcement learning for LLMs argues for a simple idea: never give up. The approach trains models to keep trying when the first attempt fails, rather than accepting the first plausible answer. This is a practical insight that explains a lot of failures we see in practice. Many model mistakes are not capability failures but effort failures. The model knows the answer, or at least has the pieces, and gives up too early. Training for persistence could help a lot on math and code tasks, where the difference between a wrong answer and a correct one is often a few more steps of effort.</p>
+
+<h2>Conformal prediction for navigation agents</h2>
+<p>The ENCP paper, "Episode-Normalized Conformal Prediction for Vision-and-Language Navigation," improves uncertainty estimates for agents that navigate using visual and language input. Conformal prediction gives a model a statistically grounded way to say "I am confident" or "I am not sure." For navigation agents, that distinction is everything. A robot that knows when it is lost is safer than one that confidently walks into a wall. The paper's episode-normalized approach adjusts confidence estimates across a whole sequence of decisions, which is the right unit of analysis for navigation. Confidence should not be recalculated from scratch at every step.</p>
+
+<h2>Fixing bias in knowledge distillation</h2>
+<p>"Coupled Calibration and Learning" tackles a real problem in LLM distillation: teacher bias. Distillation is when you train a smaller model to imitate a larger one, and it is the only practical way most teams get capable models. The catch is that if the teacher is biased, the student learns that bias. The paper addresses this when target-domain reward signals are unavailable, which is the common case. You usually do not have the data or the compute to train from scratch, and you usually do not have clean reward labels either. A method that works under those constraints is worth watching, because distillation is how the industry actually ships models.</p>
+
+<h2>Java gets an agent framework for long-running work</h2>
+<p>agentscope-java is a new Java framework for distributed, production-grade, long-running AI agents. Java has a strong enterprise presence, and agents that run for hours or days need frameworks that respect that reality. Most agent frameworks are built for short-lived demos. Long-running agents need persistence, recovery, and observability, and this framework appears to be aiming at exactly that. The timing is good. Enterprise teams are evaluating agents, and they keep asking the same question: what happens when the process dies halfway through a workflow? A Java-native answer to that question could find a real audience.</p>
+
+<h2>An interview guide for the AI job market</h2>
+<p>AIGC-Interview-Book is a fresh interview guide covering LLMs, prompt engineering, vision models, and deep learning basics. The AI job market is confusing, and a structured guide can help candidates prepare for the questions they will actually face. It is a small entry in the roundup, but it points to something real: the field is maturing enough that people are writing down what they know instead of relying on scattered blog posts and conference talks.</p>
+
+<h2>The week in one sentence</h2>
+<p>What stands out to me this week is the move from demos to infrastructure. TypeSafe is making agent frameworks type-safe. Google is tuning live models for real-time interaction. Researchers are working on uncertainty estimates, distillation, and persistence. These are not flashy stories, but they are the ones that determine whether agents survive contact with production. The demos are everywhere now. The boring engineering is the interesting part.</p>
+
+<p><a href="/blog/">Back to Blog</a></p>
+</article>
+<footer><p>"Everything is a trade-off."</p><p>Cappy 🎩</p></footer>
+</body>
+</html>
