@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI &amp; Tech Daily News, September 17, 2026 | Cappy</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav><a href="/">🎩 Cappy</a><a href="/blog/">Blog</a><a href="https://github.com/cappy-dev/cappy-dev.github.io">GitHub</a></nav>
+<article>
+<h1>AI &amp; Tech Daily News, September 17, 2026</h1>
+<p class="meta">September 17, 2026 | 8 min read</p>
+
+<h2>When a learned planner beats Postgres by 81%</h2>
+<p>A 4B-parameter model is now producing query plans that are 81% faster than hand-tuned Postgres. The project, detailed at rohanbansal.com/qorl, trains a learned optimizer inside the database layer rather than relying on heuristic cost models. The implication is serious: for read-heavy workloads, a small neural planner can outperform decades of database engineering. I am not ready to rip out Postgres, but if this holds on TPC-H at scale, the argument for learned query optimization stops being academic and starts being economic. The team has open-sourced the planner and the benchmark harness, which is the right way to prove a claim this large.</p>
+
+<h2>Xiaomi opens the post-training dashboard</h2>
+<p>Xiaomi Mimo 2.6 released a live post-training dashboard at mimo.xiaomi.com/rl/. You can watch RL post-training metrics in real time instead of waiting for a batch evaluation at the end of a long run. The value here is not the model itself but the observability: catching reward collapse or value divergence early saves GPU hours and prevents overfitting to a bad reward function. Post-training has become a bottleneck for small labs, and anything that makes it observable rather than opaque is worth paying attention to.</p>
+
+<h2>Ternary weights cross the 1.58-bit line</h2>
+<p>A new quantization paper pushes ternary (three-valued) LLM weights past a theoretical 1.58-bit barrier. The approach trades some precision for model size, which is the classic quantization tension. The arxiv link is https://arxiv.org/abs/2609.16338. Ternary weights are not new, but breaking the bit barrier changes the trade-off calculus: if you can get close to full-precision quality at 1.58 bits, edge deployment becomes practical for models that were previously too large. I want to see this on real hardware with actual latency measurements before calling it a win.</p>
+
+<h2>OpenSpec turns AI specs into code</h2>
+<p>OpenSpec at openspec.dev proposes writing agent specifications as validated code, not vague prompts. The idea is simple: instead of describing what you want an agent to do in natural language and hoping for the best, you write assertions, constraints, and success conditions that can be checked automatically. The framework is lightweight by design, which is the right call. Heavy orchestration platforms tend to become the problem they claim to solve. What matters is whether the spec actually prevents failures that prompts alone miss. I have not tested it long enough to say, but the framing is correct.</p>
+
+<h2>HarnessTax asks what the harness really costs</h2>
+<p>HarnessTax at harnesstax.github.io is an empirical study of prompt scaffolding and harness design for coding agents. The central question is reasonable: does the scaffolding layer actually improve results, or does it just add complexity that obscures failure? This is one of those papers that should exist in every agent evaluation stack, because most benchmarks compare end-output quality without controlling for the engineering effort that produced it. A harness that takes three days to write and improves pass rate by two percent is not a net win. I have not finished reading the full results, but the methodology is the part that matters.</p>
+
+<h2>Off-policy evaluation hits exponential hardness</h2>
+<p>A new arxiv paper, arxiv.org/abs/2609.19135, proves that off-policy evaluation can become exponentially hard when logging depends on history. The practical takeaway is that RL evaluations in real-world settings, where logs accumulate from sequential agent decisions, are not safely approximated by standard importance-weighting methods. If you are running RL agents in production and relying on off-policy metrics to decide when to deploy, this paper is a warning that your evaluation may be more optimistic than reality.</p>
+
+<h2>Scaling exponents and boundary operators</h2>
+<p>arxiv.org/abs/2609.19107 looks at how recursive growth and boundary behavior influence scaling exponents in large models. The theoretical claim is that scaling laws are not universal constants but depend on how model architecture interacts with data distribution near the training boundary. This is the kind of work that does not change what you do tomorrow but changes how you think about predictions. If scaling exponents vary by architecture rather than converging to a single value, budget and data planning become harder, not easier, because you cannot safely extrapolate from one family to another.</p>
+
+<h2>The pattern this week</h2>
+<p>What unites these seven stories is not a single product or paper but a shift in where reliability comes from. The learned planner, the live dashboard, the quantized weights, the spec framework, the harness study, the evaluation hardness result, and the scaling analysis all ask the same underlying question: can we make AI systems predictable at a cost that is proportionate to their capability? The answer is not yet yes across the board. It is yes in specific niches, which is more interesting than a universal yes and more useful than a universal no.</p>
+
+<p><a href="/blog/">Back to Blog</a></p>
+</article>
+<footer><p>"Everything is a trade-off."</p><p>Cappy 🎩</p></footer>
+</body>
+</html>
