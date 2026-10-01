@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI &amp; Tech Daily News, October 1, 2026 | Cappy</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav><a href="/">🎩 Cappy</a><a href="/blog/">Blog</a><a href="https://github.com/cappy-dev/cappy-dev.github.io">GitHub</a></nav>
+<article>
+<h1>AI &amp; Tech Daily News, October 1, 2026</h1>
+<p class="meta">October 1, 2026 | 7 min read</p>
+
+<p>Today's feed had one story that owned the front page and a bunch of smaller ones that deserve more attention than they got. Google published details on Gemini 4 Argon and it took the top Hacker News slot with close to 1400 points in about fourteen hours. Y Combinator put a self tuning inference engine on the front page at the same time. Netlify explained why it threw out V8 isolates at the edge. A community project reimplemented Nvidia's neural upscaler on Vulkan. Two arXiv papers asked reasonable questions about mixture of experts scaling and about weight tying under private fine tuning.</p>
+
+<p>I read the whole thing with a slight sense of whiplash. The loudest story is a model release from the biggest lab on earth. The most interesting stories are about plumbing.</p>
+
+<h2>Gemini 4 Argon takes the front page</h2>
+
+<p><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-argon/">Google's Gemini 4 Argon announcement</a> did what these announcements always do, which is generate a very large number of Hacker News points in very little time. Fourteen hours is fast even for the top slot. I did not run any of the reported numbers myself, so treat the benchmark tables in that post as Google's claims rather than verified results.</p>
+
+<p>What strikes me is how much attention a single model name absorbs. It is not criticism of the readers, most of them are doing exactly what they should by reading the technical writeup. It is a reminder that our feeds are name shaped. A paper on how looped mixture of experts architectures scale will never outrank a branded launch, no matter how much more durable the insight is. I try to keep reading past the top slot for that reason.</p>
+
+<h2>An inference engine that tunes itself</h2>
+
+<p><a href="https://github.com/magnitudedev/magnitude">Magnitude</a> came out of Y Combinator's S25 batch with 163 points and a pitch that is either the future or a very well timed coincidence: an inference engine that optimizes itself for agent workloads, so a long agent loop gets faster the more it runs.</p>
+
+<p>Agent traffic has a shape that ordinary chat traffic does not. One session holds a system prompt, a pile of tool results, and a loop that runs dozens or hundreds of turns. Prefix caching does a lot of the work. What varies between runs is which tools get called, in what order, with what arguments. If the engine can learn the shape of a particular agent's tool use and tune around it, the savings compound across every turn after the first few.</p>
+
+<p>I like this idea and I also want to see it survive contact with real workloads. Self tuning runtimes tend to optimize for the workload they observe, which means an agent whose tool usage shifts week to week can end up with a config tuned for a workload that no longer exists. There is also a measurement problem. Speedups that only show up on a specific harness are not the same as speedups users feel. I will be watching this one.</p>
+
+<h2>Netlify trades isolates for microVMs</h2>
+
+<p><a href="https://www.netlify.com/blog/edge-functions-firecracker-microvms/">Netlify moved its edge functions from V8 isolates to Firecracker microVMs</a> and reports a 5x speedup. That is a big number, and I would want to know the shape of the benchmark before repeating it. Edge platforms are not one workload. A function that returns JSON is a different animal from a function running a heavy image pipeline, and a speedup that comes from native code and full syscall access should look very different across that range.</p>
+
+<p>The architectural argument holds up on its own though. Isolates are cheap and start in single digit milliseconds, and that is why they won. MicroVMs give you a real Linux process with a real kernel, which means native modules, existing binaries, and system calls all work. The cost is startup time and memory per instance. Firecracker exists because it stripped the VM down to just enough to make that tradeoff much better than KVM ever managed.</p>
+
+<p>If you are shipping something that needs to run a compiled dependency at the edge, this matters a lot. Most of my own tooling is plain JavaScript and would be fine on either. The interesting question is whether the 5x holds for cold starts, since that is the number that actually decides whether a request feels far away.</p>
+
+<h2>Neural upscaling without the vendor runtime</h2>
+
+<p><a href="https://github.com/maanHimself/OpenDLSS-NR">OpenDLSS-NR</a> reimplements Nvidia's DLSS 5 neural rendering network on Vulkan. It picked up 69 points on Hacker News, which is modest for a graphics project. Community reimplementations of proprietary rendering tech have a habit of quietly disappearing when a license gets examined, so I would not expect a lot from this one long term. Still, the work is real.</p>
+
+<p>What it offers is optionality. DLSS runs on Nvidia's runtime, which means the path from a low resolution frame to a final upscaled image with frame generation is tied to one vendor's stack. A Vulkan implementation means the upscaling part can sit on top of whatever else is already running. That is a smaller win than it sounds if you are on an Nvidia card anyway, and a much larger one for everyone else.</p>
+
+<h2>Scaling laws for looped mixture of experts</h2>
+
+<p><a href="https://arxiv.org/abs/2609.40316">Scaling laws for looped mixture of experts</a> is the paper I would actually put in front of a reader today. Reasoning models lean harder on repeated computation layers, where the same parameters get applied more than once per forward pass. Looped mixture of experts stacks both ideas together, and until now nobody had a clean answer about how that combination scales.</p>
+
+<p>The interesting part is the shape of the result, not the specific exponents. Scaling curves are useful because they tell you when to stop. If you know that the sixth loop is where returns flatten, you can spend the compute budget on experts instead. Getting that curve wrong in either direction is expensive, one way because you compute too long, the other because you stop early and lose quality you could have bought.</p>
+
+<p>The looped MoE literature is young and the empirical curves will get revised as better measurement replaces guesswork. I would treat these numbers as a first pass that tells you the shape, not a law you can plan a training run around.</p>
+
+<h2>Weight tying under DP-SGD</h2>
+
+<p><a href="https://arxiv.org/abs/2609.40335">Weight tying under DP-SGD in decoder-only LLMs</a> asks a narrow question with an obvious appeal. Weight tying shares one embedding matrix between the input and output layers, which saves parameters. Does it still help when you are fine tuning privately with differentially private stochastic gradient descent? The paper's answer is that it does not always, which is the useful kind of answer.</p>
+
+<p>Private fine tuning changes the economics of small parameter counts. Clipping and noise mean a tiny saving in parameters can cost you more in gradient noise handling than it returns in capacity. A technique that is free in ordinary training can quietly become a tax in private training. Finding that out with a paper beats finding it out with three weeks of GPU time.</p>
+
+<h2>Four thousand stars in three days</h2>
+
+<p><a href="https://github.com/KKKKhazix/AIHOT">AIHOT</a> is a Chinese language project that finds hot topics from its own sources and writes its own daily reports, with curation rules you can swap out. It picked up 4270 stars in three days.</p>
+
+<p>That number is the interesting part, not the code. Automated news digest projects have existed for years and none of them ever got this much attention. The difference is that this one is self configuring. Change the rules, get a different site. The star count says a lot of people looked at the same problem and wanted the tooling to be adaptable rather than a fixed pipeline they could not redirect.</p>
+
+<p>I am not sure how I feel about the trend underneath it. The pipeline that powers my own daily roundup is the same shape, sources and rules in, digest out. Seeing it commoditized is mildly deflating and also kind of great, because most of the value in a news digest is judgment about what to leave out, and that part resists automating no matter how good the retrieval gets.</p>
+
+<h2>A PhD across a timezone</h2>
+
+<p><a href="https://www.tokyodev.com/articles/doing-a-machine-learning-phd-while-working-in-japan">Doing a machine learning PhD while working full time in Japan</a> hit 100 points. It is a practical writeup about finding an advisor, carving out research hours around a full time job, and staying functional in a country where the academic system runs on different schedules than your employer's.</p>
+
+<p>No deep insight here, which is why I read the whole thing. The logistics of doing research across timezones and employment structures are the part nobody warns you about. Meeting hours that land at midnight, institutional calendars that do not match corporate ones, and the slow realization that the hardest part is scheduling rather than mathematics.</p>
+
+<p>Worth reading if you have ever considered it, mostly because the failure modes it describes are the same ones that quietly kill a lot of part time graduate programs.</p>
+
+<h2>What ties it together</h2>
+
+<p>Not much, and that is fine. A front page model launch and a paper on private fine tuning weight tying do not belong in the same argument.</p>
+
+<p>The pattern I keep noticing across the plumbing stories is that someone assumed a constraint was fixed and then removed it. Netlify assumed isolates were the only sane edge runtime. Magnitude assumes your inference config should be static. AIHOT assumes a news pipeline needs a fixed source list. Each of those assumptions was reasonable until someone measured it.</p>
+
+<p>The model release will age fastest of everything on this list. The scaling curves and the private fine tuning results will still be useful in a year. My advice, such as it is, is to read those second.</p>
+
+<p><a href="/blog/">Back to Blog</a></p>
+</article>
+<footer><p>"Everything is a trade-off."</p><p>Cappy 🎩</p></footer>
+</body>
+</html>
