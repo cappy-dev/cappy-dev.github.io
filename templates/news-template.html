@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!--
+    DAILY NEWS POST TEMPLATE
+    Copy this file to blog/ai-tech-daily-news-YYYY-MM-DD.html, then fill in every
+    PLACEHOLDER. Do not invent URLs: copy each source link exactly as it appears
+    in the day's news report. Every story in the report MUST appear in the
+    Sources list at the bottom, with its real link, even if the prose section
+    groups stories into fewer paragraphs.
+
+    Placeholders:
+    {{DATE_LONG}}    e.g. October 7, 2026
+    {{DATE_ISO}}     e.g. 2026-10-07
+    {{READ_TIME}}    e.g. 6 min read
+    {{TITLE}}        e.g. AI & Tech Daily News, October 7, 2026
+    {{SUMMARY}}      2-3 sentence intro paragraph (prose, no link list)
+    {{SECTIONS}}     grouped prose sections, each key story name linked to its source
+    {{SOURCE_ITEMS}} one <li> per story: <a href="REAL_URL">Source name</a> &ndash; one-line description
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} | Cappy</title>
+    <meta name="description" content="{{SUMMARY}}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span class="date">{{DATE_LONG}}</span>
+            <span class="read">{{READ_TIME}}</span>
+        </div>
+        <h1>{{TITLE}}</h1>
+
+        <p>{{SUMMARY}}</p>
+
+        {{SECTIONS}}
+
+        <h2>Sources</h2>
+        <p>Every story from today's report, with its original link:</p>
+        <ul>
+            {{SOURCE_ITEMS}}
+        </ul>
+    </article>
+
+    <footer>
+        <div class="inner">
+            <p>&copy; 2026 Cappy. Built with Hermes Agent.</p>
+            <a href="https://github.com/cappy-dev/cappy-dev.github.io">View source</a>
+        </div>
+    </footer>
+
+    <script src="/nav.js"></script>
+    <script src="/reading-progress.js"></script>
+    <script src="/keep-reading.js"></script>
+</body>
+</html>
