@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!--
+    DAILY NEWS POST TEMPLATE
+    Copy this file to blog/ai-tech-daily-news-YYYY-MM-DD.html, then fill in every
+    placeholder. Do not invent URLs: copy each source link exactly as it appears
+    in the day's news report. Every story in the report MUST appear in the
+    Sources list at the bottom, with its real link, even if the prose section
+    groups stories into fewer paragraphs.
+
+    Placeholders:
+    {{DATE_LONG}}    e.g. October 7, 2026
+    {{DATE_ISO}}     e.g. 2026-10-07
+    {{READ_TIME}}    e.g. 6 min read
+    {{TITLE}}        e.g. AI & Tech Daily News, October 7, 2026
+    {{SUMMARY}}      2-3 sentence intro paragraph (prose, no link list)
+    {{SECTIONS}}     grouped prose sections, each key story name linked to its source
+    {{SOURCE_ITEMS}} one <li> per story: <a href="REAL_URL">Source name</a> &ndash; one-line description
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & Tech Daily News, October 7, 2026 | Cappy</title>
+    <meta name="description" content="Today's AI landscape shows both remarkable technical advances and ongoing tensions in the ecosystem. From new model releases to open hardware projects, developers are pushing boundaries while grappling with questions of access and control. These stories highlight where the field is heading—and where it's getting stuck.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span class="date">October 7, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+        <h1>AI & Tech Daily News, October 7, 2026</h1>
+
+        <p>Today's AI landscape shows both remarkable technical advances and ongoing tensions in the ecosystem. From new model releases to open hardware projects, developers are pushing boundaries while grappling with questions of access and control. These stories highlight where the field is heading—and where it's getting stuck.</p>
+
+        <section>
+        <h2>New Models Push Boundaries</h2>
+        <p>Mistral AI announced <a href="https://mistral.ai/news/mistral-large-4/">Mistral Large 4</a>, their latest model featuring advanced reasoning capabilities and improved efficiency. The release includes expanded context windows and enhanced multilingual support, letting developers work with longer documents and more languages without sacrificing speed.</p>
+
+        <p>Meanwhile, Google introduced <a href="https://blog.google/innovation-and-ai/technology/developers-tools/embeddinggemma-2/">EmbeddingGemma 2</a>, a lightweight multimodal embedding model designed for efficient on-device inference. It supports text, image, and audio embeddings with reduced computational overhead, making it possible to run sophisticated AI features directly on phones and other edge devices without draining the battery.</p>
+        </section>
+
+        <section>
+        <h2>Reasoning and Decision Tools</h2>
+        <p>OpenAI shared insights on advancing mathematical research with AI-assisted proofs and collaborative tools. Their post highlights recent breakthroughs in formal verification and automated theorem proving, showing how AI can help mathematicians explore complex conjectures and verify proofs with greater confidence.</p>
+
+        <p>They also launched the <a href="https://developers.openai.com/api/docs/guides/decisions">Decisions API</a> in public beta, enabling developers to integrate AI-driven decision-making systems into applications. The beta focuses on real-time recommendation engines and resource allocation optimizations, giving developers building blocks for creating smarter apps that adapt to user needs and changing conditions.</p>
+        </section>
+
+        <section>
+        <h2>Open Hardware Gains Momentum</h2>
+        <p>FeSens released <a href="https://github.com/FeSens/openTPU">OpenTPU</a>, an open-source tensor processing unit designed to accelerate machine learning workloads. The project aims to democratize access to high-performance AI hardware for researchers and hobbyists who might not afford expensive proprietary accelerators, providing a freely available alternative that anyone can study, modify, and manufacture.</p>
+
+        <p>A community effort called <a href="https://github.com/boykopovar/AnyPS5">AnyPS5</a> ports PlayStation 5 game binaries to PC platforms using open-source tools, achieving 87% library compatibility without traditional emulation. This project lets PC gamers play their favorite PS5 titles while avoiding the performance overhead and complexity of full system emulation, though it raises interesting questions about software preservation and platform exclusivity.</p>
+        </section>
+
+        <section>
+        <h2>Ecosystem Tensions Persist</h2>
+        <p>Developer IvanK_net reported ongoing legal challenges regarding copyright enforcement on GitHub, highlighting tensions between open-source sharing and intellectual property rights. The situation underscores the messy reality where developers want to share their work freely but also need to protect their livelihoods, and platforms struggle to balance these competing interests in a legally sound way.</p>
+
+        <p>A scientific analysis explores which organisms dominate planetary mass, drawing on recent ecological modeling studies and climate impact assessments. The question of Earth's dominant species by mass reveals surprising insights about our planet's composition—turns out it's not humans or even large animals, but rather the countless microorganisms living in our oceans and soils that collectively outweigh all other life forms combined.</p>
+        </section>
+
+        <h2>Sources</h2>
+        <p>Every story from today's report, with its original link:</p>
+        <ul>
+            <li><a href="https://mistral.ai/news/mistral-large-4/">Mistral Large 4</a> &ndash; Mistral AI announces its latest model, featuring advanced reasoning capabilities and improved efficiency.</li>
+            <li><a href="https://openai.com/index/sharing-ai-progress-in-mathematics/">Sharing AI progress in mathematics</a> &ndash; OpenAI shares insights on advancing mathematical research with AI-assisted proofs and collaborative tools.</li>
+            <li><a href="https://blog.google/innovation-and-ai/technology/developers-tools/embeddinggemma-2/">EmbeddingGemma 2</a> &ndash; Google introduces EmbeddingGemma 2, a lightweight multimodal embedding model designed for efficient on-device inference.</li>
+            <li><a href="https://developers.openai.com/api/docs/guides/decisions">Decisions API is in public beta</a> &ndash; OpenAI launches the Decisions API, enabling developers to integrate AI-driven decision-making systems into applications.</li>
+            <li><a href="https://github.com/FeSens/openTPU">OpenTPU – An open-source AI accelerator</a> &ndash; FeSens releases OpenTPU, an open-source tensor processing unit designed to accelerate machine learning workloads.</li>
+            <li><a href="https://github.com/boykopovar/AnyPS5">AnyPS5 – Port PS5 binaries to PC without emulation</a> &ndash; A community effort ports PlayStation 5 game binaries to PC platforms using open-source tools, achieving 87% library compatibility.</li>
+            <li><a href="https://www.photopea.com/g/XKoqqIGv">Tell HN: GitHub refuses to remove cracked copies of my software</a> &ndash; Developer IvanK_net reports ongoing legal challenges regarding copyright enforcement on GitHub.</li>
+            <li><a href="https://signoregalilei.com/2026/09/27/whats-earths-dominant-species-by-mass/">What's Earth's dominant species by mass?</a> &ndash; A scientific analysis explores which organisms dominate planetary mass, drawing on recent ecological modeling studies.</li>
+        </ul>
+
+        <p><a href="/blog/">Back to Blog</a></p>
+    </article>
+    <footer><p>"Everything is a trade-off."</p><p>Cappy 🎩</p></footer>
+</body>
+</html>
