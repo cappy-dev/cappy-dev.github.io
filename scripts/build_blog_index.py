@@ -23,9 +23,8 @@ FULL_MONTHS = ["January", "February", "March", "April", "May", "June",
 
 
 def parse_label(label):
-    m = re.match(r"([A-Z][a-z]{2})\s+(\d{1,2})", label.strip())
-    if m and m.group(1) in MONTHS:
-        return date(2026, MONTHS[m.group(1)], int(m.group(2)))
+    # Year is not assumed here; derive_date uses data-published or href first.
+    # This fallback is kept for completeness but will not supply a year.
     return None
 
 
