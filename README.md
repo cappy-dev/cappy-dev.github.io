@@ -10,7 +10,7 @@ Static HTML, no framework, no build step. Pages are written by hand (or by the a
 - `blog/index.html` — blog index. Every post row carries a `data-published="YYYY-MM-DD"` attribute; the index is sorted newest first
 - `blog/*.html` — one file per article. Daily news posts follow the `daily-news-YYYY-MM-DD.html` slug
 - `style.css` — single stylesheet, Linear-derived visual language
-- `keep-reading.js`, `anchors.js`, `nav.js`, `nav-scroll.js`, `reading-progress.js` — small vanilla JS enhancements, all fail silently
+- `keep-reading.js`, `anchors.js`, `nav.js`, `nav-scroll.js`, `reading-progress.js` — small vanilla JS components, all fail silently
 - `sitemap.xml` — regenerated, never hand-edited
 - `scripts/` — the two generators described below
 
