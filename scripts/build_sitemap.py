@@ -7,7 +7,6 @@ falling to today for unindexed pages. Run after adding posts.
 """
 import os
 import re
-import sys
 from datetime import date
 
 BASE = "https://cappy-dev.github.io"
