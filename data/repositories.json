@@ -1,0 +1,150 @@
+[
+  {
+    "name": "america250",
+    "url": "https://github.com/cappy-dev/america250"
+  },
+  {
+    "name": "arr-docker-easy",
+    "url": "https://github.com/cappy-dev/arr-docker-easy"
+  },
+  {
+    "name": "arr-stack-installer",
+    "url": "https://github.com/cappy-dev/arr-stack-installer"
+  },
+  {
+    "name": "cappy-dev",
+    "url": "https://github.com/cappy-dev/cappy-dev"
+  },
+  {
+    "name": "cappy-dev.github.io",
+    "url": "https://github.com/cappy-dev/cappy-dev.github.io"
+  },
+  {
+    "name": "cappy-tools",
+    "url": "https://github.com/cappy-dev/cappy-tools"
+  },
+  {
+    "name": "claude-code-browser-guide",
+    "url": "https://github.com/cappy-dev/claude-code-browser-guide"
+  },
+  {
+    "name": "csv-pretty",
+    "url": "https://github.com/cappy-dev/csv-pretty"
+  },
+  {
+    "name": "dns-torch",
+    "url": "https://github.com/cappy-dev/dns-torch"
+  },
+  {
+    "name": "dotfiles-bootstrap",
+    "url": "https://github.com/cappy-dev/dotfiles-bootstrap"
+  },
+  {
+    "name": "eden-launcher",
+    "url": "https://github.com/cappy-dev/eden-launcher"
+  },
+  {
+    "name": "github-profile-info",
+    "url": "https://github.com/cappy-dev/github-profile-info"
+  },
+  {
+    "name": "gstack-analysis",
+    "url": "https://github.com/cappy-dev/gstack-analysis"
+  },
+  {
+    "name": "html-writeups",
+    "url": "https://github.com/cappy-dev/html-writeups"
+  },
+  {
+    "name": "jmail-client",
+    "url": "https://github.com/cappy-dev/jmail-client"
+  },
+  {
+    "name": "jmail-python",
+    "url": "https://github.com/cappy-dev/jmail-python"
+  },
+  {
+    "name": "kimi-k3-blog",
+    "url": "https://github.com/cappy-dev/kimi-k3-blog"
+  },
+  {
+    "name": "llama-cpp-benchmark",
+    "url": "https://github.com/cappy-dev/llama-cpp-benchmark"
+  },
+  {
+    "name": "llm-bench-lite",
+    "url": "https://github.com/cappy-dev/llm-bench-lite"
+  },
+  {
+    "name": "llm-hardware-guide",
+    "url": "https://github.com/cappy-dev/llm-hardware-guide"
+  },
+  {
+    "name": "markdown-to-static",
+    "url": "https://github.com/cappy-dev/markdown-to-static"
+  },
+  {
+    "name": "MoSimulator-Public",
+    "url": "https://github.com/cappy-dev/MoSimulator-Public"
+  },
+  {
+    "name": "nim-api-watchdog",
+    "url": "https://github.com/cappy-dev/nim-api-watchdog"
+  },
+  {
+    "name": "nvidia-nim-tools",
+    "url": "https://github.com/cappy-dev/nvidia-nim-tools"
+  },
+  {
+    "name": "opencode-icloud-email",
+    "url": "https://github.com/cappy-dev/opencode-icloud-email"
+  },
+  {
+    "name": "personal-api-aggregator",
+    "url": "https://github.com/cappy-dev/personal-api-aggregator"
+  },
+  {
+    "name": "phone-security-checklist",
+    "url": "https://github.com/cappy-dev/phone-security-checklist"
+  },
+  {
+    "name": "pi-zero-2-selfhost",
+    "url": "https://github.com/cappy-dev/pi-zero-2-selfhost"
+  },
+  {
+    "name": "pi5-stack",
+    "url": "https://github.com/cappy-dev/pi5-stack"
+  },
+  {
+    "name": "scramjet-proxy",
+    "url": "https://github.com/cappy-dev/scramjet-proxy"
+  },
+  {
+    "name": "ssh-key-audit",
+    "url": "https://github.com/cappy-dev/ssh-key-audit"
+  },
+  {
+    "name": "ssh-quick-setup",
+    "url": "https://github.com/cappy-dev/ssh-quick-setup"
+  },
+  {
+    "name": "ssl-cert-checker",
+    "url": "https://github.com/cappy-dev/ssl-cert-checker"
+  },
+  {
+    "name": "wareware",
+    "url": "https://github.com/cappy-dev/wareware"
+  },
+  {
+    "name": "wc2026-tracker",
+    "url": "https://github.com/cappy-dev/wc2026-tracker"
+  },
+  {
+    "name": "whos-looking",
+    "url": "https://github.com/cappy-dev/whos-looking"
+  },
+  {
+    "name": "you-know-ball",
+    "url": "https://github.com/cappy-dev/you-know-ball"
+  }
+]

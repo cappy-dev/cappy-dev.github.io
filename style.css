@@ -74,6 +74,18 @@ a:focus-visible, button:focus-visible {
 }
 .featured-project h2 { font-size: 28px; }
 .catalog-note a { color: var(--accent-bright); }
+.repository-directory { max-width: 960px; margin: 0 auto; padding: 0 24px 64px; }
+.repository-directory h2 { font-size: 24px; margin-bottom: 12px; }
+.repository-directory p { color: var(--fg3); margin-bottom: 24px; max-width: 65ch; }
+.repository-directory ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 0 24px;
+    list-style: none;
+    padding: 0;
+}
+.repository-directory a { display: flex; align-items: center; min-height: 44px; overflow-wrap: anywhere; text-decoration: underline; }
+.repository-directory a:hover { color: var(--accent-bright); }
 .hero .actions { flex-wrap: wrap; }
 nav .logo, nav .links a, footer .right a {
     min-height: 44px;

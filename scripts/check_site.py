@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Check static pages without a build or third-party packages."""
 
+import json
 from collections import Counter
 from html.parser import HTMLParser
 from pathlib import Path
@@ -65,6 +66,20 @@ def check():
             references += 1
             if not path.is_file():
                 errors.append(f"{relative}: missing {link}")
+    index = Page()
+    index.feed((ROOT / "blog/index.html").read_text())
+    indexed = {urlsplit(urljoin(ORIGIN + "blog/index.html", link)).path for link in index.links}
+    for article in sorted((ROOT / "blog").glob("*.html")):
+        if article.name != "index.html" and f"/blog/{article.name}" not in indexed:
+            errors.append(f"blog/index.html: unlisted article {article.name}")
+    catalog = ROOT / "data/repositories.json"
+    if catalog.exists():
+        projects = Page()
+        projects.feed((ROOT / "projects.html").read_text())
+        linked = {link.rstrip("/") for link in projects.links}
+        for repository in json.loads(catalog.read_text()):
+            if repository["url"].rstrip("/") not in linked:
+                errors.append(f"projects.html: unlisted repository {repository['name']}")
     for error in errors:
         print(error)
     print(f"Checked {len(pages)} HTML files and {references} local references; {len(errors)} errors.")
