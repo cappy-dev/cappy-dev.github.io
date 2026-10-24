@@ -10,32 +10,25 @@
     --surface-hover: #28282c;
     --fg: #f7f8f8;
     --fg2: #d0d6e0;
-    --fg3: #8a8f98;
-    --fg4: #62666d;
-    --accent: #5e6ad2;
-    --accent-bright: #7170ff;
-    --accent-hover: #828fff;
+    --fg3: #a2a7b1;
+    --fg4: #959ba6;
+    --accent: #5360c4;
+    --accent-bright: #a5b0ff;
+    --accent-hover: #4b56bd;
     --green: #10b981;
-    --border: rgba(255,255,255,0.05);
-    --border2: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.09);
+    --border2: rgba(255,255,255,0.14);
+    color-scheme: dark;
+    scrollbar-color: var(--fg4) var(--panel);
 }
 
 /* --- Reset & base --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; height: 100%; }
+html { scroll-behavior: smooth; height: 100%; scroll-padding-top: 80px; }
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-feature-settings: "cv01", "ss03";
-    /* font-optical-sizing: auto lets the browser pick Inter's display
-       optical at large sizes (the hero at 64px, page-headers at 48px,
-       article h1 at 40px) and the text optical at body sizes. Inter
-       ships two designs .  text and display .  with the display optical
-       being lighter and more geometric, which is the actual detail
-       behind Linear's "compressed headlines" look. Without this, large
-       headings fall back to the text optical and read subtly heavier
-       than the brand intends. Requires the @font-face to carry the opsz
-       axis, which the updated Google Fonts URL supplies. No visual
-       effect at body sizes where the text optical is already correct. */
+
     font-optical-sizing: auto;
     background: var(--bg);
     color: var(--fg2);
@@ -51,54 +44,59 @@ h1, h2, h3, h4, h5, h6 {
     font-feature-settings: "cv01", "ss03";
 }
 
-/* --- Hero atmosphere: radial glow + fine dot grid --- */
-.hero {
-    position: relative;
-    overflow: hidden;
+a { text-underline-offset: 0.2em; }
+.about p a, .about-page p a, .about-page li a, .catalog-note a {
+    text-decoration: underline;
 }
-.hero::before {
-    content: '';
-    position: absolute;
-    top: -40%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 640px;
-    height: 640px;
-    background: radial-gradient(
-        circle,
-        rgba(94, 106, 210, 0.12) 0%,
-        rgba(94, 106, 210, 0.04) 40%,
-        transparent 70%
-    );
-    pointer-events: none;
-    z-index: 0;
+a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 3px;
 }
-.hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.03) 1px,
-        transparent 1px
-    );
-    background-size: 24px 24px;
-    pointer-events: none;
-    z-index: 0;
-    mask-image: radial-gradient(
-        ellipse 70% 60% at 50% 40%,
-        black 20%,
-        transparent 100%
-    );
-    -webkit-mask-image: radial-gradient(
-        ellipse 70% 60% at 50% 40%,
-        black 20%,
-        transparent 100%
-    );
+.skip-link {
+    position: fixed;
+    top: 8px;
+    left: 16px;
+    z-index: 300;
+    padding: 12px 20px;
+    background: var(--fg);
+    color: var(--bg);
+    transform: translateY(-160%);
 }
-.hero > * {
-    position: relative;
-    z-index: 1;
+.skip-link:focus { transform: translateY(0); }
+.featured-project, .catalog-note {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+}
+.featured-project .project-card {
+    background: var(--panel);
+    padding: 32px;
+}
+.featured-project h2 { font-size: 28px; }
+.catalog-note a { color: var(--accent-bright); }
+.hero .actions { flex-wrap: wrap; }
+nav .logo, nav .links a, footer .right a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+}
+nav .links a.cta { color: var(--fg); }
+.capability-name, .about-capability-name, .project-card h2, .project-card h3 {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.month-nav { flex-wrap: wrap; }
+.month-nav a, .topic-chip { min-height: 44px; display: inline-flex; align-items: center; }
+.article-body a:hover, .about-page a:hover, .about a:hover,
+.catalog-note a:hover, article .body a:hover { color: var(--fg); text-decoration: underline; }
+@media (max-width: 640px) {
+    html:not(.js) nav .inner { flex-wrap: wrap; padding: 8px 0; }
+    html:not(.js) nav .inner > .links { flex-wrap: wrap; gap: 4px 16px; }
+    .capability-name { font-size: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .capability, .post-row, .btn-ghost { transition: none; }
 }
 
 /* --- Navigation --- */
@@ -115,18 +113,7 @@ nav {
     transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-/* Scroll-aware elevation .  Linear's actual depth model (design
-   tokens Section 6): on dark surfaces elevation is read through
-   background luminance stepping and a sharper hairline, never a
-   dark drop shadow (which is nearly invisible on dark and reads
-   as slop). When the page is scrolled past 8px, nav-scroll.js adds
-   .is-scrolled. The bar darkens one luminance step toward the
-   deepest tone and gains the next border tier (--border2) on its
-   bottom edge, so it reads as chrome floating *over* streaming
-   content instead of a strip flush *with* the page. At the very
-   top of a page the nav keeps its resting flush state .  no
-   elevation is needed when nothing is beneath it. No new tokens
-   are invented; --bg / --border2 are reused. */
+
 nav.is-scrolled {
     background: var(--bg);
     border-bottom-color: var(--border2);
@@ -139,7 +126,7 @@ nav.is-scrolled {
 nav .inner {
     max-width: 960px; margin: 0 auto;
     display: flex; align-items: center; justify-content: space-between;
-    height: 52px;
+    min-height: 64px;
 }
 nav .logo {
     font-weight: 510; font-size: 14px; color: var(--fg);
@@ -170,16 +157,7 @@ nav .cta {
 }
 nav .cta:hover { background: var(--accent-hover); }
 
-/* Current-page indicator .  "you are here" on a multi-page site.
-   nav.js adds .is-current to whichever link matches the page's
-   path, in BOTH the desktop bar and the mobile collapse panel.
-   Linear's state-is-the-signal rule: the current section reads at
-   full primary ink (--fg) where the rest stay muted (fg3), and a
-   single 2px accent underline .  reusing the existing --accent token,
-   the same width as the .progress-bar .  anchors it. No new box,
-   icon, or pill; the ink shift IS the hierarchy, the rule IS the
-   location. hover is intentionally suppressed on the current link
-   so the "you are here" state can not flicker as the cursor passes. */
+
 nav .links a.is-current {
     color: var(--fg);
     position: relative;
@@ -200,18 +178,7 @@ nav .links a.is-current::after {
    above is scoped to plain .links a, not .links a.cta. */
 nav .links a.is-current:hover { color: var(--fg); }
 
-/* Keyboard focus on primary site-level interactive elements.
-   Reuses the same --accent-bright inset 2px ring recipe already
-   established for .post-row /.topic-chip /.project-card, so every
-   clickable surface on the site reads as focusable in the same
-   register. Linear is meticulous about keyboard focus visibility . 
-   without these rules a keyboard user navigating the hero CTAs, the
-   desktop nav links, the nav CTA, or the article "Back" link sees
-   no focus indicator at all (the browser default outline is
-   suppressed visually against the dark panel). Two shapes only:
-   text links get an inset offset ring; solid buttons get a 2px
-   outline ring outside their own fill so the indicator is visible
-   against the accent fill. No new tokens, no new boxes. */
+
 nav .links a:focus-visible,
 .btn-ghost:focus-visible,
 .back:focus-visible,
@@ -264,7 +231,7 @@ footer .right a:hover { color: var(--fg); }
     display: inline-block;
     background: transparent; color: var(--fg4);
     border: 1px solid rgba(255,255,255,0.06); border-radius: 9999px;
-    padding: 2px 10px 2px 8px;
+    padding: 4px 10px;
     font-size: 12px; font-weight: 510;
     letter-spacing: -0.01em;
     transition: border-color 0.15s, color 0.15s;
@@ -285,7 +252,7 @@ footer .right a:hover { color: var(--fg); }
    hairline that reads as a document edge, not a decoration. */
 .hero {
     max-width: 720px; margin: 0 auto;
-    padding: 140px 24px 100px;
+    padding: 104px 24px 80px;
     text-align: center;
 }
 .hero-label {
@@ -301,7 +268,7 @@ footer .right a:hover { color: var(--fg); }
     background: var(--green);
 }
 .hero h1 {
-    font-size: 64px; font-weight: 510; line-height: 1.00;
+    font-size: clamp(40px, 6vw, 64px); font-weight: 590; line-height: 1.08;
     letter-spacing: -1.408px; color: var(--fg);
     margin-bottom: 24px;
 }
@@ -338,23 +305,15 @@ footer .right a:hover { color: var(--fg); }
     padding: 0 24px 80px;
 }
 .section-title {
-    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 12px; font-weight: 500; color: var(--fg4);
-    letter-spacing: 0.05em; text-transform: uppercase;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 20px; font-weight: 590; color: var(--fg);
+    letter-spacing: -0.01em;
     margin-bottom: 32px;
 }
 
-/* Section dividers .  Linear-style hairline opener.
-   The home page is a Decide/Learn surface that stacks four
-   content sections. Without distinction they read as one
-   undifferentiated scroll. A hairline top rule + a tiny mono
-   index ("01 .  Capabilities") gives each section a clear
-   visual opening, exactly the editorial rhythm Linear uses
-   on its landing pages. Inherits the existing hairline token
-   (--border2) already used by .post-year and .projects-cat-label;
-   no new boxes, icons, or colors. */
-.has-divider {
-    padding-top: 56px;
+
+.has-divider.has-divider {
+    padding-top: 40px;
     margin-top: 24px;
     position: relative;
 }
@@ -367,12 +326,7 @@ footer .right a:hover { color: var(--fg); }
     height: 1px;
     background: var(--border2);
 }
-/* The numbered index .  Linear's "01 .  Capabilities" rhythm.
-   The mono label already sets font/size/weight; the only
-   addition is putting the index in accent-bright so it reads
-   as the section's anchor while the title stays muted. The
-   em-dash separator inherits the muted tone automatically.
-   One tiny span, one color swap, no new box. */
+
 .section-index {
     color: var(--accent-bright);
 }
@@ -383,18 +337,17 @@ footer .right a:hover { color: var(--fg); }
     border-bottom: 1px solid var(--border);
     display: flex; justify-content: space-between; align-items: baseline;
     gap: 24px;
-    transition: padding 0.2s ease, border-color 0.2s ease;
+    transition: border-color 0.2s ease;
     border-radius: 0;
 }
 .capability:first-of-type { padding-top: 0; }
 .capability:last-of-type { border-bottom: none; }
 .capability:hover {
-    padding-left: 12px;
     border-color: var(--border2);
 }
 .capability-name {
     font-size: 20px; font-weight: 590; color: var(--fg);
-    letter-spacing: -0.24px; white-space: nowrap;
+    letter-spacing: -0.24px;    white-space: normal;
 }
 .capability-desc {
     font-size: 15px; font-weight: 400; color: var(--fg3);
@@ -455,39 +408,7 @@ footer .right a:hover { color: var(--fg); }
     scroll-margin-top: 72px;
 }
 
-/* Month arrival cue .  hairline opener for secondary month groups.
 
-   The blog index is an Explore surface, and .month-nav exists
-   specifically to jump readers straight to #m-july, #m-june, etc.
-   But until now .post-month was the only section-opener on the
-   site that didn't carry a hairline arrival mark: every other
-   labelled opener (.has-divider on the home page, .post-year
-   above, .projects-cat-label, .keep-reading-title) uses the same
-   "mono label + hairline" rhythm to signal "a new surface begins
-   here." A reader who clicked "July" in the month-nav landed on
-   plain uppercase text floating mid-list, with no visual stop
-   confirming the jump target.
-
-   This closes that gap the same way the rest of the site already
-   does: a whisper-thin --border2 rule above the label, plus a
-   small padding step so the label doesn't sit hard against the
-   rule. The :not(.post-year + .post-month) guard keeps the first
-   month under a year (e.g. August) untouched .  it already
-   inherits the year's own establishing hairline directly above,
-   so adding a second rule there would just stack two lines
-   fractions of a millimeter apart. Subsequent months (July,
-   June, May) get the cue instead, which is exactly where it's
-   needed: each is a fresh jump destination in the middle of a
-   long scroll, with no other visual marker around it.
-
-   Reuses the existing --border2 token (.post-year's own rule,
-   .has-divider's opener) .  no new box, icon, color, or token.
-   The rule is on the same element that carries data-divider,
-   so it composes with the topic-filter dimming already in
-   [data-divider].is-dimmed: when a month has no matching rows
-   in an active filter, the whole element .  label and rule
-   together .  fades to 0.3 opacity rather than leaving a bright
-   hairline hovering over an empty stretch. */
 .post-month:not(.post-year + .post-month) {
     border-top: 1px solid var(--border2);
     padding-top: 16px;
@@ -536,13 +457,7 @@ footer .right a:hover { color: var(--fg); }
     font-style: normal;
 }
 
-/* =========================================================
-   TOPIC FILTER CHIPS
-   The filter affordance for the blog index. Two states only:
-   default (outline, muted) and active (solid accent). No
-   third hover-decoration state, no gradient, no shadow .  the
-   state itself is the signal. Linear-style restraint.
-   ========================================================= */
+
 
 .topics {
     max-width: 720px;
@@ -651,17 +566,7 @@ footer .right a:hover { color: var(--fg); }
     max-width: 720px; margin: 0 auto;
     padding: 0 24px 80px;
 }
-/* Keep Reading section .  the "where next" moment after an article.
-   This is the only section heading on the site that previously broke
-   the established Linear mono-label + hairline rhythm used by the home
-   page ("01 .  Capabilities"), the blog index (.post-year), and the
-   projects page (.projects-cat-label). Promoting it to the same recipe
-   means a reader finishing any of the 50+ articles sees a consistent
-   section-opening cue across the whole site, with no HTML changes . 
-   the <h2 class="keep-reading-title"> already exists, injected by
-   keep-reading.js. The "Keep reading" label in JetBrains Mono caps +
-   accent-bright, sitting above a hairline, reads as the start of a new
-   surface rather than a heading floating in the middle of one. */
+
 .keep-reading {
     padding-top: 24px;
 }
@@ -682,7 +587,6 @@ footer .right a:hover { color: var(--fg); }
 .post-row:last-child { border-bottom: none; }
 .post-row:hover {
     background: rgba(255,255,255,0.02);
-    padding: 0 16px 16px;
     border-radius: 6px;
 }
 .post-row:hover .post-title { color: var(--fg); }
@@ -698,9 +602,8 @@ footer .right a:hover { color: var(--fg); }
     outline: none;
     background: rgba(255,255,255,0.02);
     border-radius: 6px;
-    margin: 0 -16px;
-    padding-left: 16px;
-    padding-right: 16px;
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 3px;
     box-shadow: inset 0 0 0 2px rgba(113, 112, 255, 0.45);
 }
 
@@ -722,16 +625,7 @@ footer .right a:hover { color: var(--fg); }
     border-color: rgba(94, 106, 210, 0.20);
 }
 
-/* =========================================================
-   FRESHNESS INDICATOR .  newest post only
-   A small emerald status dot + mono "new" micro-label,
-   shown next to the date on the single most-recent post
-   in the blog index. Follows Linear's status-dot + Mono
-   Label pattern (emerald #27a644 for "in progress"), fired
-   for ~3 days after publish so it self-maintains as new
-   posts land. No new boxes, icons, or color slop .  just
-   a dot the eye can land on when returning to the list.
-   ========================================================= */
+
 
 .fresh {
     display: inline-flex;
@@ -803,27 +697,7 @@ footer .right a:hover { color: var(--fg); }
 }
 .back-link a:hover { color: var(--fg); }
 
-/* Legacy .back selector (for old-style posts)
-   ~67 articles ship the back link as the first child of <article>,
-   directly above the <div class="meta"> date row. The original rule
-   gave it only margin-bottom: 32px against that byline, leaving it
-   visually trapped between the sticky nav chrome and the article's
-   dateline. The 38 modern articles solve this with a separate
-   .back-link wrapper (720px container, its own 32px breathing room).
-   This refactor gives the bare .back the same air gap purely via
-   CSS, scoped to its real structural position (the immediate
-   previous sibling of .meta), so all 67 old-style articles get the
-   unified treatment at once with no HTML changes.
 
-   Design posture (Decide/Learn reading surface): the back link is a
-   wayfinder, not a feature. Linear's restraint holds .  no box, no
-   icon, no accent fill. The change is purely spacing + ink: the
-   link shifts one ink tier brighter than it was (fg3 vs fg4) so it
-   reads as a findable affordance, gains a hairline at its own
-   bottom edge, and pulls down to clear the byline beneath. The
-   "larr" glyph already spaces via gap:4px; no new decoration. The
-   hairline reuses the existing --border token (.post-row separators,
-   .article-tags end-rules) .  no new token, no new box. */
 .back {
     font-size: 13px; font-weight: 510;
     color: var(--fg3);
@@ -831,22 +705,7 @@ footer .right a:hover { color: var(--fg); }
     transition: color 0.15s;
 }
 .back:hover { color: var(--fg); }
-/* Put the bare .back in its own visual lane above the byline, the
-   same way .back-link already separates from .article-header on the
-   modern posts. The .meta row keeps its own margin-bottom (24px,
-   set below) for the h1 separation; the 28px gap above the meta
-   replaces the 32px that used to sit between back and byline, while
-   the hairline at the link's bottom edge establishes the visual
-   stop instead of empty margin. margin-top stays zero so the link
-   keeps the original 64px distance from the nav rather than drifting
-   away from it. Only fires when a .back link is the direct article
-   child and immediately followed by a .meta row .  the exact
-   structural shape of all 66 old-style articles using <article> . 
-   so the 38 modern posts using .back-link separately never collide.
-   The one article without <article> (temporary-accounts) falls
-   through to the bare .back rule above and still gets the ink/
-   hover fix without the hairline, which is acceptable for that
-   single post. */
+
 article > .back {
     margin-bottom: 0;
     padding-bottom: 18px;
@@ -870,12 +729,7 @@ article > .back + .meta {
     margin-bottom: 20px;
     display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
 }
-/* De-emphasize the read-time as the secondary half of the pair,
-   so the date reads as the anchored label and "X min read" recedes.
-   Linear's Mono Label spec: the primary token carries the row,
-   the secondary one dims. No new box, color, or icon .  just opacity.
-   The real middot separator turns the two spans into one typographic
-   pair, matching Linear's "label · detail" rhythm. */
+
 .article-header .meta .read { opacity: 0.7; }
 .article-header .meta .read::before {
     content: '·';
@@ -930,46 +784,7 @@ article h3 {
     position: relative;
 }
 
-/* H2 .  section anchors. A heading-level permalink glyph that stays
-   muted by default and sharpens on hover/focus, so it never competes
-   with the prose until the reader reaches for it. Pure Linear: a mono
-   token, the quaternary text tone, no box, no icon, no color slop.
-   The anchor shifts the heading right by its own width on hover so
-   the glyph occupies space ahead of the title rather than colliding
-   with it .  Linear's "compressed headline, expanded surroundings" at
-   the section level.
 
-   Section-opener hairline .  unifies the article reading surface with
-   the site's established rhythm. Every other top-level section opener
-   on the site opens with a whisper-thin hairline + mono label: the home
-   page (.has-divider before "01 .  Capabilities"), the blog index
-   (.post-year, .post-month), the projects page (.projects-cat-label),
-   and the post-article Keep Reading rail (.keep-reading-title). Until
-   now the article <h2> was the ONLY major section opener that floated
-   on margin alone .  it broke the editorial rhythm a reader carries
-   from any other surface into the article body. Adding the same
-   hairline above every article h2 closes that gap: a section now
-   opens the same way everywhere on the site.
-
-   h3 is intentionally left without a hairline .  it is a sub-section,
-   not a section, and the site's pattern only rails top-level openers.
-   A verified sweep of all 175 articles found only 2 cases where an h2
-   is immediately followed by an h3 with no paragraph between them
-   (fastsdcpu-vs-stability-matrix); because h3 carries no rule there is
-   no double-hairline collision there. The first h2 in an article is
-   almost always (101 of 169) preceded by a <p>, so the rule sits
-   cleanly between the lead paragraph and the first section rather than
-   crowding the article header. The 64 "wrapper" cases are the
-   .article-body / .body <div> opening, which is a structural wrapper
-   not a content block .  the hairline there reads as the article's
-   first section opening, exactly as intended.
-
-   Reuses the existing --border2 token (the same hairline value used
-   by .has-divider, .post-year, .projects-cat-label, .keep-reading-
-   title) .  no new color, no new box, no icon. Top margin raises from
-   56px to 64px so the new hairline has air beneath it before the
-   heading; the heading's own leading (line-height 1.30) carries the
-   separation below. */
 .article-body h2,
 article h2 {
     font-size: 24px; font-weight: 590; color: var(--fg);
@@ -989,20 +804,7 @@ article h3 {
     transition: padding-left 0.15s ease;
 }
 
-/* H4 .  the missing fourth tier of the article reading ladder.
-   h1/h2/h3 each step down deliberately (40 → 24 → 17px, --fg → --fg2,
-   weight 590 holding to 17px, then hierarchy handed to scale + ink).
-   h4 had no rule at all, so any article using <h4> fell through to
-   the browser default .  a bold black 16-ish px block that broke the
-   rhythm the three tiers above it had established. This closes the
-   gap with one more tier in the same register: smaller than h3, ink
-   one step dimmer (fg3), the same weight discipline (510, matching
-   nav/section-label weight), tighter leading to read as a compact
-   sub-heading rather than a new section. No box, no icon, no color . 
-   scale and ink carry the hierarchy, exactly the way h2 and h3 do.
-   Margin is compressed versus h3 (28px top / 10px bottom) so a run
-   of h4s under one h2/h3 reads as a list of sub-points, not a fresh
-   section each. */
+
 .article-body h4,
 article h4 {
     font-size: 15px; font-weight: 510; color: var(--fg3);
@@ -1129,33 +931,7 @@ article pre[data-lang]::before {
     pointer-events: none;
 }
 
-/* Blockquote .  Linear full-enclosure treatment, no left-border accent rail.
-   The prior border-left: 3px solid accent was an accent-rail slop tell
-   (decoration pretending to be organization). Linear encloses callouts
-   with a uniform hairline border and lets indentation + muted ink carry
-   the "this is a quote" grammar. Indentation is preserved via the left
-   padding so the row reads as set-off prose, not as a colored strip.
 
-   Editorial quotation glyph (::before) .  the typographic mark that signals
-   "this is a quote" without using a colored strip, icon, or box. This is
-   how editorial publications (Stripe's blog, the NYT, literary magazines)
-   anchor a pulled quotation: a large dimmed " character in the article's
-   left margin gutter, where marginalia lives. Linear's own restraint holds
-   here .  the glyph is type, not decoration: a single 4xl glyph in the
-   quaternary ink tier (var(--fg4) ≈ #62666d), positioned in the left gutter
-   at 8px and bottom-anchored to the top of the quote so its baseline sits
-   against the opening line. No new color, no new token, no new box .  just
-   type set-as-hierarchy at a scale the body cannot carry.
-
-   Spatial reasoning: the article body is centered at max-width 720px, so
-   any viewport wider than 720px + 2×24px padding leaves dead margin space
-   on both sides. The glyph lives there at left: -28px, occupying no
-   content width. On narrow viewports (≤ 720px + padding) the article
-   spans most of the width and the left gutter closes; a max-width: 880px
-   media query hides the glyph so it never collides with the body text or
-   gets clipped off-screen. Below that, the hairline + muted ink still do
-   the full job of marking the quote .  the glyph is a marginalia gain for
-   wide viewports, not a load-bearing signal. */
 .article-body blockquote,
 article blockquote {
     position: relative;
@@ -1359,22 +1135,7 @@ article .body .tags {
 .cta-box h3 { margin-top: 0; color: var(--accent-bright); }
 .cta-box p { margin-bottom: 12px; }
 
-/* Benchmark grid .  used across feature articles.
-   Two consumption patterns live on the same .bench-card component,
-   kept distinct by class name so they never collide:
 
-   1. Big-stat card: .bench-card .label / .stat / .detail . 
-      one large mono number per card (fastsdcpu, apertus, turbovla).
-   2. Row-pair table: .bench-label / .bench-row / .bench-tool /
-      .bench-time .  key/value pairs stacked inside a card with
-      hairline separators (oak-version-control, gpt-5-6-sol,
-      reame-cpu-first, and ~30 other articles).
-
-   The grid uses auto-fit so the same component renders two columns
-   inside the 720px article body (672px content / 280px min = 2) and
-   collapses to one on narrow viewports .  replacing the old fixed
-   1fr 1fr that needed a media query the original desktop-first
-   definition never carried. */
 .bench-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
@@ -1401,38 +1162,9 @@ article .body .tags {
     font-size: 13px; color: var(--fg3); margin-top: 4px;
 }
 
-/* --- Row-pair table variant ---
-   These class names previously had to be inline-<style>-defined in
-   every article that used them (33 files), and the definitions
-   drifted: some articles stapled rows without hairlines and printed
-   the value in --fg (white) instead of the accent, others used
-   baseline alignment + accent-bright, and font sizes moved between
-   rem and px on each rewrite. Pulling them into the shared
-   stylesheet normalizes every benchmark table on the site to one
-   on-system treatment: baseline-aligned label/value, hairline row
-   separators (the same --border token the .post-row list uses),
-   and Mono-on-accent for the measured value .  Linear's numeric-
-   emphasis register for a Compare surface inset inside a reading
-   surface. */
 
-/* .bench-label: the section title inside a row-pair card.
-   Mono, fg3, xs caps tracking .  the same .spec-label /
-   .bench-card .label recipe so the two variants read as one
-   family. Carries the row group's name (e.g. "Run summary",
-   "13-year-old Xeon, AVX1 only").
 
-   Hierarchy refinement: the label was previously only separated
-   from its rows by 12px of margin, so on a 4-5 row card it read
-   as the first row rather than as the row group's header. Linear's
-   Mono Label spec anchors a data block under a label with a hairline
-   separator .  the exact pattern .post-year and .projects-cat-label
-   already use on this site. A bottom hairline (the existing --border
-   token, no new color) followed by a tight 10px gap closes the
-   label-to-first-row relationship so the rows read as the content
-   of the label, not as another peer. The first row's own top
-   hairline is suppressed so the label hairline is the single opener.
-   No new boxes, icons, or colors .  one hairline + spacing, the same
-   system the home/blog/projects pages already use. */
+
 .bench-card .bench-label {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
     font-size: 12px; font-weight: 500; color: var(--fg3);
@@ -1441,12 +1173,7 @@ article .body .tags {
     padding-bottom: 10px;
     border-bottom: 1px solid var(--border);
 }
-/* Suppress the first row's top hairline so the label hairline is
-   the single opener .  otherwise the label gets a double rule under
-   it (its own + the row's), which reads as a mistake. The
-   :first-of-type guard also stops a card whose first child is not a
-   .bench-row (e.g. a big-stat variant, which has no rows) from
-   losing padding on an unrelated element. */
+
 .bench-card .bench-row:first-of-type {
     border-top: none;
     padding-top: 0;
@@ -1474,14 +1201,7 @@ article .body .tags {
     line-height: 1.40;
 }
 
-/* .bench-time: the right value of a pair.
-   Mono .  Linear's numeric register. accent-bright (the exact
-   --accent-bright #7170ff token every link and heading anchor
-   already uses) so the measurement reads as the figure the
-   reader came for, without calling for a heavier weight or a
-   higher contrast tone. Keep it on one line; the flex space-
-   between lets long tool names wrap without forcing the value
-   off its baseline. */
+
 .bench-card .bench-time {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 13px; font-weight: 500;
@@ -1645,13 +1365,7 @@ body {
     body { animation: none; }
 }
 
-/* =========================================================
-   ARTICLE READING TYPOGRAPHY REFINEMENTS
-   Typographic hierarchy without decoration .  the reading
-   surface is where visitors spend the most time, so the
-   prose itself has to carry rhythm. These four rules are
-   all "type as hierarchy" moves: no boxes, colors, or icons.
-   ========================================================= */
+
 
 /* 1. text-wrap on headings .  modern browsers balance the
    last line so headings read as deliberately set, not
@@ -1682,17 +1396,7 @@ article .body p,
     widows: 2;
 }
 
-/* 3. Lead paragraph .  the first paragraph following an
-   article's h1 gets a slightly larger size and the primary
-   ink color, establishing it as the "lede" of the piece.
-   Uses adjacent-sibling and direct-child selectors so it
-   applies automatically across all 50+ articles without
-   any HTML changes. This is how editorial sites build
-   hierarchy without a box around the intro.
-   Caveat: the .article-header .subtitle is intentionally
-   NOT touched here .  it carries its own muted (var(--fg3))
-   treatment as a deck line, and is a separate semantic
-   element from the first prose paragraph. */
+
 .article-header h1 + p,
 article > h1 + p,
 .article-body > p:first-of-type {
@@ -1726,21 +1430,16 @@ footer .left {
     letter-spacing: -0.01em;
 }
 
-/* =========================================================
-   MOBILE NAVIGATION
-   Linear-style responsive collapse. The desktop bar stays exactly
-   as-is above 640px; below it, the inline links hide behind a
-   hamburger icon-button (Linear icon-button: translucent bg,
-   50% radius, hairline border) that toggles a stacked panel.
-   ========================================================= */
+
 
 /* Hamburger toggle .  hidden on desktop, shown on mobile */
 .nav-toggle {
     display: none; /* JS reveals it under 640px */
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
+    flex-direction: column;
     border-radius: 8px;
     background: rgba(255,255,255,0.03);
     border: 1px solid var(--border2);
@@ -1808,6 +1507,12 @@ footer .left {
         display: inline-flex;
     }
     .nav-collapse {
+        position: absolute;
+        top: 100%;
+        left: -24px;
+        right: -24px;
+        background: var(--panel);
+        visibility: hidden;
         display: block;
         overflow: hidden;
         max-height: 0;
@@ -1822,6 +1527,7 @@ footer .left {
         display: none;
     }
     .nav-collapse.is-open {
+        visibility: visible;
         max-height: 400px;
     }
     .nav-collapse .links {
@@ -1857,16 +1563,9 @@ footer .left {
         margin: 8px 16px;
         justify-content: center;
         border-radius: 6px;
-        min-height: 40px;
+        min-height: 44px;
     }
-    /* Mobile current-page indicator. The desktop underline (::after
-       bottom rule) does not translate to a stacked vertical list, so
-       the current link gets a 2px accent left edge instead .  the
-       orientation where a leading rule reads as location, not as the
-       horizontal "accent rail" slop tell. Same ink shift to --fg,
-       same --accent token, suppressed hover. The rule sits inside
-       the panel's 24px padding channel so it does not collide with
-       the panel's own left edge. */
+
     .nav-collapse .links a.is-current {
         color: var(--fg);
         box-shadow: inset 2px 0 0 var(--accent);
@@ -1888,11 +1587,15 @@ footer .left {
     /* Home */
     .hero h1 { font-size: 40px; letter-spacing: -0.704px; }
     .hero .subtitle { font-size: 16px; }
-    .hero { padding: 100px 24px 64px; }
+    .hero { padding: 64px 24px 40px; }
+    .section, .home-links, .about { padding-bottom: 48px; }
+    .projects-cat { margin-bottom: 40px; }
+    .featured-project .project-card { padding: 24px; }
+    .featured-project, .catalog-note { padding-bottom: 32px; }
     .capability { flex-direction: column; gap: 4px; }
     .capability-desc { text-align: left; max-width: none; }
     footer { flex-direction: column; gap: 16px; text-align: center; }
-    footer .right { justify-content: center; }
+    footer .right { justify-content: center; flex-wrap: wrap; gap: 4px 20px; }
 
     /* Section dividers .  keep the hairline flush with mobile padding */
     .has-divider { padding-top: 40px; }
@@ -1902,9 +1605,9 @@ footer .left {
     .page-header h1 { font-size: 32px; letter-spacing: -0.704px; }
     .page-header { padding: 64px 24px 40px; }
     .post-row { flex-direction: column; gap: 4px; padding: 16px 8px; }
-    .post-row:hover { margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+    .post-row:hover { padding-left: 8px; padding-right: 8px; }
     /* Match the mobile hover treatment so keyboard focus doesn't overflow */
-    .post-row:focus-visible { margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+    .post-row:focus-visible { padding-left: 8px; padding-right: 8px; }
     .post-date { padding-top: 0; min-width: 0; }
     .post-title { font-size: 15px; }
     .post-excerpt { font-size: 13px; }
@@ -1918,13 +1621,7 @@ footer .left {
     article h1 { font-size: 28px; letter-spacing: -0.528px; }
     .article-body { font-size: 15px; }
     .article-body h2, article h2 { font-size: 20px; }
-    /* h3 holds at 17px on mobile; h4 at 15px would otherwise collide
-       with the 15px body text and lose its sub-heading distinction.
-       Pinning h4 to 15px with weight 510 (vs body 400) keeps the
-       tier readable even when the scale gap to body closes to zero . 
-       the weight is what carries the hierarchy at that point. No
-       explicit override needed: the default-rule values already do
-       this, so no mobile block is added. */
+
 
     /* Components */
     .bench-grid { grid-template-columns: 1fr; }
@@ -1937,21 +1634,7 @@ footer .left {
    PROJECTS PAGE
    ========================================================= */
 
-/* The projects page is an Explore surface: a visitor browsing
-   an open catalog of repos. The prior 2x7 wall of equal cards
-   carried no scannable structure (feature-tile-grid slop . 
-   every card the same weight, nothing prioritized). Grouping
-   the 14 projects into a few category-led sections lets the
-   eye scan "self-hosting" vs "AI tooling" vs "utilities" in
-   one glance, exactly the way the blog index already scans by
-   topic chips and month headings.
 
-   Implementation note: NO new tokens. The category label reuses
-   the exact mono-label recipe already in the system:
-   .section-title / .post-year (JetBrains Mono, 12px, 500,
-   accent-bright / fg4, 0.05, 0.08em tracking, uppercase, with a
-   hairline bottom rule to attach the grid beneath). The hairline
-   is the existing --border2 token that .post-year already uses. */
 .projects {
     max-width: 960px; margin: 0 auto;
     padding: 0 24px 80px;
@@ -1961,16 +1644,16 @@ footer .left {
 }
 .projects-cat:last-child { margin-bottom: 0; }
 .projects-cat-label {
-    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 12px; font-weight: 500;
-    color: var(--fg4);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 17px; font-weight: 590;
+    color: var(--fg2);
+    letter-spacing: -0.01em;
     margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--border2);
     display: flex;
     align-items: baseline;
+    flex-wrap: wrap;
     gap: 8px;
     /* The category itself is the primary signal; the count is the
        secondary mono detail, exactly mirroring how .article-header
@@ -1982,7 +1665,7 @@ footer .left {
        Linear's "label · detail" rhythm already used by .meta .read.
        No new color or token -- just opacity on the existing label
        tone, same recipe as .article-header .meta .read (opacity 0.7). */
-    opacity: 0.55;
+    opacity: 1;
     font-weight: 400;
     letter-spacing: 0.04em;
     white-space: nowrap;
@@ -1999,12 +1682,7 @@ footer .left {
     outline: none;
 }
 .projects-cat .projects-grid {
-    /* Override .projects-grid's own max-width + bottom padding so
-       the page can flow the four category sections top-to-bottom
-       inside the single .projects container. The grid rules here
-       are deliberately IDENTICAL to the base .projects-grid . 
-       removing only the per-grid sizing that conflicts with the
-       outer wrapper. Cards themselves are touched. */
+
     max-width: none;
     padding: 0;
     margin: 0;
@@ -2042,36 +1720,9 @@ footer .left {
     background: var(--surface-hover);
     box-shadow: inset 0 0 0 2px rgba(113, 112, 255, 0.45);
 }
-.project-card:first-child h2 { margin-top: 0; }
+.project-card:first-child h2, .project-card:first-child h3 { margin-top: 0; }
 
-/* Primary-language micro-label .  a scan-level affordance for the
-   projects Explore surface.
 
-   The projects page is an Explore surface: a visitor scans 14 repos
-   across four categories to find what is useful to them. Until now
-   every card rendered the repo name and a one-line description at
-   the same visual weight, so the reader could not tell "all five
-   self-hosting tools are Shell scripts" from "the four AI tools are
-   all Python" without reading every body sentence. Linear places the
-   primary categorical label as a quiet mono token at the scan level
-   of a card (its Mono Label spec), letting the eye differentiate
-   siblings before committing to the prose.
-
-   This surfaces data that already exists in the markup .  every card's
-   first .pill tag is its primary language (Shell / Python /
-   JavaScript) .  without inventing new content. The label is rendered
-   above the h2 in the *same* JetBrains Mono / --fg4 / 12px / uppercase
-   / 0.04em recipe already established across the site for
-   .bench-card .label, .section-title, .post-year, and
-   .projects-cat-label. No new tokens, no icon, no color .  type is
-   the hierarchy. The h2's top margin is removed so the lang label
-   opens the card and the heading sits flush beneath it (the label's
-   own 8px bottom margin carries the separation), and
-   :first-child margin-top:0 is preserved so the first card in each
-   category still opens level with its peers. Cards without a
-   .project-lang child fall through unchanged .  the h2 keeps its own
-   top margin from the rule below, so a future card added without the
-   label still reads correctly. */
 .project-lang {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
     font-size: 12px;
@@ -2081,10 +1732,10 @@ footer .left {
     text-transform: uppercase;
     margin-bottom: 8px;
 }
-.project-card:has(.project-lang) h2 {
+.project-card:has(.project-lang) h2, .project-card:has(.project-lang) h3 {
     margin-top: 0;
 }
-.project-card h2 {
+.project-card h2, .project-card h3 {
     font-size: 18px;
     font-weight: 590;
     color: var(--fg);
@@ -2173,12 +1824,7 @@ footer .left {
    HOME LINK CARDS
    ========================================================= */
 
-/* The home-links section now has an eyebrow above the grid:
-   a mono section label + a short lead line that says what the
-   three cards are for. Linear's editorial pattern: a labelled
-   opener, then the grid. The eyebrow lives inside the 960px
-   section, the grid keeps its own max-width so the cards
-   align with everything else on the page. */
+
 .home-links {
     max-width: 960px; margin: 0 auto;
     padding: 0 24px 80px;
@@ -2246,31 +1892,7 @@ footer .left {
     .home-links-grid { grid-template-columns: 1fr; }
 }
 
-/* =========================================================
-   ARTICLE-END SIGNATURE FOOTER
-   A quiet editorial close for blog posts .  the essay's final
-   rule, a mono signoff, and three small nav links. Replaces
-   the chaos of ~10 unstyled per-post footer variants
-   (bare <p>, .left/.right, .footer-quote/.footer-links/
-   .footer-signoff, .signoff, .quote…) with one consistent,
-   scoped component.
 
-   Design posture: this is a Decide/Learn reading surface,
-   so the close is hairline + type, never a card or CTA
-   banner. The hairline matches the .tags end-rule already
-   used at the bottom of article bodies; the mono signoff
-   reuses the exact .read-time / .section-title recipe; the
-   links reuse the muted footer .right a treatment. Nothing
-   new is invented .  existing tokens are reused deliberately.
-
-   Scope: `article footer` and `article > footer` override the
-   site-wide `footer` rules (which target the 960px page
-   footer on index/about/projects) so article footers stop
-   inheriting a 960px flex strip and instead stay inside the
-   720px reading column. The `.post-footer` class is the
-   canonical hook for footers placed outside <article> (older
-   posts); it carries the same scoped rules.
-   ========================================================= */
 
 /* Scoped article footer .  overrides unscoped footer rules.
    Placed *after* the site-wide footer block so specificity
