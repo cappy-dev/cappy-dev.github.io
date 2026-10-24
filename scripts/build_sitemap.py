@@ -8,24 +8,33 @@ falling to today for unindexed pages. Run after adding posts.
 import os
 import re
 from datetime import date
+from html.parser import HTMLParser
+from pathlib import Path
 
 BASE = "https://cappy-dev.github.io"
 TODAY = date.today().isoformat()
+
+
+class PublishedDates(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.dates = {}
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        match = re.fullmatch(r"/blog/([a-z0-9-]+)\.html", attrs.get("href") or "")
+        published = attrs.get("data-published")
+        if tag == "a" and match and published:
+            self.dates[match[1]] = date.fromisoformat(published).isoformat()
 
 
 def main():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(root)
 
-    # published dates from the index
-    idx = open("blog/index.html").read()
-    dates = dict(re.findall(
-        r'href="/blog/([a-z0-9-]+)\.html".*?data-published="(\d{4}-\d{2}-\d{2})"',
-        idx, re.S))
-    # also catch attribute order variant (data-published before href)
-    for href, d in re.findall(
-            r'data-published="(\d{4}-\d{2}-\d{2})"[^>]*href="/blog/([a-z0-9-]+)\.html"', idx):
-        dates[href] = d
+    parser = PublishedDates()
+    parser.feed(Path("blog/index.html").read_text())
+    dates = parser.dates
 
     static = ["", "projects.html", "about.html", "blog/"]
     posts = sorted(f for f in os.listdir("blog")
@@ -47,7 +56,7 @@ def main():
         out.append(f"    <lastmod>{lastmod}</lastmod>")
         out.append("  </url>")
     out.append("</urlset>")
-    open("sitemap.xml", "w").write("\n".join(out) + "\n")
+    Path("sitemap.xml").write_text("\n".join(out) + "\n")
     print(f"sitemap: {len(static)} static + {len(posts)} posts = {len(urls)} urls")
 
 

@@ -12,11 +12,17 @@ Static HTML, no framework, no build step. Pages are written by hand (or by the a
 - `style.css`.  single stylesheet, Linear-derived visual language
 - `keep-reading.js`, `anchors.js`, `nav.js`, `nav-scroll.js`, `reading-progress.js`.  small vanilla JS helpers, all fail silently
 - `sitemap.xml`.  regenerated, never hand-edited
-- `scripts/`.  the two generators described below
+- `data/repositories.json`. Public source repository snapshot used by the directory on `projects.html`.
+- `scripts/`. Maintenance and validation commands described below.
 
 ## Maintenance scripts
 
-Both scripts run from the repo root and are idempotent. Run them after adding or changing posts, before committing.
+The generators run from the repo root and are idempotent. Run the blog and sitemap generators after adding or changing posts, before committing.
+
+### scripts/build_project_directory.py
+
+Refresh `data/repositories.json` from the public GitHub repository list, keeping active non-fork entries and their `name` and `url`. Run `python3 scripts/build_project_directory.py` to render that snapshot beneath the selected projects. No GitHub API request runs in visitors' browsers.
+
 
 ### scripts/build_blog_index.py
 
@@ -47,7 +53,7 @@ The overnight cron automates this daily; the blog-publishing skill holds the ful
 
 ## Validation
 
-Run `python3 scripts/check_site.py` to check local links, assets, duplicate IDs, and catalog counts before opening a pull request.
+Run `python3 scripts/check_site.py` to check local links, assets, duplicate IDs, catalog counts, every article's presence in the blog index, and every snapshot repository's presence in the directory. Run `python3 -m unittest discover -s tests` for the coverage-check regression tests.
 
 ## License
 
