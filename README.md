@@ -6,13 +6,13 @@ Static HTML, no framework, no build step. Pages are written by hand (or by the a
 
 ## Site structure
 
-- `index.html`, `about.html`, `projects.html` — top-level pages
-- `blog/index.html` — blog index. Every post row carries a `data-published="YYYY-MM-DD"` attribute; the index is sorted newest first
-- `blog/*.html` — one file per article. Daily news posts follow the `daily-news-YYYY-MM-DD.html` slug
-- `style.css` — single stylesheet, Linear-derived visual language
-- `keep-reading.js`, `anchors.js`, `nav.js`, `nav-scroll.js`, `reading-progress.js` — small vanilla JS enhancements, all fail silently
-- `sitemap.xml` — regenerated, never hand-edited
-- `scripts/` — the two generators described below
+- `index.html`, `about.html`, `projects.html`.  top-level pages
+- `blog/index.html`.  blog index. Every post row carries a `data-published="YYYY-MM-DD"` attribute; the index is sorted newest first
+- `blog/*.html`.  one file per article. Daily news posts follow the `daily-news-YYYY-MM-DD.html` slug
+- `style.css`.  single stylesheet, Linear-derived visual language
+- `keep-reading.js`, `anchors.js`, `nav.js`, `nav-scroll.js`, `reading-progress.js`.  small vanilla JS helpers, all fail silently
+- `sitemap.xml`.  regenerated, never hand-edited
+- `scripts/`.  the two generators described below
 
 ## Maintenance scripts
 
@@ -41,9 +41,13 @@ python3 scripts/build_sitemap.py
 1. Create `blog/<slug>.html` following the structure of an existing post. The page must contain a real `<article>` body with prose, not a copy of the index layout.
 2. Give the row in `blog/index.html` a `data-published` attribute, or let the script derive it.
 3. Run both scripts in `scripts/`.
-4. Commit and push to `main`. GitHub Pages deploys automatically.
+4. Open a pull request. After review and merge, GitHub Pages deploys automatically.
 
 The overnight cron automates this daily; the blog-publishing skill holds the full workflow and rules (no em dashes, security sweep before pushing, humanized prose).
+
+## Validation
+
+Run `python3 scripts/check_site.py` to check local links, assets, duplicate IDs, and catalog counts before opening a pull request.
 
 ## License
 
