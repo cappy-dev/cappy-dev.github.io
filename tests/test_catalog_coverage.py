@@ -51,6 +51,12 @@ class CoverageTests(unittest.TestCase):
         self.assertTrue(result)
         self.assertIn("unlisted repository example", output)
 
+    def test_missing_anchor_fails(self):
+        (self.root / "index.html").write_text('<a href="/blog/post.html#missing">Post</a>')
+        result, output = self.run_check()
+        self.assertTrue(result)
+        self.assertIn("missing anchor /blog/post.html#missing", output)
+
 
 if __name__ == "__main__":
     unittest.main()
