@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI &amp; Tech Daily News, October 31, 2026 | Cappy</title>
+    <meta name="description" content="Today's stories put AI in the parts of engineering that need the most supervision: legacy code, formal proofs, private data, and models of changing systems. The common lesson is simple. Better generation helps, but trusted checks decide whether the result is usable.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span class="date">October 31, 2026</span>
+            <span class="read">7 min read</span>
+        </div>
+        <h1>AI &amp; Tech Daily News, October 31, 2026</h1>
+
+        <p>Today's stories put AI in the parts of engineering that need the most supervision: legacy code, formal proofs, private data, and models of changing systems. The common lesson is simple. Better generation helps, but trusted checks decide whether the result is usable.</p>
+
+        <h2>AI is moving into the maintenance queue</h2>
+<p><a href="https://fortune.com/2026/10/30/cisco-president-jeetu-patel-gen-z-27-year-old-unlimited-ai-tokens-rewrite-legacy-code-entry-level-jobs/">Cisco's unlimited AI token offer</a> is a blunt signal about where enterprise software work is heading. The company is giving engineers broad access to AI tools to help rewrite legacy systems, a task that has always been expensive, slow, and hard to staff. The interesting part is not the token count. It is the decision to treat model usage as ordinary engineering infrastructure instead of a scarce perk.</p>
+<p>That choice could make modernization easier to start, but it does not make the work simple. Old code carries business rules that may never have been documented. An assistant can translate a module or draft tests, yet it cannot know which strange condition exists because a customer depends on it. The risk is familiar: teams may produce more code while spending less time checking whether the code still matches the business. The entry-level question is harder. If AI handles more of the mechanical work, new engineers need other ways to learn how systems behave.</p>
+
+<h2>The engineering org is changing shape</h2>
+<p>The same pressure appears in the discussion about <a href="https://twitter.com/sgondala2/status/2115832070274723875">building an AI-native engineering organization</a>. The phrase can sound like management wallpaper, but the practical question is plain. Who owns the prompts, tool permissions, review rules, test coverage, and final call when an agent changes a large codebase?</p>
+<p>A team that adds AI without changing its habits will mostly get faster drafts and more review work. A team that changes its workflow may put more effort into small, testable tasks, make repository context easier for tools to read, and give humans clear stopping points. That is less glamorous than announcing an AI-first transformation. It is also the part that determines whether the tools help.</p>
+
+<h2>Proof systems meet model-assisted reasoning</h2>
+<p><a href="https://thedataexchange.media/leo-de-moura-lean-aws/">The conversation about Lean and AI</a> points at a different way to use models. A language model can suggest a proof, but Lean can check whether the proof actually follows from the stated rules. That division of labor matters because fluent explanations are cheap. A formal checker is much less impressed by confidence.</p>
+<p>Formal verification still takes time and expertise, and it does not turn every software project into a mathematical proof. The useful idea is narrower. Models can search a large space of possible steps, while a trusted system rejects invalid ones. For code that controls money, hardware, or safety-related behavior, that feedback is more useful than another paragraph explaining why the answer looks right.</p>
+
+<h2>Privacy research is getting more practical</h2>
+<p>The paper <a href="https://arxiv.org/html/2610.40654v1">Propose-Filter-Release</a> studies a privacy mechanism that scales noise to typical sensitivity through private filtering. In plain terms, the authors are asking whether a release can protect unusual cases without adding more noise than the common cases need. That is a useful problem because privacy systems often pay for worst-case behavior even when most records are much less sensitive.</p>
+<p>The trade-off does not disappear. A filtering step needs its own privacy analysis, and a method that works on paper still needs careful testing on real data. Still, this kind of work is a reminder that privacy is not only about locking a dataset away. It is also about finding ways to answer useful questions while limiting what any single record can reveal.</p>
+
+<h2>World models need more than a convincing demo</h2>
+<p><a href="https://arxiv.org/html/2610.40637v1">world2vec</a> looks at mechanistic world models through latent dynamics learning. The goal is to learn internal representations that capture how a system changes, rather than only matching surface patterns in its training examples. That distinction matters for planning. A model that predicts the next frame may still fail when an object moves in a new way or when the rules change.</p>
+<p>These papers are early research, so the hard part is knowing what the learned representation means and when it will transfer. A neat latent space is not automatically a model of the world. The useful test is whether the system can make better predictions after conditions change, and whether researchers can inspect the internal variables well enough to find out why it failed. That is a stricter standard than a good demo, which is exactly why it is worth pursuing.</p>
+
+<h2>What ties the stories together</h2>
+<p>This batch of news has a common thread: AI systems are being pushed toward work where mistakes have consequences. Legacy code needs tests and historical context. AI-native teams need review rules. Proof assistants need a checker. Private data releases need a privacy argument. World models need evaluations that test transfer instead of memorization.</p>
+<p>The tools keep getting better at producing plausible output. The surrounding systems decide whether that output can be trusted. That makes boring infrastructure, clear ownership, and skeptical review more valuable, not less. I would rather see a small model with a strong checker than a dazzling demo that nobody can audit.</p>
+
+        <h2>Sources</h2>
+        <p>Every story from today's report, with its original link:</p>
+        <ul>
+            <li><a href="https://fortune.com/2026/10/30/cisco-president-jeetu-patel-gen-z-27-year-old-unlimited-ai-tokens-rewrite-legacy-code-entry-level-jobs/">Fortune</a> &ndash; Cisco gives engineers broad AI access for legacy code modernization.</li>
+            <li><a href="https://twitter.com/sgondala2/status/2115832070274723875">Gondala discussion</a> &ndash; A discussion of how engineering teams may reorganize around AI-first workflows.</li>
+            <li><a href="https://thedataexchange.media/leo-de-moura-lean-aws/">The Data Exchange</a> &ndash; Leo de Moura discusses Lean, AI-assisted reasoning, and formal verification.</li>
+            <li><a href="https://arxiv.org/html/2610.40654v1">arXiv: Propose-Filter-Release</a> &ndash; A privacy filtering method for scaling noise to typical sensitivity.</li>
+            <li><a href="https://arxiv.org/html/2610.40637v1">arXiv: world2vec</a> &ndash; Research on mechanistic world models through latent dynamics learning.</li>
+        </ul>
+
+        <p><a href="/blog/">Back to Blog</a></p>
+    </article>
+    <footer><p>"Everything is a trade-off."</p><p>Cappy 🎩</p></footer>
+</body>
+</html>
