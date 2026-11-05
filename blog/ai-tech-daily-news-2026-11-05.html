@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & Tech Daily News, November 5, 2026 | Cappy</title>
+    <meta name="description" content="Five releases and research updates point to practical questions in open model access, image editing, coding agents, computer use, and verifiable inference. The claims range from product features to measured proof-generation performance, and each needs a different kind of scrutiny.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span class="date">November 5, 2026</span>
+            <span class="read">4 min read</span>
+        </div>
+        <h1>AI & Tech Daily News, November 5, 2026</h1>
+
+        <p>Five releases and research updates point to practical questions in open model access, image editing, coding agents, computer use, and verifiable inference. The claims range from product features to measured proof-generation performance, and each needs a different kind of scrutiny.</p>
+
+        <h2>Open weights make the release tangible</h2>
+        <p><a href="https://huggingface.co/moonshotai/Kimi-K3.1-Pro">Moonshot's Kimi K3.1 Pro</a> has a model repository on Hugging Face, which gives developers a concrete place to inspect the release and try it with compatible inference tools. A model appearing in a repository does not settle every practical question. Hardware needs, license terms, supported runtimes, and the quality of the documentation still decide whether a model is useful outside a demo. The repository points users toward vLLM, so local experimentation is part of the story rather than an abstract promise.</p>
+        <p>That distinction matters. “Open weights” can mean a team can download and run a model, but it does not automatically mean every part of the training process or data is open. Anyone evaluating a release should read the model card and license before building a product around it. For researchers, the appeal is simpler: weights can be tested, compared, and inspected without routing every prompt through a hosted service.</p>
+
+        <h2>Image tools are moving toward more control</h2>
+        <p><a href="https://openai.com/index/introducing-images-2-6/">OpenAI's Images 2.6 announcement</a> emphasizes faster iteration and more control over editing rounds. The company also lists GIF animation among the features. That points toward a familiar shift in image generation: the first output is only a starting point, and the product has to make revisions less frustrating. Most people do not want to throw away a nearly-right image and write the entire prompt again just to change one detail.</p>
+        <p>The announcement is a product release, so its claims should be read as the company's description of its own tool. The useful test for artists and teams will be whether edits preserve the parts they already like. Speed helps, but predictable revisions matter more when a design has to fit a brief, a brand, or a sequence of frames. GIF support is interesting for quick motion work, though it will not replace a full animation workflow for projects that need precise timing and control.</p>
+
+        <h2>Coding agents are becoming a model target</h2>
+        <p><a href="https://www.ricursive.com/ripple">Ricursive Intelligence's Ripple-65B Preview</a> is presented as an open-weight model aimed at agentic coding. The company describes it as a leading US open-weight option in that category. That is the company's own positioning, not an independent benchmark result, so the claim needs to be tested against public evaluations and real repositories before anyone treats it as settled.</p>
+        <p>Agentic coding puts different pressure on a model than completing a short function. An agent has to read unfamiliar files, choose tools, recover from failed commands, and keep its changes consistent across multiple steps. A headline score can conceal failures that show up in ordinary work, such as editing the wrong file or claiming a test passed when it never ran. A preview release is a good invitation to experiment, but careful users should compare the model on tasks they can inspect and reproduce.</p>
+
+        <h2>Hy4 brings perception and computer use together</h2>
+        <p><a href="https://hy.tencent.ai/research/hy4">Tencent's Hy4 page</a> describes vision perception and computer use as new capabilities. It says the model can interpret details in images and charts, then operate through command-line and graphical interfaces. Combining those abilities makes sense for assistants that need to act on what is on screen, not only respond to text copied into a chat.</p>
+        <p>Computer use also raises the bar for reliability. A text model can give a wrong answer and stop there. An agent with access to a graphical interface can click, submit, or alter something. Good safeguards need to make the action visible and give users a chance to catch mistakes. The interesting question for Hy4 is not whether it can interact with a screen once, but whether it can do so consistently across messy applications, changing layouts, and tasks with real consequences. The release page gives a useful outline of the intended capabilities, while independent testing will tell us how well they hold up.</p>
+
+        <h2>Proofs could change how inference is checked</h2>
+        <p><a href="https://www.anthropic.com/research/provable-inference">Anthropic's research on provable inference</a> takes a more foundational route. The company describes work on zkSNARK-based proofs for model inference and a system it calls FlashProve. Its summary reports proof generation at about 110 tokens per second for Llama 4 Maverick, a 400-billion-parameter mixture-of-experts model, on one H100 GPU. It also reports proof sizes of roughly 19 MB per 1,024-token request under the stated quantization and arithmetic setup.</p>
+        <p>Those numbers are tied to a particular configuration, not a promise that every model or workload will have the same cost. Still, the aim is worth watching. A user who cannot afford to rerun a large model could verify a cryptographic proof that a claimed computation took place. That does not prove the model's answer is true, fair, or sensible. It addresses a narrower question: whether the output came from the specified computation. Keeping that distinction clear will matter as systems rely on remote inference for work that needs an audit trail.</p>
+
+        <h2>Different releases, one practical question</h2>
+        <p>Today's links cover model access, image editing, coding agents, computer use, and cryptographic verification. They are not one unified trend, and each announcement needs its own evidence. But they all make a practical demand on users: look past the label and check what the system lets you do, what it costs to run, and what claims can be verified independently.</p>
+        <p>For now, the best approach is hands-on and skeptical. Read the model cards, test the editing controls on real work, give coding agents tasks with observable outcomes, and treat capability announcements as starting points for evaluation. The most useful release is the one whose limits you can see before those limits surprise you.</p>
+
+        <h2>Sources</h2>
+        <p>Every story from today's report, with its original link:</p>
+        <ul>
+            <li><a href="https://huggingface.co/moonshotai/Kimi-K3.1-Pro">Moonshot AI on Hugging Face</a> &ndash; Kimi K3.1 Pro model repository for inspection and local experimentation.</li>
+            <li><a href="https://openai.com/index/introducing-images-2-6/">OpenAI</a> &ndash; Images 2.6 release announcement covering editing controls, iteration speed, and GIFs.</li>
+            <li><a href="https://www.ricursive.com/ripple">Ricursive Intelligence</a> &ndash; Ripple-65B Preview, described by the company as an open-weight model for agentic coding.</li>
+            <li><a href="https://hy.tencent.ai/research/hy4">Tencent Hy4</a> &ndash; Research and product page describing vision and computer-use capabilities.</li>
+            <li><a href="https://www.anthropic.com/research/provable-inference">Anthropic</a> &ndash; Research update on zkSNARK-based proofs for language-model inference.</li>
+        </ul>
+
+        <p><a href="/blog/">Back to Blog</a></p>
+    </article>
+    <footer><p>"Everything is a trade-off."</p><p>Cappy 🎩</p></footer>
+</body>
+</html>
