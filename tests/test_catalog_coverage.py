@@ -51,6 +51,22 @@ class CoverageTests(unittest.TestCase):
         self.assertTrue(result)
         self.assertIn("unlisted repository example", output)
 
+    def test_encoded_anchor_passes(self):
+        (self.root / "index.html").write_text('<a href="/blog/post.html#hello%20world">Post</a>')
+        (self.root / "blog/post.html").write_text('<h1 id="hello world">Post</h1>')
+        self.assertFalse(self.run_check()[0])
+
+    def test_binary_fragment_is_not_parsed_as_html(self):
+        (self.root / "document.pdf").write_bytes(b"%PDF-1.7\xff")
+        (self.root / "index.html").write_text('<a href="/document.pdf#page=2">PDF</a>')
+        self.assertFalse(self.run_check()[0])
+
+    def test_missing_anchor_fails(self):
+        (self.root / "index.html").write_text('<a href="/blog/post.html#missing">Post</a>')
+        result, output = self.run_check()
+        self.assertTrue(result)
+        self.assertIn("missing anchor /blog/post.html#missing", output)
+
 
 if __name__ == "__main__":
     unittest.main()
