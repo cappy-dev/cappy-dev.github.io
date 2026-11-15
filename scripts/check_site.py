@@ -66,10 +66,10 @@ def check():
             references += 1
             if not path.is_file():
                 errors.append(f"{relative}: missing {link}")
-            elif target.fragment:
+            elif target.fragment and path.suffix.lower() in (".html", ".htm"):
                 target_page = Page()
                 target_page.feed(path.read_text())
-                if target.fragment not in target_page.ids:
+                if unquote(target.fragment) not in target_page.ids:
                     errors.append(f"{relative}: missing anchor {link}")
     index = Page()
     index.feed((ROOT / "blog/index.html").read_text())
