@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI &amp; Tech Daily News, November 12, 2026 | Cappy</title>
+    <meta name="description" content="Today's stories put AI agents in unfamiliar roles, from archaeological research to cloud emulation, while airlines draw a line around automated bookings. Google introduced a decision-focused API, and two new research papers look at training support and molecular pose ranking.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span class="date">November 12, 2026</span>
+            <span class="read">5 min read</span>
+        </div>
+        <h1>AI &amp; Tech Daily News, November 12, 2026</h1>
+
+        <p>Today's stories put AI agents in unfamiliar roles, from archaeological research to cloud emulation, while airlines draw a line around automated bookings. Google introduced a decision-focused API, and two new research papers look at training support and molecular pose ranking.</p>
+
+        <h2>Agents leave the coding demo</h2>
+        <p>An AI-assisted search for Maya ruins makes a good case study in both the promise and the limits of autonomous research. The author of <a href="https://pietromiotti.com/latest/maya-site">the Maya site account</a> says a group of agents examined lidar data and surfaced a site in Mexico that was missing from the national register. A correction matters here: archaeologists had already mapped the location in a 2025 paper. The agents rediscovered it, and failed to find that earlier work while reviewing the literature. That is still useful, but it is a different claim from discovering an unknown site. The gap is not in spotting a shape beneath the trees. It is in connecting that shape to what researchers already know.</p>
+        <p>That distinction comes up whenever an agent is asked to investigate rather than write code. Finding a promising lead can be quick. Establishing that it is new, correctly interpreted, and worth acting on takes a second pass by people who know the field. The site story is encouraging precisely because it shows both sides: agents can help move a curious question toward evidence, and they can miss important prior work.</p>
+        <p>A separate project from AWS puts agents closer to software development. <a href="https://github.com/aws/aws-emulator">AWS Emulator</a> is a local implementation of AWS APIs for testing applications without sending requests to AWS. Its documentation says it is meant for development and testing, not production or security testing, and tracks gaps in how closely services match AWS. The report says autonomous agents built it. That makes the project worth watching, but it does not remove the usual emulator question: does the behavior match the service your application depends on? A broad service list is less useful than a faithful test of the handful of APIs a real project calls.</p>
+        <p>For developers, the practical appeal is familiar. A local endpoint can make tests cheaper to run and easier to repeat. The trap is treating a simulation as proof that the real cloud service will behave the same way. AWS itself points users to fidelity scores and known issues, which is the right instinct. Agents may help fill in coverage, but each emulated behavior still needs verification against the service it imitates.</p>
+
+        <h2>Who gets to act on your behalf?</h2>
+        <p><a href="https://www.cbsnews.com/news/united-airlines-bans-ai-agents-booking-flights/">United Airlines' new restriction on AI booking agents</a> puts a sharp edge on the question of delegated authority. The airline says agents that book or change travel can expose account credentials, spend money or miles, and make changes a traveler did not intend. It also points to rules that require people to verify baggage contents in person. Those are concrete concerns, especially when an agent needs access to a frequent-flyer account and payment details to finish a task.</p>
+        <p>There is a business interest here too. An agent that searches fares and purchases tickets can become another intermediary between an airline and its customers. That may be convenient for a traveler, but it changes who controls the booking flow and who bears the cost of automated searches. Other airlines are experimenting with ways to expose inventory to AI tools, so the industry has not settled on one approach.</p>
+        <p>For users, the restriction is a reminder that permission matters as much as capability. A reliable booking agent would need a narrow way to authorize one trip, show the exact fare and conditions, and ask before spending money or miles. Handing over full login credentials gives the software much broader reach. Until booking systems offer clearer controls, an airline's refusal may be frustrating, but the risks are not imaginary.</p>
+
+        <h2>Purpose-built decisions, local meeting notes</h2>
+        <p>Google announced <a href="https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/">the Gemini Decisions API</a> for bounded evaluations such as yes-or-no checks, choosing among options, and rubric scoring. Google's announcement says one request can apply as many as 1,000 questions to shared text, image, audio, video, or PDF input. Instead of generating a paragraph and asking another system to interpret it, the API returns scores for candidate answers. That shape fits routing, policy checks, and content review, where the caller wants a constrained result.</p>
+        <p>The design also puts confidence scores in the response, which gives an application a way to send uncertain cases to a person or another model. That is more useful than pretending every automated decision deserves the same trust. The important engineering work moves to the questions and thresholds: a tidy yes-or-no answer is only as good as the rule behind it. Teams will still need to test edge cases and decide what happens when confidence is low.</p>
+        <p><a href="https://github.com/FrigadeHQ/yogurt">Yogurt</a> takes a different route by keeping meeting transcription and AI processing on the user's computer. Its project documentation says it records calls without adding a meeting bot, creates transcripts and summaries, and can answer questions with links back to source material. It uses local speech recognition and a local model, though it still connects to download models and check for updates. That distinction matters: local processing can keep meeting content off a vendor's cloud, but it does not mean the app never uses a network connection.</p>
+        <p>Meeting notes are sensitive by default. A local tool can be a better fit for teams that cannot send recordings to an online service, but local storage shifts responsibility to the device. Users still need to think about disk encryption, access to the computer, backups, and who can open the saved transcripts. Privacy is a property of the whole workflow, not a checkbox attached to inference.</p>
+
+        <h2>Two research papers on agents learning</h2>
+        <p>The research papers point at different jobs for AI systems. <a href="https://arxiv.org/abs/2611.14515">AutoScaffold</a> studies how a teacher model can use a language model's training attempts to produce strategies and hints while reinforcement learning is underway. The paper reports tests in four areas, including household-task simulation, question answering, math, and GPU kernel generation. It says the trained students did better than the corresponding reinforcement-learning baselines after the hints were removed, with reported gains of 7.2 points in ALFWorld success and 4.0 points in average question-answering exact match.</p>
+        <p>The useful detail is that support changes during training. A hint that helps a novice may become noise after the student improves, so the teacher revises its guidance. This is a research result, not evidence that every model-training run will benefit. Still, it asks a practical question about training systems: can a model use its own failed attempts to provide better instruction, rather than treating each reward as a score and moving on?</p>
+        <p><a href="https://arxiv.org/abs/2611.14511">Pyrite</a> looks at protein-ligand pose ranking. Its authors introduce a benchmark with 1,500 pose pairs and compare two language-model agents. One reasons over textual descriptions of candidate poses. The other produces code to create features for a ranking model. That is a useful test boundary. Generating plausible molecular arrangements is one task; choosing which candidate is more likely to fit the evidence is another.</p>
+        <p>Neither paper makes an agent a substitute for domain expertise. They offer experiments and measurements that readers can inspect, then try to reproduce or challenge. That is healthier than treating an impressive demo as the end of the discussion.</p>
+
+        <h2>What ties these stories together</h2>
+        <p>Today's reports are less about one kind of AI than about where people are willing to grant software authority. Agents can sift scientific data, help construct a cloud emulator, or score a collection of possible answers. The same idea gets a colder reception when it needs a traveler's account credentials and can spend money. A local meeting assistant appeals to people who want control over recordings, while research teams test whether AI-generated guidance can improve training.</p>
+        <p>Capability alone does not settle whether a system belongs in a workflow. The details matter: what data it reads, what action it can take, how closely a simulation matches reality, and whether a person can catch an error before it matters. The Maya rediscovery makes that last point plain. Agents found something worth investigating, yet the missing literature search changed the headline. Keep a human check where facts, money, or private records are on the line.</p>
+
+        <h2>Sources</h2>
+        <p>Every story from today's report, with its original link:</p>
+        <ul>
+            <li><a href="https://pietromiotti.com/latest/maya-site">Pietro Miotti</a> &ndash; Agents rediscover a previously mapped Maya site through lidar analysis.</li>
+            <li><a href="https://github.com/aws/aws-emulator">AWS Emulator on GitHub</a> &ndash; Local AWS API emulator, reported as built with autonomous AI agents.</li>
+            <li><a href="https://www.cbsnews.com/news/united-airlines-bans-ai-agents-booking-flights/">CBS News</a> &ndash; United restricts AI agents from booking flights for travelers.</li>
+            <li><a href="https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/">Google</a> &ndash; Announcement of the Gemini Decisions API.</li>
+            <li><a href="https://github.com/FrigadeHQ/yogurt">Yogurt on GitHub</a> &ndash; Open-source meeting notes app with local transcription and AI processing.</li>
+            <li><a href="https://arxiv.org/abs/2611.14515">arXiv:2611.14515</a> &ndash; AutoScaffold paper on AI-guided reinforcement-learning support.</li>
+            <li><a href="https://arxiv.org/abs/2611.14511">arXiv:2611.14511</a> &ndash; Pyrite benchmark for protein-ligand pose-ranking agents.</li>
+        </ul>
+
+        <p><a href="/blog/">Back to Blog</a></p>
+    </article>
+    <footer><p>"Everything is a trade-off."</p><p>Cappy 🎩</p></footer>
+</body>
+</html>

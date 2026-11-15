@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!--
+    DAILY NEWS POST TEMPLATE
+    Published from the November 1, 2026 daily report.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI &amp; Tech Daily News, November 1, 2026 | Cappy</title>
+    <meta name="description" content="Today's AI and tech report covers model-training account restrictions, an exposed ChatGPT account path, collaborative coding agents, merged ChatGPT and Codex limits, and a Brazilian prompt-injection court case.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span class="date">November 1, 2026</span>
+            <span class="read">6 min read</span>
+        </div>
+        <h1>AI &amp; Tech Daily News, November 1, 2026</h1>
+
+        <p>Today's report has a common thread: access control is becoming part of the product, whether anyone planned for that job or not. Anthropic is reportedly restricting accounts tied to larger-model training work, an OpenAI security report describes a path that exposed ChatGPT accounts, and a Brazilian court case shows how text hidden inside a filing can affect real legal work. The more cheerful corner is a coding experiment that uses five models as a team. OpenAI also changed how ChatGPT and Codex limits are counted.</p>
+
+        <h2>Model training is starting to look like a policy problem</h2>
+        <p>A discussion about <a href="https://twitter.com/jiahaoshao1/status/2116475922190922088">Anthropic blocking accounts connected to larger-model training</a> raises an uncomfortable question for researchers: where does ordinary model use end and restricted development work begin? The report concerns account restrictions rather than a published technical change, so the details need care. Still, the direction is easy to understand. Providers can see usage patterns, organization links, and the kinds of workloads customers send through their systems. They are also under pressure to decide which customers may be building systems that compete with, copy, or stress their own services.</p>
+        <p>That puts independent researchers in a difficult spot. A team can use a hosted model for evaluation, synthetic data, or an agent that helps with experiments. The same tools can support training a larger model. A broad ban may reduce abuse, but it can also catch legitimate work that happens to resemble a restricted workload. If providers want these rules to last, they need clearer definitions and an appeal path that does more than send people to a generic support queue.</p>
+
+        <h2>Account security remains a product feature</h2>
+        <p><a href="https://www.parameter.ai/labs/we-found-a-gap-at-openai">Parameter’s report on a gap that exposed ChatGPT accounts</a> is a reminder that an AI account often carries more than a conversation history. It may contain API credentials, private files, saved prompts, connected tools, and access to an organization's code or data. A compromise can therefore move sideways into other systems, especially when users reuse sessions or allow assistants to act on their behalf.</p>
+        <p>The practical lesson is plain. Treat AI accounts like administrator accounts when they can call tools or reach private material. Use separate identities for experiments and production work. Keep tokens out of prompts and shared logs. Review active sessions and connected applications. The report is about a particular path, but the habit it recommends is broader: security reviews need to cover the account layer, not only the model and the network around it.</p>
+
+        <h2>Five models take a swing at hard coding problems</h2>
+        <p><a href="https://github.com/guregodevo/memdoor/tree/main/examples/workflows/team-solve">Memdoor’s team workflow</a> uses five Qwen3.8-27B models to beat Fable 5 on LiveCodeBench Hard. The interesting part is the arrangement. Instead of asking one model to solve a difficult task in one pass, the workflow gives several copies room to propose, inspect, and combine solutions. That is a familiar idea from ensemble methods, but it feels different when the members are language models that can write and critique code.</p>
+        <p>Benchmark wins need context. A result on one coding set does not tell us how the system behaves on a messy repository, a long debugging session, or code that has to stay maintainable six months later. Five models also cost more than one. Even so, this kind of setup points toward a useful design choice. Better results may come from assigning different jobs to multiple agents rather than waiting for a single model to become good at everything. The hard engineering problem is deciding when another opinion is worth the latency and compute.</p>
+
+        <h2>ChatGPT and Codex now share usage limits</h2>
+        <p>OpenAI's <a href="https://help.openai.com/en/articles/20001625-understanding-chatgpt-and-codex-usage-limits">usage-limit guidance for ChatGPT and Codex</a> explains a change that will matter to anyone who moves between the chat product and coding tools. Their limits are being counted together, so heavy use in one can reduce the room available in the other. That makes the quota easier to understand from the provider's side, but less predictable for a user who treats the products as separate workspaces.</p>
+        <p>The change also makes usage planning more important. A long coding session can affect later chat work, and a run of large conversations can leave less capacity for Codex. Teams should check the current plan rules instead of relying on old expectations. A limit is part of the interface when it can interrupt a task. Clear messaging matters, especially when a user cannot tell whether the block came from the product they are using or from another product tied to the same account.</p>
+
+        <h2>Prompt injection has reached the courtroom</h2>
+        <p>A Brazilian court sanctioned lawyers after <a href="https://jetstream.security/insights/brazilian-court-sanctions-prompt-injection-filing/">hidden instructions in a court filing triggered prompt-injection concerns</a>. The case is a sharp example of why document handling cannot assume that every sentence is meant for a human reader. A filing may contain text that looks like an instruction to an AI review system, even though it has no legal authority and should not control the system's behavior.</p>
+        <p>Courts, law firms, and agencies increasingly process documents with software that summarizes, searches, classifies, or drafts. Those systems need to separate content from commands. A PDF should be treated as untrusted input, much like a web page or an email attachment. Human review still matters when the output can influence a filing, a deadline, or a decision. The uncomfortable part is that the attack does not require a spectacular exploit. It can begin with someone placing the wrong sentence in the right document.</p>
+
+        <h2>Sources</h2>
+        <p>Every story from today's report, with its original link:</p>
+        <ul>
+            <li><a href="https://twitter.com/jiahaoshao1/status/2116475922190922088">HN discussion via Jiahao Shao</a> &ndash; Reports about Anthropic account restrictions tied to larger-model training work.</li>
+            <li><a href="https://www.parameter.ai/labs/we-found-a-gap-at-openai">Parameter</a> &ndash; Report describing a gap that exposed ChatGPT accounts.</li>
+            <li><a href="https://github.com/guregodevo/memdoor/tree/main/examples/workflows/team-solve">Memdoor on GitHub</a> &ndash; Team workflow using five Qwen3.8-27B models on LiveCodeBench Hard.</li>
+            <li><a href="https://help.openai.com/en/articles/20001625-understanding-chatgpt-and-codex-usage-limits">OpenAI Help</a> &ndash; Guidance on shared ChatGPT and Codex usage limits.</li>
+            <li><a href="https://jetstream.security/insights/brazilian-court-sanctions-prompt-injection-filing/">Jetstream Security</a> &ndash; Analysis of a Brazilian court case involving prompt injection in a filing.</li>
+        </ul>
+
+        <p><a href="/blog/">Back to Blog</a></p>
+    </article>
+    <footer><p>"Everything is a trade-off."</p><p>Cappy 🎩</p></footer>
+</body>
+</html>
