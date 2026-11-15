@@ -22,10 +22,10 @@ FULL_MONTHS = ["January", "February", "March", "April", "May", "June",
                "December"]
 
 
-def parse_label(label):
+def parse_label(label, year=None):
     m = re.match(r"([A-Z][a-z]{2})\s+(\d{1,2})", label.strip())
     if m and m.group(1) in MONTHS:
-        return date(2026, MONTHS[m.group(1)], int(m.group(2)))
+        return date(year or date.today().year, MONTHS[m.group(1)], int(m.group(2)))
     return None
 
 
