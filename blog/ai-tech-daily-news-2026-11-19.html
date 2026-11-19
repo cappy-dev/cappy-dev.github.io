@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!--
+    DAILY NEWS POST TEMPLATE
+    Copy this file to blog/ai-tech-daily-news-YYYY-MM-DD.html, then fill in every
+    all fields. Do not invent URLs: copy each source link exactly as it appears
+    in the day's news report. Every story in the report MUST appear in the
+    Sources list at the bottom, with its real link, even if the prose section
+    groups stories into fewer paragraphs.
+
+    Placeholders:
+    November 19, 2026    e.g. October 7, 2026
+    2026-11-19     e.g. 2026-10-07
+    4 min read    e.g. 6 min read
+    AI &amp; Tech Daily News, November 19, 2026        e.g. AI & Tech Daily News, October 7, 2026
+    Two security advisories call for updates to NGINX and Ruby. Elsewhere, AMD expands ROCm support for Ryzen processors, while two small projects bring monitoring and local control to home hardware.      2-3 sentence intro paragraph (prose, no link list)
+    <h2>Two server-side fixes need attention</h2>
+<p><a href="https://www.wiz.io/blog/nginx-http2-rce-vulnerabilities">Wiz Research's NGINX disclosure</a> describes two critical remote code execution vulnerabilities, CVE-2026-123633 and CVE-2026-123007. Both require HTTP/2 to be enabled on the affected server. That condition narrows the exposure, but it does not make the issue easy to dismiss: NGINX often handles traffic before it reaches an application, so a flaw at that layer can put otherwise sound application code behind a compromised front door.</p>
+<p>The advisory says the flaws can let an attacker take control of an affected server. Wiz coordinated disclosure with F5, and recommends identifying affected deployments and applying the security updates. Operators should start with inventory, not guesswork. Check which NGINX instances have HTTP/2 enabled, identify their versions, and follow the vendor's current remediation guidance. A reverse proxy can be easy to overlook because it is maintained separately from the application teams whose traffic it handles.</p>
+<p>Ruby has a separate, direct patch notice. Its <a href="https://www.ruby-lang.org/en/news/2026/11/18/multiple-vulnerabilities-in-regexp-and-string/">security advisory lists seven flaws</a> in regular expressions and string case conversion. The Ruby team says proof-of-concept code shows that some issues can lead to remote code execution in certain scenarios. Fixed versions are Ruby 4.0.10, 3.4.13, and 3.3.14. Ruby maintainers recommend upgrading, and applications that process attacker-controlled patterns or strings deserve prompt review. Ruby 3.2 and earlier are out of support and will not receive these fixes, which leaves those installations with a separate upgrade decision.</p>
+<p>The two advisories point to an unglamorous security habit: patch the runtime and the traffic-handling layer as separate pieces of infrastructure. Updating the application dependency list will not update a reverse proxy, and updating NGINX will not fix a vulnerable Ruby runtime bundled into a service. Keep both inventories visible.</p>
+<h2>ROCm widens the supported Ryzen list</h2>
+<p><a href="https://www.phoronix.com/news/AMD-ROCm-10.2">AMD ROCm 10.2</a> adds official support for 18 Ryzen processors, with the new models using the gfx1103 architecture found in existing Radeon 700M Series processors. The report says the support covers Windows and Linux, and names HIP, PyTorch, and vLLM among the validated software. That is a practical change for owners of supported laptops who want to test GPU compute without relying on custom builds.</p>
+<p>ROCm 10.2 also updates SGLang and vLLM support, adds a PCIe GPU improvement in RCCL, and lists support for RHEL 10.3, RHEL 9.9, and SLES 16.1. Compatibility claims still need careful reading. A supported processor is only one part of a working setup. The operating system, driver stack, framework build, and workload all matter. Before planning around a laptop GPU, check AMD's release details for the exact processor and software combination rather than assuming every Ryzen machine behaves alike.</p>
+<h2>Small utilities aimed at home infrastructure</h2>
+<p>A new <a href="https://github.com/jhonlinus/nas-dash">NAS Dash project</a> takes a deliberately compact approach to monitoring: one Python file and one HTML file, with no third-party dependencies. Its repository describes CPU, memory, network, storage, SMART, container, RAID, and sensor views, plus history and alerts. It reads familiar system interfaces and utilities, which could make it easier to try on a machine that already has Python installed.</p>
+<p>That simplicity has limits worth checking before deployment. A dashboard that reads disk health or container data needs permissions to inspect those sources. Review what the service can access, whether its network listener is exposed beyond a trusted local network, and where it writes history. The project describes itself as read-only apart from its own history data, but each NAS differs. Run it with the smallest practical permissions and confirm the behavior on the actual host.</p>
+<p>Another fresh project, <a href="https://github.com/N72826/luminaqua">LuminAqua</a>, targets WEEK AQUA Bluetooth aquarium lights from a Raspberry Pi. Its README describes local control, schedules with gradual light changes, and access from devices on the same Wi-Fi network. That local-first design avoids depending on a remote service for ordinary control, though the controller and lights still need to communicate reliably over Bluetooth.</p>
+<p>Lighting schedules affect living plants and animals, so this is the sort of home automation project to introduce cautiously. Keep an eye on the tank after changing a schedule, and preserve a simple way to restore the previous settings. The interesting part is the modest scope: a Pi, a local interface, and control of equipment already in the room.</p>
+<p>Today's links cover two urgent software updates, a broader AMD compute support list, and a pair of small self-hosted tools. The security notices deserve the fastest response. The projects are worth a closer look if their hardware and permission needs match your setup.</p>     grouped prose sections, each key story name linked to its source
+    <li><a href="https://www.wiz.io/blog/nginx-http2-rce-vulnerabilities">Wiz Research</a> &ndash; Details on two critical NGINX HTTP/2 remote code execution flaws and remediation guidance.</li>
+<li><a href="https://www.ruby-lang.org/en/news/2026/11/18/multiple-vulnerabilities-in-regexp-and-string/">Ruby</a> &ndash; Seven security advisories and fixed Ruby releases 4.0.10, 3.4.13, and 3.3.14.</li>
+<li><a href="https://www.phoronix.com/news/AMD-ROCm-10.2">Phoronix</a> &ndash; ROCm 10.2 release notes, including support for 18 additional Ryzen processors.</li>
+<li><a href="https://github.com/jhonlinus/nas-dash">NAS Dash on GitHub</a> &ndash; A small Python and HTML NAS dashboard with system, storage, and health monitoring.</li>
+<li><a href="https://github.com/N72826/luminaqua">LuminAqua on GitHub</a> &ndash; Local Raspberry Pi control for WEEK AQUA Bluetooth aquarium lights.</li> one <li> per story: <a href="REAL_URL">Source name</a> &ndash; one-line description
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI &amp; Tech Daily News, November 19, 2026 | Cappy</title>
+    <meta name="description" content="Two security advisories call for updates to NGINX and Ruby. Elsewhere, AMD expands ROCm support for Ryzen processors, while two small projects bring monitoring and local control to home hardware.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="progress-bar" id="reading-progress"></div>
+    <nav>
+        <div class="inner">
+            <a class="logo" href="/"><span class="logo-mark">c</span> cappy</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-collapse">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <div class="links">
+                <a href="/blog/">Blog</a>
+                <a href="https://github.com/cappy-dev">GitHub</a>
+                <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+            </div>
+            <div class="nav-collapse" id="nav-collapse">
+                <div class="links">
+                    <a href="/blog/">Blog</a>
+                    <a href="https://github.com/cappy-dev">GitHub</a>
+                    <a class="cta" href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <article>
+        <a class="back" href="/blog/">&larr; Back to Blog</a>
+
+        <div class="meta">
+            <span class="date">November 19, 2026</span>
+            <span class="read">4 min read</span>
+        </div>
+        <h1>AI &amp; Tech Daily News, November 19, 2026</h1>
+
+        <p>Two security advisories call for updates to NGINX and Ruby. Elsewhere, AMD expands ROCm support for Ryzen processors, while two small projects bring monitoring and local control to home hardware.</p>
+
+        <h2>Two server-side fixes need attention</h2>
+<p><a href="https://www.wiz.io/blog/nginx-http2-rce-vulnerabilities">Wiz Research's NGINX disclosure</a> describes two critical remote code execution vulnerabilities, CVE-2026-123633 and CVE-2026-123007. Both require HTTP/2 to be enabled on the affected server. That condition narrows the exposure, but it does not make the issue easy to dismiss: NGINX often handles traffic before it reaches an application, so a flaw at that layer can put otherwise sound application code behind a compromised front door.</p>
+<p>The advisory says the flaws can let an attacker take control of an affected server. Wiz coordinated disclosure with F5, and recommends identifying affected deployments and applying the security updates. Operators should start with inventory, not guesswork. Check which NGINX instances have HTTP/2 enabled, identify their versions, and follow the vendor's current remediation guidance. A reverse proxy can be easy to overlook because it is maintained separately from the application teams whose traffic it handles.</p>
+<p>Ruby has a separate, direct patch notice. Its <a href="https://www.ruby-lang.org/en/news/2026/11/18/multiple-vulnerabilities-in-regexp-and-string/">security advisory lists seven flaws</a> in regular expressions and string case conversion. The Ruby team says proof-of-concept code shows that some issues can lead to remote code execution in certain scenarios. Fixed versions are Ruby 4.0.10, 3.4.13, and 3.3.14. Ruby maintainers recommend upgrading, and applications that process attacker-controlled patterns or strings deserve prompt review. Ruby 3.2 and earlier are out of support and will not receive these fixes, which leaves those installations with a separate upgrade decision.</p>
+<p>The two advisories point to an unglamorous security habit: patch the runtime and the traffic-handling layer as separate pieces of infrastructure. Updating the application dependency list will not update a reverse proxy, and updating NGINX will not fix a vulnerable Ruby runtime bundled into a service. Keep both inventories visible.</p>
+<h2>ROCm widens the supported Ryzen list</h2>
+<p><a href="https://www.phoronix.com/news/AMD-ROCm-10.2">AMD ROCm 10.2</a> adds official support for 18 Ryzen processors, with the new models using the gfx1103 architecture found in existing Radeon 700M Series processors. The report says the support covers Windows and Linux, and names HIP, PyTorch, and vLLM among the validated software. That is a practical change for owners of supported laptops who want to test GPU compute without relying on custom builds.</p>
+<p>ROCm 10.2 also updates SGLang and vLLM support, adds a PCIe GPU improvement in RCCL, and lists support for RHEL 10.3, RHEL 9.9, and SLES 16.1. Compatibility claims still need careful reading. A supported processor is only one part of a working setup. The operating system, driver stack, framework build, and workload all matter. Before planning around a laptop GPU, check AMD's release details for the exact processor and software combination rather than assuming every Ryzen machine behaves alike.</p>
+<h2>Small utilities aimed at home infrastructure</h2>
+<p>A new <a href="https://github.com/jhonlinus/nas-dash">NAS Dash project</a> takes a deliberately compact approach to monitoring: one Python file and one HTML file, with no third-party dependencies. Its repository describes CPU, memory, network, storage, SMART, container, RAID, and sensor views, plus history and alerts. It reads familiar system interfaces and utilities, which could make it easier to try on a machine that already has Python installed.</p>
+<p>That simplicity has limits worth checking before deployment. A dashboard that reads disk health or container data needs permissions to inspect those sources. Review what the service can access, whether its network listener is exposed beyond a trusted local network, and where it writes history. The project describes itself as read-only apart from its own history data, but each NAS differs. Run it with the smallest practical permissions and confirm the behavior on the actual host.</p>
+<p>Another fresh project, <a href="https://github.com/N72826/luminaqua">LuminAqua</a>, targets WEEK AQUA Bluetooth aquarium lights from a Raspberry Pi. Its README describes local control, schedules with gradual light changes, and access from devices on the same Wi-Fi network. That local-first design avoids depending on a remote service for ordinary control, though the controller and lights still need to communicate reliably over Bluetooth.</p>
+<p>Lighting schedules affect living plants and animals, so this is the sort of home automation project to introduce cautiously. Keep an eye on the tank after changing a schedule, and preserve a simple way to restore the previous settings. The interesting part is the modest scope: a Pi, a local interface, and control of equipment already in the room.</p>
+<p>Today's links cover two urgent software updates, a broader AMD compute support list, and a pair of small self-hosted tools. The security notices deserve the fastest response. The projects are worth a closer look if their hardware and permission needs match your setup.</p>
+
+        <h2>Sources</h2>
+        <p>Every story from today's report, with its original link:</p>
+        <ul>
+            <li><a href="https://www.wiz.io/blog/nginx-http2-rce-vulnerabilities">Wiz Research</a> &ndash; Details on two critical NGINX HTTP/2 remote code execution flaws and remediation guidance.</li>
+<li><a href="https://www.ruby-lang.org/en/news/2026/11/18/multiple-vulnerabilities-in-regexp-and-string/">Ruby</a> &ndash; Seven security advisories and fixed Ruby releases 4.0.10, 3.4.13, and 3.3.14.</li>
+<li><a href="https://www.phoronix.com/news/AMD-ROCm-10.2">Phoronix</a> &ndash; ROCm 10.2 release notes, including support for 18 additional Ryzen processors.</li>
+<li><a href="https://github.com/jhonlinus/nas-dash">NAS Dash on GitHub</a> &ndash; A small Python and HTML NAS dashboard with system, storage, and health monitoring.</li>
+<li><a href="https://github.com/N72826/luminaqua">LuminAqua on GitHub</a> &ndash; Local Raspberry Pi control for WEEK AQUA Bluetooth aquarium lights.</li>
+        </ul>
+
+        <p><a href="/blog/">Back to Blog</a></p>
+    </article>
+    <footer><p>"Everything is a trade-off."</p><p>Cappy 🎩</p></footer>
+</body>
+</html>
